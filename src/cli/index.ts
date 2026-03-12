@@ -1,0 +1,841 @@
+// cli/index.ts — CLI entry point for Theorex.
+// Dispatches scan/status/ref/prune/search/graduate subcommands to their respective modules.
+//
+// INVARIANTS:
+//   - No business logic here — pure dispatch and I/O
+//   - All paths are relative to process.cwd()
+
+import { parseArgs } from "util";
+import { scanAxon } from "../axon/scan";
+import { pruneAxon } from "../axon/prune";
+import { propagateActivation } from "../axon/propagate";
+import { AxonStore } from "../axon/store";
+import { compositeScore, classifyTier } from "../axon/scorer";
+import { loadConfig } from "../config";
+import type { Config } from "../config";
+import { hybridSearch } from "../short-term/search";
+import { readShortTermFiles, rotateStm } from "../short-term/store";
+import { findGraduateCandidates, graduateToLongTerm } from "../short-term/graduate";
+import { readMoments } from "../moments/store";
+import type { CodeRef } from "../moments/store";
+import { searchMoments } from "../moments/search";
+import { runMoment } from "../moments/capture";
+import { EVENTS_PATH } from "../audit/logger";
+import type { AuditEventType } from "../audit/logger";
+import { readAuditEvents } from "../audit/reader";
+import {
+  computeDriftScore,
+  detectInstability,
+  detectSentimentFlips,
+  classifyTrend,
+} from "../audit/scorer";
+
+const AXON_PATH = "data/axon.json";
+const ARCHIVE_DIR = "data/archive";
+const MEMORY_PATH = "data/MEMORY.md";
+
+// ---------------------------------------------------------------------------
+// Exported handler functions (testable without spawning subprocess)
+// ---------------------------------------------------------------------------
+
+export async function runScan(axonPath: string, config: Config): Promise<void> {
+  await scanAxon(axonPath, config);
+  console.log("Scan complete.");
+}
+
+export async function runStatus(axonPath: string, config: Config): Promise<void> {
+  const store = await AxonStore.load(axonPath);
+
+  if (store.graph.order === 0) {
+    console.log("No concepts in axon. Run: theorex scan");
+    return;
+  }
+
+  const nodes = store.graph.nodes().map((key) => ({
+    key,
+    attrs: store.graph.getNodeAttributes(key),
+  }));
+
+  nodes.sort((a, b) => b.attrs.importance_weight - a.attrs.importance_weight);
+
+  console.log(`Concept Web — ${nodes.length} nodes\n`);
+
+  // Column widths
+  const COL_ID = 12;
+  const COL_FORM = 24;
+  const COL_REL = 8;
+  const COL_SNT = 14;
+  const COL_WEIGHT = 8;
+  const COL_FREQ = 6;
+  const COL_SEEN = 12;
+
+  const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+
+  const header =
+    pad("concept_id", COL_ID) +
+    pad("surface_form", COL_FORM) +
+    pad("rel", COL_REL) +
+    pad("sentiment", COL_SNT) +
+    pad("weight", COL_WEIGHT) +
+    pad("freq", COL_FREQ) +
+    pad("last_seen", COL_SEEN);
+
+  const divider = "-".repeat(header.length);
+
+  console.log(header);
+  console.log(divider);
+
+  const nowMs = Date.now();
+
+  for (const { key, attrs } of nodes) {
+    // Lazy elapsed-time correction (REL-03): recompute tier at read time using current clock.
+    // This is read-only — no disk write. axon.json is unchanged.
+    const neighborStrengths = store.graph
+      .neighbors(key)
+      .map((nbr) => store.graph.getEdgeAttributes(store.graph.edge(key, nbr)!).strength);
+    const score = compositeScore(attrs.last_seen, attrs.frequency_count, neighborStrengths, nowMs, config);
+    const displayTier = classifyTier(score, config);
+
+    const dateOnly = attrs.last_seen.slice(0, 10);
+    const row =
+      pad(String(attrs.concept_id), COL_ID) +
+      pad(attrs.surface_form, COL_FORM) +
+      pad(displayTier, COL_REL) +
+      pad(attrs.sentiment_tier, COL_SNT) +
+      pad(attrs.importance_weight.toFixed(2), COL_WEIGHT) +
+      pad(String(attrs.frequency_count), COL_FREQ) +
+      pad(dateOnly, COL_SEEN);
+    console.log(row);
+  }
+
+  // Append moment nodes section — failure does NOT affect status output
+  try {
+    const moments = await readMoments();
+    if (moments.length > 0) {
+      const displayCount = Math.min(moments.length, 20);
+      console.log(`\nMoment Nodes — ${moments.length} permanent (never pruned)`);
+      for (let i = 0; i < displayCount; i++) {
+        const m = moments[i]!;
+        console.log(`  ${m.timestamp.slice(0, 10)}  ${m.story.slice(0, 60)}`);
+      }
+      if (moments.length > 20) {
+        console.log(`  ... and ${moments.length - 20} more`);
+      }
+    }
+  } catch {
+    // moment status failure is non-fatal
+  }
+
+  // Append drift summary — failure does NOT affect status output (DRF-07)
+  try {
+    const events = await readAuditEvents(EVENTS_PATH);
+    const nowMs = Date.now();
+    const momentList = await readMoments(config.momentsDir ?? "data/moments");
+    const momentIds = new Set<number>(momentList.flatMap((m) => [...m.concept_ids]));
+
+    // Re-use nodes from the loop above to get active IDs
+    const activeIdsForDrift = new Set<number>();
+    for (const { key, attrs } of nodes) {
+      const neighborStrengths = store.graph
+        .neighbors(key)
+        .map((nbr) => store.graph.getEdgeAttributes(store.graph.edge(key, nbr)!).strength);
+      const score = compositeScore(attrs.last_seen, attrs.frequency_count, neighborStrengths, nowMs, config);
+      if (classifyTier(score, config) === "ACTIVE") activeIdsForDrift.add(attrs.concept_id);
+    }
+
+    const driftScore = computeDriftScore(momentIds, activeIdsForDrift);
+    const instability = detectInstability(events as unknown as readonly { type: string; timestamp: string; [key: string]: unknown }[], config.driftWindowDays ?? 7, nowMs);
+    const trend = classifyTrend(driftScore, instability.length);
+    const alert = driftScore < 0.5 ? " [!]" : "";
+    console.log(`\nDrift: ${driftScore.toFixed(2)} — ${trend}${alert}`);
+  } catch {
+    // drift summary failure is non-fatal
+  }
+}
+
+export async function runRef(axonPath: string, keyword: string, config: Config): Promise<void> {
+  const store = await AxonStore.load(axonPath);
+
+  const nodeKey = store.graph.nodes().find((key) => {
+    const attrs = store.graph.getNodeAttributes(key);
+    return (
+      attrs.surface_form.toLowerCase() === keyword.toLowerCase() ||
+      String(attrs.concept_id) === keyword
+    );
+  });
+
+  if (nodeKey === undefined) {
+    console.error(
+      `Concept not found: ${keyword}. Use theorex scan to ingest concepts first.`,
+    );
+    process.exit(1);
+  }
+
+  propagateActivation(store, nodeKey, 1.0, Date.now());
+  await store.save(axonPath);
+
+  const attrs = store.graph.getNodeAttributes(nodeKey);
+  console.log(`Referenced: ${attrs.surface_form} (tier: ${attrs.relevance_tier})`);
+}
+
+export async function runPrune(
+  axonPath: string,
+  archiveDir: string,
+  config: Config,
+): Promise<void> {
+  await pruneAxon(axonPath, archiveDir, config);
+  console.log("Prune complete.");
+}
+
+export async function runSearch(query: string, config: Config): Promise<void> {
+  // Housekeeping: rotate stale STM files on every CLI invocation (STM-02)
+  await rotateStm();
+
+  const results = await hybridSearch(query, 10, {
+    lmStudioUrl: config.lmStudioUrl,
+    lmStudioEmbedModel: config.lmStudioEmbedModel,
+    lmStudioTimeoutMs: config.lmStudioTimeoutMs,
+  });
+
+  if (results.length === 0) {
+    console.log(`No results found for: ${query}`);
+    return;
+  }
+
+  console.log(`# Search: ${query}\n`);
+
+  const COL_RANK = 6;
+  const COL_CONCEPT = 21;
+  const COL_SCORE = 9;
+  const COL_DATE = 10;
+
+  const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+  const padLeft = (s: string, n: number) => s.padStart(n).slice(-n);
+
+  const header =
+    pad("Rank", COL_RANK) +
+    pad("Concept", COL_CONCEPT) +
+    pad("Score", COL_SCORE) +
+    pad("Date", COL_DATE);
+  const divider =
+    "-".repeat(COL_RANK - 2) + "  " +
+    "-".repeat(COL_CONCEPT - 2) + "  " +
+    "-".repeat(COL_SCORE - 2) + "  " +
+    "-".repeat(COL_DATE);
+
+  console.log(header);
+  console.log(divider);
+
+  for (let i = 0; i < results.length; i++) {
+    const { entry, score } = results[i]!;
+    const row =
+      padLeft(String(i + 1), COL_RANK - 2) + "  " +
+      pad(entry.surface_form, COL_CONCEPT - 2) + "  " +
+      score.toFixed(4).padStart(COL_SCORE - 2) + "  " +
+      entry.date;
+    console.log(row);
+  }
+
+  // Append moment node results — failure does NOT fail the search command
+  try {
+    const moments = await readMoments();
+    const momentResults = await searchMoments(moments, query, 5);
+    if (momentResults.length > 0) {
+      console.log("\n--- Moment Nodes ---");
+      for (const result of momentResults) {
+        console.log(`[MOMENT] ${result.story.slice(0, 80)} (${result.timestamp.slice(0, 10)})`);
+      }
+    }
+  } catch {
+    // moment search failure is non-fatal
+  }
+}
+
+export async function runGraduate(config: Config, memoryPath: string): Promise<void> {
+  // Housekeeping: rotate stale STM files on every CLI invocation (STM-02)
+  await rotateStm();
+
+  const entries = await readShortTermFiles();
+  const candidates = await findGraduateCandidates(entries, config.stmGraduateDays);
+
+  if (candidates.length === 0) {
+    console.log("Nothing to graduate.");
+    return;
+  }
+
+  await graduateToLongTerm(candidates, memoryPath);
+
+  console.log(`Graduated ${candidates.length} concept(s) to long-term memory:`);
+  for (const candidate of candidates) {
+    console.log(`  - ${candidate.surface_form}`);
+  }
+}
+
+export async function runDrift(
+  axonPath: string,
+  eventsPath: string,
+  config: Config,
+  nowMs: number = Date.now(),
+): Promise<void> {
+  // 1. Load all audit events
+  const events = await readAuditEvents(eventsPath);
+
+  // 2. Get ACTIVE concept IDs using lazy tier correction (same as runStatus — REL-03)
+  const store = await AxonStore.load(axonPath);
+  const activeIds = new Set<number>();
+  const nodeKeys = store.graph.nodes();
+  for (const key of nodeKeys) {
+    const attrs = store.graph.getNodeAttributes(key);
+    const neighborStrengths = store.graph
+      .neighbors(key)
+      .map((nbr) => {
+        const edgeKey = store.graph.edge(key, nbr);
+        return edgeKey ? store.graph.getEdgeAttributes(edgeKey).strength : 0;
+      });
+    const score = compositeScore(attrs.last_seen, attrs.frequency_count, neighborStrengths, nowMs, config);
+    const tier = classifyTier(score, config);
+    if (tier === "ACTIVE") activeIds.add(attrs.concept_id);
+  }
+
+  // 3. Get moment concept IDs (union across all moments)
+  const moments = await readMoments(config.momentsDir);
+  const momentIds = new Set<number>();
+  for (const m of moments) {
+    for (const id of m.concept_ids) momentIds.add(id);
+  }
+
+  // 4. Compute drift score and flags
+  // Cast to satisfy scorer.ts's local AuditEvent type (which has index signature [key: string]: unknown)
+  type ScorerEvent = { type: string; timestamp: string; [key: string]: unknown };
+  const eventsForScorer = events as unknown as readonly ScorerEvent[];
+  const score = computeDriftScore(momentIds, activeIds);
+  const instability = detectInstability(eventsForScorer, config.driftWindowDays, nowMs);
+  const flips = detectSentimentFlips(eventsForScorer, config.driftWindowDays, nowMs);
+  const trend = classifyTrend(score, instability.length);
+
+  // 5. Output
+  const alert = score < 0.5 ? " [!]" : "";
+  console.log(`Drift Score: ${score.toFixed(2)} — ${trend}${alert}`);
+  console.log(`Window: ${config.driftWindowDays} days | Active concepts: ${activeIds.size} | Moment anchors: ${momentIds.size}`);
+
+  if (instability.length > 0) {
+    console.log(`\nTier Instability (${instability.length} concept(s) dropped from ACTIVE):`);
+    for (const flag of instability) {
+      console.log(`  ${flag.surface_form} (id:${flag.concept_id}) — ACTIVE → ${flag.to} at ${flag.dropped_at.slice(0, 10)}`);
+    }
+  }
+
+  if (flips.length > 0) {
+    console.log(`\nSentiment Flips (${flips.length} concept(s)):`);
+    for (const flip of flips) {
+      console.log(`  ${flip.surface_form} (id:${flip.concept_id}) — ${flip.sentiments_seen.join(" ↔ ")}`);
+    }
+  }
+
+  if (instability.length === 0 && flips.length === 0) {
+    console.log("No flagged concepts in window.");
+  }
+}
+
+export async function runAudit(
+  eventsPath: string,
+  options: { type?: string; since?: string },
+  limit = 50,
+): Promise<void> {
+  let sinceMs: number | undefined;
+  if (options.since) {
+    // Treat --since YYYY-MM-DD as UTC midnight start of that day (DRF-08 pitfall 4)
+    sinceMs = new Date(options.since + "T00:00:00.000Z").getTime();
+    if (isNaN(sinceMs)) {
+      console.error(`Invalid --since date: ${options.since}. Expected format: YYYY-MM-DD`);
+      process.exit(1);
+    }
+  }
+
+  const events = await readAuditEvents(eventsPath, {
+    type: options.type as AuditEventType | undefined,
+    sinceMs,
+  });
+
+  if (events.length === 0) {
+    console.log("No events found" + (options.type ? ` of type: ${options.type}` : "") + (options.since ? ` since: ${options.since}` : "") + ".");
+    return;
+  }
+
+  // Display most recent events first, up to limit
+  const display = events.slice(-limit).reverse();
+  console.log(`Event Log — ${events.length} total${options.type ? ` (type: ${options.type})` : ""}${options.since ? ` (since: ${options.since})` : ""}\n`);
+
+  for (const event of display) {
+    const date = event.timestamp.slice(0, 19).replace("T", " ");
+    const base = `${date}  [${event.type}]`;
+    if (event.type === "tier_change") {
+      console.log(`${base}  ${event.surface_form} (id:${event.concept_id})  ${event.from} → ${event.to}  source:${event.source}`);
+    } else if (event.type === "sentiment_flip") {
+      console.log(`${base}  ${event.surface_form} (id:${event.concept_id})  ${event.from} → ${event.to}  source:${event.source}`);
+    } else if (event.type === "graduation") {
+      console.log(`${base}  ${event.surface_form} (id:${event.concept_id})  source:${event.source}`);
+    } else if (event.type === "prune") {
+      console.log(`${base}  ${event.surface_form} (id:${event.concept_id})  source:${event.source}`);
+    } else if (event.type === "moment_capture") {
+      console.log(`${base}  ${event.moment_id.slice(0, 8)}...  "${event.story_preview}"  source:${event.source}`);
+    } else {
+      console.log(`${base}  ${JSON.stringify(event)}`);
+    }
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Phase 6: AI Family subcommands
+// ---------------------------------------------------------------------------
+
+/**
+ * write: Write text to an agent's private axon store.
+ * Usage: theorex write --agent <id> <text>
+ */
+export async function runWrite(agentId: string, text: string, config: Config, observationType = ""): Promise<void> {
+  const result = await writeToAgent(agentId, text, config, Date.now(), observationType);
+  console.log(`Written to ${agentId}: +${result.conceptsAdded} concepts, +${result.edgesAdded} edges`);
+  console.log(`  Path: ${result.axonPath}`);
+}
+
+/**
+ * promote: Promote qualifying concepts from an agent's private axon to the shared web.
+ * Usage: theorex promote --agent <id> [--force <concept_id,...>]
+ */
+export async function runPromote(
+  agentId: string,
+  config: Config,
+  forceIds?: ReadonlySet<number>,
+): Promise<void> {
+  const result = await promoteToShared(agentId, config, Date.now(), forceIds);
+  console.log(`Promoted from ${agentId} → shared: ${result.promoted} concepts, ${result.edgesPromoted} edges (${result.skipped} skipped)`);
+  console.log(`  Shared: ${resolvedSharedAxonPath(config.sharedAxonPath)}`);
+}
+
+/**
+ * query-shared: Show status of the shared concept web.
+ * Usage: theorex query-shared
+ */
+export async function runQueryShared(config: Config): Promise<void> {
+  const sharedPath = resolvedSharedAxonPath(config.sharedAxonPath);
+  await runStatus(sharedPath, config);
+}
+
+/**
+ * ingest: Read markdown files into an agent's private axon (section-chunked).
+ * Usage: theorex ingest --agent <id> <file1> [file2 ...]
+ */
+export async function runIngest(agentId: string, filePaths: string[], config: Config): Promise<void> {
+  console.log(`Ingesting ${filePaths.length} file(s) for ${agentId}...`);
+  const result = await ingestFiles(agentId, filePaths, config);
+  console.log(`Done: ${result.filesProcessed} file(s), ${result.sectionsProcessed} section(s), +${result.conceptsAdded} concepts, +${result.edgesAdded} edges`);
+}
+
+/**
+ * ingest-code: Parse a source directory and write code symbols into an agent's axon.
+ * Usage: theorex ingest-code --agent <id> <dir>
+ */
+export async function runIngestCode(agentId: string, targetDir: string, config: Config): Promise<void> {
+  console.log("Ingesting code from " + targetDir + " for " + agentId + "...");
+  const result = await ingestCode(agentId, targetDir, config);
+  console.log("Done: " + result.filesProcessed + " file(s), +" + result.symbolsAdded + " symbols, +" + result.edgesAdded + " edges");
+}
+
+/**
+ * synthesize: LLM-assisted lesson extraction → write to agent's private axon.
+ * Usage: theorex synthesize --agent <id> <text>
+ * Uses local LLM to extract structured lessons before writing.
+ */
+/**
+ * boot-inject: Write SHARED_CONTEXT.md from the shared axon for agent boot loading.
+ * Usage: theorex boot-inject [--output <path>]
+ */
+export async function runBootInject(config: Config, outputPath?: string): Promise<void> {
+  const result = await generateBootContext(config, outputPath);
+  console.log(`Boot context written: ${result.activeConcepts} active concepts → ${result.outputPath}`);
+}
+
+export async function runSynthesize(agentId: string, text: string, config: Config): Promise<void> {
+  console.log(`Synthesizing for ${agentId} via ${config.lmStudioUrl}...`);
+  const result = await synthesizeToAgent(agentId, text, config);
+  if (result.fallbackUsed) {
+    console.log(`LLM unavailable — NLP fallback: +${result.conceptsAdded} concepts`);
+  } else {
+    console.log(`Extracted ${result.lessonsExtracted} lesson(s): +${result.conceptsAdded} concepts, +${result.edgesAdded} edges`);
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Flash Lobe subcommands (Phase 3)
+// ---------------------------------------------------------------------------
+import { writeToAgent } from "../family/write";
+import { promoteToShared } from "../family/promote";
+import { resolvedSharedAxonPath, agentAxonPath } from "../family/paths";
+import { ingestFiles } from "../family/ingest";
+import { synthesizeToAgent } from "../family/synthesize";
+import { generateBootContext } from "../family/boot-inject";
+import { writeSessionSummary } from "../family/session-summary";
+import { ingestCode } from "../code/ingest";
+import { recordFlashEvent } from "../flash/record.ts";
+import { flushFlash } from "../flash/flush.ts";
+import { injectContext } from "../flash/inject.ts";
+
+/**
+ * flash-write: Parse PostToolUse stdin JSON and record to flash ring buffer.
+ * Called by PostToolUse hook (async: true — non-blocking).
+ */
+export async function runFlashWrite(sessionId: string, stdinJson: string): Promise<void> {
+  let hookInput: Record<string, unknown>;
+  try {
+    hookInput = JSON.parse(stdinJson) as Record<string, unknown>;
+  } catch {
+    return; // malformed JSON — silent exit (async context, stderr not shown)
+  }
+  await recordFlashEvent(sessionId, hookInput);
+}
+
+/**
+ * flash-flush: Flush flash buffer to short-term. Called by SessionEnd hook.
+ * Also callable manually as `theorex flush` (SessionEnd /exit bug workaround).
+ * Returns count of events written to short-term.
+ */
+export async function runFlashFlush(sessionId: string): Promise<number> {
+  return await flushFlash(sessionId);
+}
+
+/**
+ * flash-inject: Print ACTIVE-tier context to stdout for SessionStart hook.
+ * Stdout is injected into Claude's conversation context.
+ * Exits cleanly with empty output on cold start.
+ */
+export async function runFlashInject(sessionId: string): Promise<void> {
+  const context = await injectContext(sessionId);
+  if (context.trim()) {
+    process.stdout.write(context + "\n");
+  }
+}
+
+// ---------------------------------------------------------------------------
+// Main dispatch (only runs when executed directly)
+// ---------------------------------------------------------------------------
+
+if (import.meta.main) {
+  const { positionals } = parseArgs({
+    args: Bun.argv.slice(2),
+    allowPositionals: true,
+    strict: false,
+  });
+
+  const [subcommand, ...rest] = positionals;
+  const config = await loadConfig();
+
+  // Parse --ref file:line flags for the `moment` subcommand
+  const rawRefs: CodeRef[] = Bun.argv
+    .filter((_, i) => Bun.argv[i - 1] === "--ref")
+    .map((v) => {
+      const colonIdx = v.lastIndexOf(":");
+      const file = colonIdx > 0 ? v.slice(0, colonIdx) : v;
+      const line = colonIdx > 0 ? Number(v.slice(colonIdx + 1)) || 1 : 1;
+      return { file, line };
+    });
+
+  switch (subcommand) {
+    case "prune-agent": {
+      // Usage: theorex prune-agent --agent <id>
+      // Prune LESS-tier nodes from an agent's private axon. Run after scan-agent.
+      const { values: paValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const paAgent = typeof paValues.agent === "string" ? paValues.agent : undefined;
+      if (!paAgent) {
+        console.error("Usage: theorex prune-agent --agent <id>");
+        process.exit(1);
+      }
+      const paPath = agentAxonPath(paAgent, config.agentAxonDir);
+      const paArchive = paPath.replace(/axon\.json$/, "archive");
+      console.log("Pruning " + paAgent + "...");
+      await runPrune(paPath, paArchive, config);
+      break;
+    }
+
+    case "scan-agent": {
+      // Usage: theorex scan-agent --agent <id>
+      // Re-scores all nodes in an agent's private axon using compositeScore (recency + frequency + co-occurrence).
+      // Updates relevance_tier: ACTIVE / MILD / LESS. Decays edges. Call this periodically.
+      const { values: saValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const saAgent = typeof saValues.agent === "string" ? saValues.agent : undefined;
+      if (!saAgent) {
+        console.error("Usage: theorex scan-agent --agent <id>");
+        process.exit(1);
+      }
+      const saPath = agentAxonPath(saAgent, config.agentAxonDir);
+      console.log("Scanning " + saAgent + "...");
+      await runScan(saPath, config);
+      console.log("Done.");
+      break;
+    }
+
+    case "scan":
+      await runScan(AXON_PATH, config);
+      break;
+
+    case "status":
+      await runStatus(AXON_PATH, config);
+      break;
+
+    case "ref": {
+      const keyword = rest[0];
+      if (!keyword) {
+        console.error("Usage: theorex ref <keyword>");
+        process.exit(1);
+      }
+      await runRef(AXON_PATH, keyword, config);
+      break;
+    }
+
+    case "prune":
+      await runPrune(AXON_PATH, ARCHIVE_DIR, config);
+      break;
+
+    case "search": {
+      const query = rest.join(" ");
+      if (!query) {
+        console.error("Usage: theorex search <query>");
+        process.exit(1);
+      }
+      await runSearch(query, config);
+      break;
+    }
+
+    case "graduate":
+      await runGraduate(config, MEMORY_PATH);
+      break;
+
+    case "flash-write": {
+      // Usage: theorex flash-write --session <id> (reads stdin)
+      const sessionFlag = rest.indexOf("--session");
+      const sid = sessionFlag >= 0 ? rest[sessionFlag + 1] : "unknown";
+      const stdin = await Bun.stdin.text();
+      await runFlashWrite(sid ?? "unknown", stdin);
+      break;
+    }
+
+    case "flash-flush":
+    case "flush": {
+      // Usage: theorex flush --session <id>
+      // "flush" alias = SessionEnd /exit bug workaround (HKS-02 fallback)
+      const sessionFlag = rest.indexOf("--session");
+      const sid = sessionFlag >= 0 ? rest[sessionFlag + 1] : "unknown";
+      const count = await runFlashFlush(sid ?? "unknown");
+      console.log(`Flushed ${count} event(s) to short-term.`);
+      break;
+    }
+
+    case "flash-inject": {
+      // Usage: theorex flash-inject --session <id>
+      const sessionFlag = rest.indexOf("--session");
+      const sid = sessionFlag >= 0 ? rest[sessionFlag + 1] : "unknown";
+      await runFlashInject(sid ?? "unknown");
+      break;
+    }
+
+    case "moment": {
+      // Usage: theorex moment <story> [--ref file:line ...]
+      const story = positionals.slice(1).join(" ").trim();
+      if (!story) {
+        console.error("Usage: theorex moment <story>");
+        process.exit(1);
+      }
+      await runMoment(story, AXON_PATH, config, rawRefs);
+      break;
+    }
+
+    case "write": {
+      // Usage: theorex write --agent <id> <text...>
+      const { values: writeValues, positionals: writePos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: true,
+        strict: false,
+      });
+      const agentId = typeof writeValues.agent === "string" ? writeValues.agent : rest[0];
+      const writeText = agentId === rest[0] ? rest.slice(1).join(" ") : writePos.join(" ");
+      if (!agentId || !writeText) {
+        console.error("Usage: theorex write --agent <id> <text>");
+        process.exit(1);
+      }
+      await runWrite(agentId, writeText, config);
+      break;
+    }
+
+    case "promote": {
+      // Usage: theorex promote --agent <id> [--force <id1,id2,...>]
+      const { values: promValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent: { type: "string" },
+          force: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const promAgentId = typeof promValues.agent === "string" ? promValues.agent : rest[0];
+      if (!promAgentId) {
+        console.error("Usage: theorex promote --agent <id> [--force <concept_id,...>]");
+        process.exit(1);
+      }
+      const forceIds = typeof promValues.force === "string"
+        ? new Set(promValues.force.split(",").map(Number).filter(Boolean))
+        : undefined;
+      await runPromote(promAgentId, config, forceIds);
+      break;
+    }
+
+    case "query-shared":
+      await runQueryShared(config);
+      break;
+
+    case "boot-inject": {
+      // Usage: theorex boot-inject [--output <path>]
+      const { values: biValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { output: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      await runBootInject(config, typeof biValues.output === "string" ? biValues.output : undefined);
+      break;
+    }
+
+    case "ingest": {
+      // Usage: theorex ingest --agent <id> <file1> [file2 ...]
+      const { values: ingestValues, positionals: ingestFiles } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: true,
+        strict: false,
+      });
+      const ingestAgent = typeof ingestValues.agent === "string" ? ingestValues.agent : ingestFiles[0];
+      const ingestPaths = typeof ingestValues.agent === "string" ? ingestFiles : ingestFiles.slice(1);
+      if (!ingestAgent || ingestPaths.length === 0) {
+        console.error("Usage: theorex ingest --agent <id> <file1> [file2 ...]");
+        process.exit(1);
+      }
+      await runIngest(ingestAgent, ingestPaths, config);
+      break;
+    }
+
+    case "synthesize": {
+      // Usage: theorex synthesize --agent <id> <text>
+      const { values: synthValues, positionals: synthPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: true,
+        strict: false,
+      });
+      const synthAgent = typeof synthValues.agent === "string" ? synthValues.agent : synthPos[0];
+      const synthText = typeof synthValues.agent === "string" ? synthPos.join(" ") : synthPos.slice(1).join(" ");
+      if (!synthAgent || !synthText) {
+        console.error("Usage: theorex synthesize --agent <id> <text>");
+        process.exit(1);
+      }
+      await runSynthesize(synthAgent, synthText, config);
+      break;
+    }
+
+
+
+    case "session-summary": {
+      // Usage: theorex session-summary --agent <id> [--investigated ...] [--learned ...] [--completed ...] [--next ...]
+      const { values: ssValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:        { type: "string" },
+          investigated: { type: "string" },
+          learned:      { type: "string" },
+          completed:    { type: "string" },
+          next:         { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const ssAgent = typeof ssValues.agent === "string" ? ssValues.agent : undefined;
+      if (!ssAgent) {
+        console.error("Usage: theorex session-summary --agent <id> [--investigated ...] [--learned ...] [--completed ...] [--next ...]");
+        process.exit(1);
+      }
+      const summary = {
+        investigated: typeof ssValues.investigated === "string" ? ssValues.investigated : undefined,
+        learned:      typeof ssValues.learned      === "string" ? ssValues.learned      : undefined,
+        completed:    typeof ssValues.completed    === "string" ? ssValues.completed    : undefined,
+        next_steps:   typeof ssValues.next        === "string" ? ssValues.next         : undefined,
+      };
+      const fields = Object.values(summary).filter(Boolean).length;
+      if (fields === 0) {
+        console.error("Provide at least one field: --investigated, --learned, --completed, --next");
+        process.exit(1);
+      }
+      console.log("Writing session summary for " + ssAgent + " (" + fields + " field(s))...");
+      const ssResult = await writeSessionSummary(ssAgent, summary, config);
+      console.log("Done: +" + ssResult.conceptsAdded + " concepts, +" + ssResult.edgesAdded + " edges");
+      break;
+    }
+
+    case "ingest-code": {
+      // Usage: theorex ingest-code --agent <id> <dir>
+      const { values: icValues, positionals: icPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: true,
+        strict: false,
+      });
+      const icAgent = typeof icValues.agent === "string" ? icValues.agent : icPos[0];
+      const icDir = typeof icValues.agent === "string" ? icPos[0] : icPos[1];
+      if (!icAgent || !icDir) {
+        console.error("Usage: theorex ingest-code --agent <id> <dir>");
+        process.exit(1);
+      }
+      await runIngestCode(icAgent, icDir, config);
+      break;
+    }
+
+        case "drift":
+      await runDrift(AXON_PATH, config.eventsPath, config);
+      break;
+
+    case "audit": {
+      // Re-parse from raw argv so --type and --since flags are captured correctly.
+      // The top-level parseArgs discards option values for unknown options,
+      // so we must re-parse the full arg list starting after the subcommand.
+      const auditArgs = Bun.argv.slice(2).filter((a) => a !== "audit");
+      const { values: auditValues } = parseArgs({
+        args: auditArgs,
+        options: {
+          type: { type: "string" },
+          since: { type: "string" },
+        },
+        strict: false,
+        allowPositionals: false,
+      });
+      await runAudit(config.eventsPath, {
+        type: typeof auditValues.type === "string" ? auditValues.type : undefined,
+        since: typeof auditValues.since === "string" ? auditValues.since : undefined,
+      });
+      break;
+    }
+
+    default:
+      console.error(`Unknown command: ${subcommand ?? "(none)"}`);
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject>");
+      process.exit(1);
+  }
+}

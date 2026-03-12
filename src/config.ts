@@ -1,0 +1,75 @@
+// config.ts — Project-wide configuration loader.
+// Reads config.json if present; falls back to DEFAULT_CONFIG.
+// No other module should hardcode these values.
+
+export interface Config {
+  halfLifeDays: number;       // default: 14
+  activeThreshold: number;    // default: 0.6
+  mildThreshold: number;      // default: 0.3
+  pruneThresholdDays: number; // default: 30
+  edgePruneThreshold: number; // default: 0.01
+  // Phase 2: Short-Term Memory fields
+  stmRetentionDays: number;      // default: 14
+  stmGraduateDays: number;       // default: 7
+  lmStudioUrl: string;           // default: "http://localhost:1234"
+  lmStudioEmbedModel: string;    // default: "nomic-embed-text-v1.5"
+  lmStudioTimeoutMs: number;     // default: 3000
+  // Phase 4: RAG Bootstrap
+  ragBootstrapK: number;               // default: 5  — max seeded edges per new concept
+  ragBootstrapMinSimilarity: number;   // default: 0.4 — min cosine similarity to seed
+  ragSeedDissolutionDays: number;      // default: 7  — days before unreinforced seed dissolves
+  ragEmbeddingStorePath: string;       // default: "data/concept-embeddings.json"
+  ragOnnxModel: string;                // default: "Xenova/all-MiniLM-L6-v2"
+  // Phase 5: Moment Nodes
+  momentsDir: string;                  // default: "data/moments"
+  // Phase 8: Drift Detection
+  driftWindowDays: number;             // default: 7  — rolling window for tier instability / sentiment flip detection
+  eventsPath: string;                  // default: "data/events.jsonl"
+  // Phase 6: AI Family Shared Layer
+  promotionThreshold: number;          // default: 0.7 — composite_score required to auto-promote to shared
+  sharedAxonPath: string;              // default: "~/.openclaw/workspace/theorex/shared-axon.json"
+  agentAxonDir: string;                // default: "~/.openclaw/agents"
+}
+
+export const DEFAULT_CONFIG: Config = {
+  halfLifeDays: 14,
+  activeThreshold: 0.6,
+  mildThreshold: 0.3,
+  pruneThresholdDays: 30,
+  edgePruneThreshold: 0.01,
+  // Phase 2: Short-Term Memory defaults
+  stmRetentionDays: 14,
+  stmGraduateDays: 7,
+  lmStudioUrl: "http://localhost:1234",
+  lmStudioEmbedModel: "nomic-embed-text-v1.5",
+  lmStudioTimeoutMs: 15000,
+  // Phase 4: RAG Bootstrap defaults
+  ragBootstrapK: 5,
+  ragBootstrapMinSimilarity: 0.4,
+  ragSeedDissolutionDays: 7,
+  ragEmbeddingStorePath: "data/concept-embeddings.json",
+  ragOnnxModel: "Xenova/all-MiniLM-L6-v2",
+  // Phase 5: Moment Nodes
+  momentsDir: "data/moments",
+  // Phase 8: Drift Detection
+  driftWindowDays: 7,
+  eventsPath: "data/events.jsonl",
+  // Phase 6: AI Family Shared Layer
+  promotionThreshold: 0.5,
+  sharedAxonPath: "",   // empty = resolved at runtime via homedir()
+  agentAxonDir: "",     // empty = resolved at runtime via homedir()
+};
+
+/**
+ * Load config from path.
+ * If file is absent or invalid JSON, returns a copy of DEFAULT_CONFIG.
+ * Merges — caller-supplied keys override defaults, missing keys use defaults.
+ */
+export async function loadConfig(path = "config.json"): Promise<Config> {
+  try {
+    const raw = await Bun.file(path).json();
+    return { ...DEFAULT_CONFIG, ...raw };
+  } catch {
+    return { ...DEFAULT_CONFIG };
+  }
+}

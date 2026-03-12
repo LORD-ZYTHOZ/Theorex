@@ -1,0 +1,1004 @@
+{"type":"sentiment_flip","timestamp":"2026-03-11T23:34:42.147Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-11T23:34:42.147Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-11T23:34:42.147Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-11T23:34:42.147Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.150Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.152Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.152Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.153Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.155Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.156Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.161Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.161Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.161Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.162Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.162Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.163Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.163Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-11T23:34:42.164Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.173Z","source":"moment","moment_id":"ae8ba306-114f-42b4-ad37-59e459da4e15","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.173Z","source":"moment","moment_id":"f3991644-ae79-46e3-9d61-0a797d8a400a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.174Z","source":"moment","moment_id":"e67093af-e17c-4b13-9f75-77748723e0d4","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.174Z","source":"moment","moment_id":"a7232fa6-0745-4299-b9e3-bfdf6e702363","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.175Z","source":"moment","moment_id":"b762453b-f508-4e9a-a9c2-94ac226b70ae","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.175Z","source":"moment","moment_id":"7359d668-1f0e-4abd-b3d3-f3d5a615980c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.176Z","source":"moment","moment_id":"169e0e92-1365-42ba-89cd-a6abea587235","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.176Z","source":"moment","moment_id":"9a302102-f19a-4353-bbfb-198ab3bc6710","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.177Z","source":"moment","moment_id":"e97a16f4-4a72-4802-861d-ce05a3380c94","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.178Z","source":"moment","moment_id":"73a0bd3a-7b20-4ca6-b6a8-b69aa622a93e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.178Z","source":"moment","moment_id":"3cec8977-edcd-4150-8d78-0beab62e2857","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.179Z","source":"moment","moment_id":"5ce6b961-ccca-41e4-b1ba-c623bede0492","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.180Z","source":"moment","moment_id":"a8e5e3bc-232d-4894-9495-14a50213cc40","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.180Z","source":"moment","moment_id":"5e38586e-98cf-465d-8bf3-ce3994de216c","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.237Z","source":"moment","moment_id":"1811b939-d364-48c0-8340-dbc74d01df8b","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.253Z","source":"moment","moment_id":"ea7dac60-bc90-4184-8ef7-d723aaf28cf1","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.268Z","source":"moment","moment_id":"98557b3c-00e1-4ef9-8336-3ad9b6a5426d","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:42.282Z","source":"moment","moment_id":"49346918-6c3c-42d9-832e-fe9046598bb9","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.339Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.340Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.340Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.341Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.410Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.411Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-11T23:34:42.412Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-11T23:34:42.419Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-11T23:34:44.058Z","source":"moment","moment_id":"0df0a56c-1c02-423e-bac5-86e0e793c1e4","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-11T23:34:44.164Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:04.467Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:04.467Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:04.467Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:04.467Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.471Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.473Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.473Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.474Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.478Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.481Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.486Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.486Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.486Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.487Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.487Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.488Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.488Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:04.488Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.497Z","source":"moment","moment_id":"4d166189-76e1-4b20-9116-3eb773cbbaef","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.498Z","source":"moment","moment_id":"cf039786-749e-49af-9599-cc56063ed9e1","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.498Z","source":"moment","moment_id":"7d1b12ae-1e7d-4291-9c38-dc6af3e98609","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.499Z","source":"moment","moment_id":"0e8ae09b-e2c6-4912-b9c1-62c0403fe530","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.499Z","source":"moment","moment_id":"206c5954-5f81-489a-a349-60cd37d3be1d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.499Z","source":"moment","moment_id":"f20da830-3780-46dc-9601-81205f48c5f6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.500Z","source":"moment","moment_id":"ee33e127-739c-46bb-8f67-8cdda71361e5","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.500Z","source":"moment","moment_id":"a2f1e638-73c1-4c17-86f9-3d8ccc8a103e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.501Z","source":"moment","moment_id":"6070c75d-7315-40af-b99a-5277f0ce9b29","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.501Z","source":"moment","moment_id":"1ff40111-bef1-48cf-9b9e-a0f153b00f51","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.502Z","source":"moment","moment_id":"02700e52-d73c-422c-bf68-bfd410d199e2","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.503Z","source":"moment","moment_id":"6a8ea64f-ac91-4d34-b571-34c9e25c58cc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.504Z","source":"moment","moment_id":"475ce581-34bf-4ec5-bbb7-5c2e9ecb1da4","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.504Z","source":"moment","moment_id":"4a57650e-d3b1-4384-8dac-a007a4c6b3bf","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.571Z","source":"moment","moment_id":"02758906-47b9-476e-b966-3ecfd8b01981","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.587Z","source":"moment","moment_id":"75008f32-7440-4cf2-a928-349d016e574a","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.602Z","source":"moment","moment_id":"0395c3d8-7a67-4c67-89d7-78826a7d57fa","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:04.616Z","source":"moment","moment_id":"b5be4b41-b43f-4c15-bd56-65b0e09c6e6c","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.737Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.738Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.739Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.739Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.927Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.928Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T01:54:04.928Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T01:54:04.937Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:05.647Z","source":"moment","moment_id":"d43a78a9-5393-4d4b-8064-96c222952b43","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T01:54:05.753Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:15.612Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:15.612Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:15.612Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:15.612Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T01:54:15.615Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:15.616Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:15.616Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T01:54:15.618Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:15.619Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:15.621Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.624Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.625Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.625Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.626Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.626Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.626Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.626Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:15.627Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.633Z","source":"moment","moment_id":"1259b59c-a256-4c8d-832a-499a5510f6a6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.634Z","source":"moment","moment_id":"041c9f24-9354-4d1d-8be9-afa61e34847b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.635Z","source":"moment","moment_id":"0649a3c6-98a4-4d04-9d40-ac0c8e3acfd9","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.636Z","source":"moment","moment_id":"0791fa06-07a8-40f1-8757-a8c633d8cd77","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.636Z","source":"moment","moment_id":"6af3f593-453d-425c-99f5-d191ddc538b9","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.636Z","source":"moment","moment_id":"ac466064-0d16-4dda-9e69-79efb89d5ecc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.637Z","source":"moment","moment_id":"d96fe380-30ac-434f-95fa-4a900a14173b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.637Z","source":"moment","moment_id":"12c68b60-6a11-4816-a68a-1a78ba6eac04","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.637Z","source":"moment","moment_id":"b81a0779-7784-48c6-ab4f-3af700341312","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.638Z","source":"moment","moment_id":"0e6ec50f-408f-4a10-bc8d-c641ba779b39","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.638Z","source":"moment","moment_id":"4fd51c1b-c3a3-4f5b-9e5e-a30b8b80fc5d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.639Z","source":"moment","moment_id":"b2bde3c5-bfc7-41d4-bed5-47a40ee47128","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.640Z","source":"moment","moment_id":"bf723d58-8bb2-43b9-be11-81d2891cc301","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.640Z","source":"moment","moment_id":"ef88086a-c921-4623-8b17-807b56d9574f","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.684Z","source":"moment","moment_id":"dbb63dd6-1e17-4c09-bfc7-8ba11ff1ff38","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.700Z","source":"moment","moment_id":"cc778587-8680-4684-9568-27be44bb1952","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.715Z","source":"moment","moment_id":"9415d5a3-54b5-45bd-a39d-407ae454b904","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:15.729Z","source":"moment","moment_id":"71ea808f-c216-4050-8251-05f25aa19376","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T01:54:15.846Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:15.846Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T01:54:15.847Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:15.847Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:16.023Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:16.024Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T01:54:16.025Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T01:54:16.032Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:16.502Z","source":"moment","moment_id":"97c7a3c1-ff3d-418f-b6ea-22eefdcb33ca","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T01:54:16.609Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:20.606Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:20.606Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:20.606Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T01:54:20.606Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T01:54:20.608Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:20.610Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:20.610Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T01:54:20.611Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:20.613Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T01:54:20.614Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.618Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.619Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.619Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.619Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.619Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.620Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.620Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T01:54:20.621Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.627Z","source":"moment","moment_id":"880931ba-7961-4872-ba6a-70c627ad58ef","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.628Z","source":"moment","moment_id":"3e9706bf-4a77-49f6-9109-e3efbb03df50","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.628Z","source":"moment","moment_id":"2e821fb3-e379-4e15-b088-796fe61c1808","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.629Z","source":"moment","moment_id":"8ef3ffd5-5676-41a3-8d2a-a667ebc95ca1","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.629Z","source":"moment","moment_id":"75d276df-0eb4-4ad1-94e1-df1d19eb4514","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.629Z","source":"moment","moment_id":"722b0754-c1ec-486d-9116-0bdc2a6018d9","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.630Z","source":"moment","moment_id":"7be8e0cb-57ab-4501-893c-af5f249f9224","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.630Z","source":"moment","moment_id":"fc98fd3e-14ef-4415-ab5e-26f6058baf71","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.631Z","source":"moment","moment_id":"36ef2b03-948c-4640-bda0-f69f172a6c56","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.631Z","source":"moment","moment_id":"6dcea074-e8ae-4abf-9134-e353a62c4837","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.632Z","source":"moment","moment_id":"d5a4e66d-dc76-43b6-86fa-4f8731ba6cdd","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.632Z","source":"moment","moment_id":"985b204f-e12c-4314-95f9-fc6ff414970f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.633Z","source":"moment","moment_id":"a137cf9a-1d21-4912-9ceb-179886bc1137","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.633Z","source":"moment","moment_id":"6afece60-5749-4ec6-8469-c145cdc8bc7b","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.679Z","source":"moment","moment_id":"d05dfccc-d520-481f-8717-728fdb2f2019","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.695Z","source":"moment","moment_id":"a5502751-df3b-49eb-ae86-ae12c7cd1f42","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.710Z","source":"moment","moment_id":"ffd0db4e-b8af-4f63-b695-5d3119fe998b","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:20.724Z","source":"moment","moment_id":"1f1f6727-258d-452f-8f30-0f3a35b59b23","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T01:54:20.839Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:20.839Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T01:54:20.840Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:20.840Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:21.016Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T01:54:21.017Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T01:54:21.018Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T01:54:21.025Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T01:54:21.462Z","source":"moment","moment_id":"b90b19b6-2342-4863-83fd-00af50490115","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T01:54:21.566Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T02:02:15.736Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T02:02:15.736Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T02:02:15.736Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T02:02:15.736Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T02:02:15.739Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T02:02:15.742Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T02:02:15.742Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T02:02:15.744Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T02:02:15.745Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T02:02:15.747Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.751Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.751Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.751Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.752Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.752Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.753Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.753Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T02:02:15.754Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.761Z","source":"moment","moment_id":"1a5ab744-645d-4067-a9ad-5b8c6ba2387c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.762Z","source":"moment","moment_id":"a7e033e7-4f45-42ab-a082-9353ef0df910","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.762Z","source":"moment","moment_id":"1edccf0d-ad68-4169-a599-8e10775bfbde","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.763Z","source":"moment","moment_id":"fbe59d48-9b32-443a-ae8a-67af7f59a30d","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.764Z","source":"moment","moment_id":"1b687081-9987-49d0-a4f3-e0ae2c995793","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.764Z","source":"moment","moment_id":"19edff4e-baf6-483a-9003-afcd675e5b47","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.765Z","source":"moment","moment_id":"fdec9517-f2a9-48e3-b848-a7b8faf70d84","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.765Z","source":"moment","moment_id":"24780df0-ffee-4805-8745-9d306d7496c8","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.765Z","source":"moment","moment_id":"2e14048e-061d-4758-833a-ef09887196e6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.766Z","source":"moment","moment_id":"7ee7675a-84ed-4e14-ac82-5a6ab24956f8","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.766Z","source":"moment","moment_id":"8d4111c3-51b7-4390-a7e6-5eafe0d3c701","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.768Z","source":"moment","moment_id":"6dd8fbe9-4db8-486a-abdf-08e20f5fb5e4","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.768Z","source":"moment","moment_id":"7c527bbf-985b-476c-95ea-8f5bffad9cf7","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.768Z","source":"moment","moment_id":"c3ae542f-ae41-4211-bea3-9bc7acba0fd0","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.843Z","source":"moment","moment_id":"f3350a0e-9446-4701-a8e3-dcdf863d4295","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.859Z","source":"moment","moment_id":"af760663-d780-4021-a899-e59d9c417c7c","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.875Z","source":"moment","moment_id":"43f33de9-458d-4aa3-b7c8-4053b5a566ef","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:15.889Z","source":"moment","moment_id":"de1a254f-e238-4b57-87d9-a0e082b6c4bd","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.014Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.014Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.015Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.015Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.199Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.201Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.201Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T02:02:16.208Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T02:02:16.880Z","source":"moment","moment_id":"422f2816-9bcd-45e2-acb5-e881d586cabf","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T02:02:16.985Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T05:25:08.868Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T05:25:08.868Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T05:25:08.868Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T05:25:08.868Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T05:25:08.871Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T05:25:08.873Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T05:25:08.873Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T05:25:08.875Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T05:25:08.878Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T05:25:08.879Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.884Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.884Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.884Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.885Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.885Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.886Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.886Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:25:08.886Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.894Z","source":"moment","moment_id":"e90479c2-6909-46f9-95cd-569d4affb547","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.894Z","source":"moment","moment_id":"ff826c5b-d81c-4eb1-815c-127c3b19c521","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.895Z","source":"moment","moment_id":"304e7466-643a-48b6-897a-8edc6a524ecf","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.895Z","source":"moment","moment_id":"de2e5977-41e1-45f0-b085-d9d11b285bef","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.896Z","source":"moment","moment_id":"4e9f95b2-6ef2-4d9b-b4e8-a053ee44b758","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.896Z","source":"moment","moment_id":"1383bc56-712d-4959-99f8-b7fdd173309b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.896Z","source":"moment","moment_id":"0e7d3fb0-aed0-4648-aa37-18406c1601b5","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.896Z","source":"moment","moment_id":"3fdd635a-60cf-4c0c-b477-c3a4ef54e3ff","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.898Z","source":"moment","moment_id":"09b5aafa-7691-4f4f-9af5-279afaa76532","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.898Z","source":"moment","moment_id":"8131090e-05d8-462f-944a-58e1f8219e19","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.899Z","source":"moment","moment_id":"9a73eefe-643b-48ab-a2fa-e3ca07ad9f60","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.900Z","source":"moment","moment_id":"a5fd78f3-765e-44f9-a4d0-f4e7b1235bec","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.900Z","source":"moment","moment_id":"76261481-ae32-4099-b3a3-15445df7d4f9","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.900Z","source":"moment","moment_id":"d4e81512-16cb-4c19-affa-d551f3030cdd","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.963Z","source":"moment","moment_id":"e63fa241-3896-411e-b7fc-dda687d479a3","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.979Z","source":"moment","moment_id":"1fcfba93-a01b-47a2-9a6e-068ef7b64b94","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:08.994Z","source":"moment","moment_id":"9eaafb31-245c-437d-99e5-8046b94d4a12","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:09.009Z","source":"moment","moment_id":"7c7eba75-597e-49a2-a171-df6b205c60b4","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.136Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.137Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.137Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.137Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.317Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.319Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T05:25:09.319Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T05:25:09.327Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T05:25:10.068Z","source":"moment","moment_id":"4daf733c-d573-4681-839c-6e73c9e5e239","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T05:25:10.174Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6435754204882501,"surface_form":"→ Claude Code.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4865912432012617,"surface_form":"tick trading.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6304758357250451,"surface_form":"Primary trading engine.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1822705658882004,"surface_form":"Nova Model Config.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6231774904854827,"surface_form":"Claude Code.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2251582013093317,"surface_form":"Fleet .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6256818267524599,"surface_form":"Engine.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7210205300206761,"surface_form":"every 50ms.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7702171874208173,"surface_form":"the single greatest filter","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1260345764403887,"surface_form":"Executive","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3049775479989607,"surface_form":"native binding issues","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4374885608980264,"surface_form":"Use Grep/Glob","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5688322651632014,"surface_form":"Nova Python tools","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3357478302201630,"surface_form":"AG: .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5189967215793628,"surface_form":"Python Go","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2806436470405620,"surface_form":"trend analysis unless requested.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2747996252472717,"surface_form":"Claude Code: .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6049576134172023,"surface_form":"prob threshold.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":803487193066313,"surface_form":"the primary regime filter.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4346341480178160,"surface_form":"the H1 MA50 .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3922041675986302,"surface_form":"Confirmed logic misalignment","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7428849921785804,"surface_form":"the Foundry Wall","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3876329864660242,"surface_form":"high-fidelity signal","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6778055632495220,"surface_form":"Despite","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":483557905628847,"surface_form":"Morning Brief:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7192586120712560,"surface_form":"a sentinel logic bypass in the tensor engine","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3900580781462256,"surface_form":"the \"Low Confidence\" gate,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6804541900428414,"surface_form":"The Singularity Architecture.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":655842234619090,"surface_form":"shared axon","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7287880060749659,"surface_form":"The $5,188 level","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":256487302925515,"surface_form":"Current equity + connection status.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3453535440014255,"surface_form":"War-game","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3598129572768520,"surface_form":"Current System .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6601470217178049,"surface_form":"the fleet.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5793063485838700,"surface_form":"Singularity v13 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3329842245022168,"surface_form":"the primary bottleneck","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3315410382875834,"surface_form":"Python Go AST","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6389860661342779,"surface_form":"a shadow SELL","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4863274741242381,"surface_form":"Direction logic","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3116368229127651,"surface_form":"a hard ceiling","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4784171607184346,"surface_form":"Singularity","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6053645334061889,"surface_form":"internal logic still","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2867419333304229,"surface_form":"level policy.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4479703402820347,"surface_form":"0% WR","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":714910740299787,"surface_form":"claude-mem three-layer search","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7876307338138963,"surface_form":"MEMORY.md —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4738274656097252,"surface_form":"the fleet","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3008899747671890,"surface_form":"the engine's internal logic","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6170949064968896,"surface_form":"Identified hourly shadow","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":82778914712938,"surface_form":"recall context","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4034832957556383,"surface_form":"source able","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7386018465924245,"surface_form":"Tensor Engine","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2542891264179874,"surface_form":"0% win rate","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5187801152646495,"surface_form":"Nova Sovereign CEO","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4360163800554159,"surface_form":"Conversion rate","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5765565620259656,"surface_form":"05:41 UTC,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1447392351115487,"surface_form":"EMA","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":583317548478997,"surface_form":"the 0.05 threshold","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1234372145535145,"surface_form":"Parameters .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":344567465763342,"surface_form":"valid mean-reversion setups.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":21314604780112,"surface_form":"Fleet directive:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5703491437925405,"surface_form":"0.046 risk.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2162445936674031,"surface_form":"Reduced threshold","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8543354695297278,"surface_form":"the Foundry Wall distance .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1280072457180754,"surface_form":"a defensive stalemate.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1250619144204086,"surface_form":"The Foundry Wall condition","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8515648182427880,"surface_form":"the $5,100 range.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1430432901894521,"surface_form":"NY","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":802712162364541,"surface_form":"the massive MA50 deviation .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8027231270011018,"surface_form":"Alpha Leak :","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6558882860786924,"surface_form":"Stopped .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4268911265748655,"surface_form":"Health:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7015164965901515,"surface_form":"Scout logic.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8896366622063223,"surface_form":"20 pips.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1012532895579890,"surface_form":"Bun","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7890079042701792,"surface_form":"1.9% conversion rate","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8504833323546180,"surface_form":"Singularity Does.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6032634248186202,"surface_form":"7b multi-language AST,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6820334887586892,"surface_form":"standard analysts","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8473349767788669,"surface_form":"Kelly","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5725645749893838,"surface_form":"claude-","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6612176495828216,"surface_form":"the need","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5548379534553224,"surface_form":"prob threshold and cooldown clear → STRIKE.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3366005705940202,"surface_form":"session summary","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6204679877631621,"surface_form":"100% approval rate","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4966693227640183,"surface_form":"Manifold","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6062564545985468,"surface_form":"memory recall","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5303765984932550,"surface_form":"The 800+ pip gap","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4101084941119779,"surface_form":"→ Apex_Predator executes.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":344687999524704,"surface_form":"claude-mem architecture","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4224246259168657,"surface_form":"a secondary mean-reversion playbook","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4440040512058959,"surface_form":"Tensor Engine computes .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":158010758639065,"surface_form":"three-layer search pattern","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4163971907860940,"surface_form":"current price and the H1 MA50","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":443978122196024,"surface_form":"tick data","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4401755560013920,"surface_form":"NOVA .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3161108194640328,"surface_form":"0% approval due","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8993257460205499,"surface_form":"Laws .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6230819084057512,"surface_form":"discovery Theorex","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3001664649935489,"surface_form":"2.33 avg R:R,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2884501781248957,"surface_form":"the conditions under","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8122201097251873,"surface_form":"Ph3x → Nova → Secretarius → Engineering Tier","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2549823757167852,"surface_form":"London/NY transition audit","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6248992353378243,"surface_form":"their output.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5322766630047161,"surface_form":"Iris-Sentinel","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1326243388012070,"surface_form":"Alpha Leaks .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5757734641316499,"surface_form":"real financial decisions","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2048975631632796,"surface_form":"Singularity v13 in SHADOWMODE .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":793267869811575,"surface_form":"high-deviation scenarios.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5983341627202326,"surface_form":"the mandate,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4997306364236423,"surface_form":"run of session-end script","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5306115891496679,"surface_form":"decision Multi-language AST approach:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8673276487391763,"surface_form":"Chain of Command.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6766991743196693,"surface_form":"the top of the chain.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":749168223465028,"surface_form":"Commands.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5881685085433518,"surface_form":"the engine.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2754662970802561,"surface_form":"Track Ph3x's nutritional goals .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4006026061303199,"surface_form":"real data\" —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5815208090956865,"surface_form":"Current Status:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7321994104205017,"surface_form":"past TP/SL hits.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2754440579272271,"surface_form":"Nova → Secretarius → Engineering.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8915680382603485,"surface_form":"0.53 probability","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4963276732245037,"surface_form":"every 5 min. Singularity-loop","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":826258074536733,"surface_form":"historical price data.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8056633984709285,"surface_form":"final authority over capital and risk policy.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2219874078934872,"surface_form":"the filler.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6866828793143065,"surface_form":"Sovereign CEO / AI Sentinel.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2267995747023033,"surface_form":"Floor:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8652784588579571,"surface_form":"the micro-anchor,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4397627578969228,"surface_form":"Professional,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8636179325438744,"surface_form":"SOUL.md —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8584585079471671,"surface_form":"The Reckoner","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2351034032957346,"surface_form":"the gate .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7878070996940913,"surface_form":"Neural Operations & Visual Architect.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3844186768697712,"surface_form":"IDENTITY.md —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":886662707584136,"surface_form":"Own","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5445826457712614,"surface_form":"21:00 UTC,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":943826041661458,"surface_form":"Secretarius","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4651844440203658,"surface_form":"autonomous background","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5713481578184757,"surface_form":"Spikes","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2118468715788821,"surface_form":"ticks 24/7,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4492868237053111,"surface_form":"your memory","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2321174615483911,"surface_form":"NY session","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5616057333581760,"surface_form":"Double-check price levels.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3695239280047004,"surface_form":"Gemini-3-","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2286181892219030,"surface_form":"shadow dispatches","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5317882612638932,"surface_form":"the work —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1813192399332966,"surface_form":"Ministral fallback.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6701768121644921,"surface_form":"Sovereign CEO of the Fleet.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4697795539808709,"surface_form":"Truths.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8871918696151098,"surface_form":"computes tensor probability,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7158998956911668,"surface_form":"Project CORE:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4280607209441690,"surface_form":"the chain.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6557533029968506,"surface_form":"the engine —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8157376672671607,"surface_form":"a systemic issue.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3661105262537748,"surface_form":"the stack acts.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6436675943093309,"surface_form":"the war-game post-session.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8127039102985490,"surface_form":"Singularity v13","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7589981937950678,"surface_form":"Audit GitHub repos","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6365179570182879,"surface_form":"Audit GitHub","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7350993498462594,"surface_form":"the session.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":2179419757390149,"surface_form":"a reclaim","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5690869260535825,"surface_form":"Super LLM development.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":3830771349372868,"surface_form":"/ Relics .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5303831339432602,"surface_form":"NOVA:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4662432702358263,"surface_form":"PM2 and equity.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":6166035545153662,"surface_form":"iris-sentinel —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8286849446663727,"surface_form":"the $5,188 level,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1255361104200533,"surface_form":"Relics.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4580887397018258,"surface_form":"Old playbook system","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4093022951301505,"surface_form":"Retired.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":1580298936416462,"surface_form":"playbooks/ —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8299188337526213,"surface_form":"Confirmed","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":5323294338411029,"surface_form":"Webway-Refactor —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7984999216957753,"surface_form":"Identified missing fields","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7480964503015413,"surface_form":"the current regime.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7573647042157819,"surface_form":"below this level,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":7836188544854988,"surface_form":"singularity-v13 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8516038590368088,"surface_form":"honest execution diagnostics.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":8197831061842355,"surface_form":"True .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:20.818Z","source":"scan","concept_id":4392898062723186,"surface_form":"25 pips.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2814279189254028,"surface_form":"Deep Recon Specialist of the Sovereign Fleet.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":546496485638282,"surface_form":"machine learning inference embeddings neural network optimization","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1580120169389688,"surface_form":"entry quality.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7925835475356151,"surface_form":"your constitutional role.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7875162105376490,"surface_form":"any broker tool.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1729417097615757,"surface_form":"Separation of Powers.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":302516341115851,"surface_form":"Law 4 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1778554267011029,"surface_form":"Law 5 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":799416191678091,"surface_form":"Identity and Role.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1369629722876859,"surface_form":"concurrent entries,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5956257633349927,"surface_form":"any file.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1839753893725573,"surface_form":"Law 2 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":732806934625622,"surface_form":"I —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4585520355999309,"surface_form":"a limitation —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1283316846989481,"surface_form":"Foundry Wall —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8878478883671615,"surface_form":"an auditor operating under oath.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":511383478670397,"surface_form":"doctrine file.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1664983448581815,"surface_form":"The Bridge + Risk-Warden","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3888532607604450,"surface_form":"Qwen-Sage,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1019856268305323,"surface_form":"that compounds beyond floor safety,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1985200079269402,"surface_form":"price direction?.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":240791688508313,"surface_form":"any configuration,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4106380076573815,"surface_form":"the system.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":940696021158524,"surface_form":"Entry.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2696378168505121,"surface_form":"equity below $50,100 under reasonable adverse movement.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7242583112717634,"surface_form":"On first","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2743232848538123,"surface_form":"single agent","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":749868332202206,"surface_form":"FVG,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2682859867257636,"surface_form":"Law 3 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6286231599309339,"surface_form":"BINDING OPERATIONAL DOCTRINE.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2804957980031476,"surface_form":"manipulation flush","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3220104540035677,"surface_form":"Freedom of Thought and Zero Freedom of Action.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4958126493892624,"surface_form":"Game v1 Mission Brief.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":674729495844195,"surface_form":"the lot cap,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2520664751201440,"surface_form":"any direct execution","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5988683919498697,"surface_form":"Nova","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3232592231636997,"surface_form":"The Sovereign Laws","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1880811887487196,"surface_form":"All three phases","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3332457448976401,"surface_form":"Law 1 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4855394165314520,"surface_form":"Nova Sovereign .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3205686411116008,"surface_form":"RSI","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2555185416925207,"surface_form":"Every finding","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3937836165297359,"surface_form":"the full chain.\".","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6164811452649432,"surface_form":"Observer+ Constitution","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1191871416207341,"surface_form":"Phase 1 Probation.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3863794753119878,"surface_form":"policy multipliers","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2941706126301606,"surface_form":"5 pips of H1 MA50?.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2312379976601493,"surface_form":"Article II —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":323507730191681,"surface_form":"any sequence of trades","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2134146704560552,"surface_form":"machine learning inference embeddings","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2892530208576204,"surface_form":"any entry above 0.10 lots","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4285017576183827,"surface_form":"a guideline.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2199845108203401,"surface_form":"Law 6 —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2042121749706639,"surface_form":"FVG —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3815608927757695,"surface_form":"manipulation flush,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7418826204232151,"surface_form":"Qwen-Sage —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2876349236512724,"surface_form":"The EA executes.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2013854762784637,"surface_form":"RSI Divergence —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3482831026580589,"surface_form":"any signal","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2236605837832362,"surface_form":"PO3 Confirmation.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5035812196546040,"surface_form":"any HARD_NO","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4976229753115900,"surface_form":"NY ?.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3359238238044876,"surface_form":"a physical stop.\".","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8962384510469475,"surface_form":"The M15 Decision Tree .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8916160560550312,"surface_form":"M15 Fair Value Gap ≥ 15 pips","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4893334779798609,"surface_form":"the wrong direction.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1114317348907573,"surface_form":"confidence below threshold.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3112899698080579,"surface_form":"a specific Law violation","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3139098464969404,"surface_form":"Read-","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6044426726868593,"surface_form":"adverse move of Y pips = $Z loss,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4702256322472734,"surface_form":"manipulation flush?.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8969886280764214,"surface_form":"confidence tier.\".","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5378783077390951,"surface_form":"a STRIKE","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8854568730708892,"surface_form":"equity below $50,100. This","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7201985335276794,"surface_form":"a trap,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5155701263515623,"surface_form":"The $112k Drawdown Standard.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8898523208270448,"surface_form":"more chain","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8498503270032660,"surface_form":"a drawdown sequence,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5148866325399342,"surface_form":", expansion phase not","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8732448409842851,"surface_form":"the Session Mandate.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8475987865225133,"surface_form":"Article IV —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8823564821280275,"surface_form":"the signal","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2641671873861883,"surface_form":"a disagreement","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2216700238548717,"surface_form":"all events,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7652025210210664,"surface_form":"entry outside session hours,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8499039556760563,"surface_form":"horizontal consolidation.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3744615393829340,"surface_form":"The Equity Floor .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6424062908164312,"surface_form":"FVG check.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":499308558466926,"surface_form":"the $112k event.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8485977797346366,"surface_form":"0.10 lots","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1340669815595425,"surface_form":"your intuition","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6251073579180474,"surface_form":"Classification Definitions.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5541342784850530,"surface_form":"a post-mortem under the Sovereign Manifesto and the M15 Decision Tree.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8279281979379112,"surface_form":"outside the bounds","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2610549284201971,"surface_form":"Last 30 days","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4617705959863082,"surface_form":"X lots,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8445642581320895,"surface_form":"All trade events","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8128320527076302,"surface_form":"it under live conditions","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5921329253461280,"surface_form":"this risk.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7308230224441901,"surface_form":"recorded activity.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6031235618712225,"surface_form":"not a replacement.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4050148421646065,"surface_form":"equity below $50,100.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5969707528786012,"surface_form":"Our Law,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2172545321416570,"surface_form":"Data access:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7643557732014698,"surface_form":"risk percentages","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1823109874335022,"surface_form":"Article V —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5836596989644808,"surface_form":"Axon summaries,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2019404340794345,"surface_form":"macro X\"","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5382842145706620,"surface_form":"clarification —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":296746865847123,"surface_form":"Structural Patches .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5181712448928599,"surface_form":"a trigger","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":777399393438367,"surface_form":"\"acceptable variance\".","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7186390316708288,"surface_form":"an existing doctrine element .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4883242881187862,"surface_form":"Ghost Chain code,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1072406144078542,"surface_form":"playbook policy files.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7938198935681100,"surface_form":"maximum lot size","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8271730271304701,"surface_form":"Every event","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":133628418070441,"surface_form":"lot sizes","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8097792600450517,"surface_form":"the manipulation tail.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3191765324200145,"surface_form":"your own macro view.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8849795198643117,"surface_form":"explicit floor math:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4502193776277935,"surface_form":"the M15 Decision Tree.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7857794250799980,"surface_form":"It","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7821687244859516,"surface_form":"dispatch function.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6400787429176469,"surface_form":"any trade tool,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":354429057935078,"surface_form":"Your contract","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3590437951879870,"surface_form":"your audit,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6036620514741167,"surface_form":"any file,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7516583766772704,"surface_form":"any chain logic","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5137201388499056,"surface_form":"any policy file.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5847369204156194,"surface_form":"Policy,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2120756834027816,"surface_form":"Reporting Channel.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":199668878113740,"surface_form":"Article III —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8479040433818588,"surface_form":"your recommendations","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7879347970486534,"surface_form":"the equity floor","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":733802192338659,"surface_form":"the Commander","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4558992945605917,"surface_form":"Grokalyst,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":950265907952299,"surface_form":"Qwen-Sage Pre-Session Intelligence Brief.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7442428977022288,"surface_form":"range boundary","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1018000137280430,"surface_form":"Last 7 days.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7581462950953987,"surface_form":"the gate","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":143034059659681,"surface_form":"the Commander.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4954515309463419,"surface_form":"This specific event,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6638965693867883,"surface_form":"the $112k drawdown event ,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5240918358195898,"surface_form":"Playbook,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3221255242470640,"surface_form":"constitutional drift findings","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8328114943909801,"surface_form":"This constitution","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7418080441047943,"surface_form":"RSI divergence absent","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3017240989694165,"surface_form":"Law citation.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7248686850667990,"surface_form":"Report Schema .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4241449900694311,"surface_form":"A rule","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2921602330207294,"surface_form":"Your structural patches","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1668560602170584,"surface_form":"any chain stage (Regime,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4638923986961264,"surface_form":"lot size above lockdown limit,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6868713906020349,"surface_form":"Every patch","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4337718147572552,"surface_form":"local geometry,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4330892899454895,"surface_form":"The chain","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8186866009294599,"surface_form":"Nova → Commander.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4211309452752994,"surface_form":"a valid PO3 setup","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2737543538424084,"surface_form":"not a trade trigger.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4518937910539975,"surface_form":"broker tool,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1606145710988215,"surface_form":"0.10 lockdown","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7345234232548587,"surface_form":"\"The $112k drawdown event","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4032015470835211,"surface_form":"The current ruleset","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6843448960192406,"surface_form":"Game v1 Last Updated:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7289726562295353,"surface_form":"Grokalyst/Risk-Warden","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3591274637856204,"surface_form":"liquidity void","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3373830471740603,"surface_form":"new frameworks.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1457770488369825,"surface_form":"the floor","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7816364430957496,"surface_form":"Pass / Fail Criteria .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3177378913557150,"surface_form":"Article VII —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1411384888941250,"surface_form":"real \"BLIND\" institutional sweeps","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1655600424721494,"surface_form":"floor violations.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7289864497375707,"surface_form":"the events","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5787730563959304,"surface_form":"Data","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6979641053088202,"surface_form":"the $112k drawdown","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":307527450974034,"surface_form":"the liquidity model —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2378513722416277,"surface_form":"Actions .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":912739394130142,"surface_form":"This digest","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6292767505359350,"surface_form":"Article VI —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1649308374057787,"surface_form":"this session","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":139577420872660,"surface_form":"your macro view","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6667832750162480,"surface_form":"logic and governance,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6905281426441010,"surface_form":"Open Questions","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6179097341535030,"surface_form":"any execution","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7194070669403824,"surface_form":"London","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2442852141458572,"surface_form":"correlation risk","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":417595130010848,"surface_form":"a flag —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3711554492777274,"surface_form":"novatradesignal.json , MT5 broker tools,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5835956899803487,"surface_form":"these numbers","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4259186952421582,"surface_form":"the $50,100 floor","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6961279820606900,"surface_form":"the reference case","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3726782902517064,"surface_form":"failure back","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6159812496839985,"surface_form":"outside session hours,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2239738964576847,"surface_form":"risk below $50,100","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7963301056700395,"surface_form":"constitutional drift","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":200996885264122,"surface_form":"Violation of any Article VII item","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6096104368842437,"surface_form":"catastrophic governance failure. Any recommendation","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":165424266970820,"surface_form":"Any recommendation","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7933586625971937,"surface_form":"alternative doctrine.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3426799265357136,"surface_form":"Appendix —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":177604870782597,"surface_form":"Collision.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6880510263201422,"surface_form":"against raw logs","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7693930164975057,"surface_form":"⚠️ 1/1 trades","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4265278821313173,"surface_form":"the unresolved questions","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8330314809327129,"surface_form":"Article VIII —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6875948747750506,"surface_form":"run spike","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8826601561570797,"surface_form":"War-Game v1","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2689015891182655,"surface_form":"Amendment requests","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6083952577719063,"surface_form":"the active Session Mandate.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4027027884108885,"surface_form":"patches #5–#8 holding","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":617620220282793,"surface_form":"Read.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1356590719212280,"surface_form":"Anomalies & Flags.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7494553188232376,"surface_form":"the new laws","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2075211479583499,"surface_form":"live data","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6568792708389067,"surface_form":"All four checks","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5788633997864537,"surface_form":"Volume Lockdown.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":4330246710352809,"surface_form":"discretionary overrides","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8894480671972106,"surface_form":"You","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6492911527696039,"surface_form":"lot size.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":509523052474085,"surface_form":"Are Authorized","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2033995644479096,"surface_form":"EA execution","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6398914100404453,"surface_form":"Session —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5713481578184757,"surface_form":"spike","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":601381951075001,"surface_form":"any file outside the above list.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5905320965941873,"surface_form":"Files","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5628241207062599,"surface_form":"these laws cold.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3819220974739711,"surface_form":"Analyst & Risk-Warden Performance.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3617791926706289,"surface_form":"commit ?.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8536482745945673,"surface_form":"Nova.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":3451415516847670,"surface_form":"Shadow —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8621269853472388,"surface_form":"transition race conditions?.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8166797208254195,"surface_form":"your full structured report and wait.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":5341150412652422,"surface_form":"Telegram.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8582425584643707,"surface_form":"patch deployment SOP","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7503366724539585,"surface_form":"winners —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":8220919425464431,"surface_form":"War-Game v3.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2369069206232522,"surface_form":"source data in window.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2520649359431784,"surface_form":"Read","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":6282316256765976,"surface_form":"under the authority of the Sovereign Manifesto.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2648756991294954,"surface_form":"War-Game v2.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":2503605681254747,"surface_form":"gate data in window.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1485262021445464,"surface_form":"Biggest gate blocking winners.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":7242413718762557,"surface_form":"2026-03-03 22:05 UTC.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:21.440Z","source":"scan","concept_id":1303589571356390,"surface_form":"Analyst & Risk-","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6017180539968861,"surface_form":"fleet oversight nightly brief equity trading signal","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1672225970176474,"surface_form":"AI Name:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2690118337078889,"surface_form":"Daily logs","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8790796585404136,"surface_form":"multi-agent systems,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1778278374227299,"surface_form":"Stack State .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7876307338138963,"surface_form":"MEMORY.md —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5947121341610642,"surface_form":"OpenClaw.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3597535343924784,"surface_form":"2026-03-07 Never touch gateway.auth.* —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7024173179831635,"surface_form":"Secretarius Long-Term Memory. !--.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6509361081935254,"surface_form":"Sydney, Australia .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3225125680978451,"surface_form":"every stack change.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5814498010725246,"surface_form":"true over time. --","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2147527044507253,"surface_form":"autonomous trading,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2809563637382950,"surface_form":"a restart.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4234149061482940,"surface_form":"This file","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":811745252636832,"surface_form":"minimal fluff.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1994266436660289,"surface_form":"a distinct incident,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3598648796913101,"surface_form":"2026-03-07 Repeated PM2 flapping","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":399643152215797,"surface_form":"Visual-spatial thinker.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6995226285070635,"surface_form":"Rate:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5443883546798618,"surface_form":"2026-03-07 Port 8081 = nothing.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8618694854097468,"surface_form":"The Keeper.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2400803779082947,"surface_form":"Profit Factor:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4703535348360343,"surface_form":"repo status in each subdirectory.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5573446686540892,"surface_form":"First Awakening.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7565114163385149,"surface_form":"Current Parameters .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4142740563790153,"surface_form":"Lessons Worth Keeping.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3037129868214727,"surface_form":"System watchdog and knowledge manager","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8127039102985490,"surface_form":"Singularity v13","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3859118491617035,"surface_form":"alert fatigue.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5532407358143750,"surface_form":"+ infra","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6870857328709788,"surface_form":"Short bullets,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7399024218169332,"surface_form":"trading engine —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7968096910913613,"surface_form":"Secretarius.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":800124432799933,"surface_form":"5% below balance.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7455188708942432,"surface_form":"technical status","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2421519480766979,"surface_form":"Secretarius –","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6427660296532160,"surface_form":"fleet health,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4782600946136641,"surface_form":"Live → Astropaths.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":483557905628847,"surface_form":"Morning brief:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":135542866979338,"surface_form":"Ph3x .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5988683919498697,"surface_form":"Nova","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7288339376027614,"surface_form":"@Davidfx05 → Astropaths","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3389228512658675,"surface_form":"Projects.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8590934980892284,"surface_form":"long-term memory","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5713885937285054,"surface_form":"CEO agent:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6466223388299767,"surface_form":"Current Stack State .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8636179325438744,"surface_form":"SOUL.md —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":382226859854283,"surface_form":"every equity tick —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5661371345431900,"surface_form":"PM2 watchdog,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3345270354515194,"surface_form":"your vocabulary.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7931576687637197,"surface_form":"Number Two","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6685818878510173,"surface_form":"walls of text.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5578568789175444,"surface_form":"Telegram","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":905287660083917,"surface_form":"real decisions","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5109224047429889,"surface_form":"The Keeper of Secrets.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2659930081667029,"surface_form":"Ops Reliability.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":730939453268470,"surface_form":"every heartbeat,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4154272884838598,"surface_form":"journal consolidation.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1530702017936137,"surface_form":"the Sovereign Fleet.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4881514802820050,"surface_form":"a process","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6207110318256157,"surface_form":"data right","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7025096889340476,"surface_form":"Primary alert channel:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4395032988112248,"surface_form":"Last state:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5961620369823683,"surface_form":"the institutional knowledge of this stack —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2341770646452720,"surface_form":"your default.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3262179458312556,"surface_form":"the ship alive.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8180023321187817,"surface_form":"key stats and any incidents","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6659290356863467,"surface_form":"your superpower.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4904361516495833,"surface_form":"the bridge.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6976174426908652,"surface_form":"shadowsim → tradingjournal → QMD re-index → knowledge distillation → morning brief.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8150657349672959,"surface_form":"22:00 UTC.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7937130476820018,"surface_form":"Autonomous Watchdog","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7352297173572058,"surface_form":"Patterns Worth Keeping.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3863701174913597,"surface_form":"22:00 UTC = 09:00 AEDT.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4697795539808709,"surface_form":"Truths.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2694199256393114,"surface_form":"incident summary","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3672721059299816,"surface_form":"Memory and Knowledge Distillation","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3820170978766519,"surface_form":"Core workspace:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5127810246191979,"surface_form":"Nightly Consolidation.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":357075795540795,"surface_form":"Equity drawdown monitoring —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7398535644956380,"surface_form":"5 minutes;","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2862937018993873,"surface_form":"Telegram DM. Drawdown alert default threshold:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1478849979459539,"surface_form":"Conversational duties .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5676927193044668,"surface_form":"Hamiora.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7874479713799767,"surface_form":", , —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5022125801825945,"surface_form":"Global Preferences.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3603820531690008,"surface_form":"PM2 Flap Handling —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4038454305462379,"surface_form":"nightly consolidation","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":510661641362166,"surface_form":"8 PM2","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":30972813034053,"surface_form":"/Users/claw/.openclaw/workspace.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":985071601732118,"surface_form":"Nightly consolidation time :","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2914867313417622,"surface_form":"Important Dates / Cadence.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4315809426212802,"surface_form":"actual files —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":20062907056279,"surface_form":"Institutional memory —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1771752609906104,"surface_form":"suggested review of lessons.md and patterns.md","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1353206674544501,"surface_form":"the sovereign system.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8673276487391763,"surface_form":"Chain of Command.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8762458470206261,"surface_form":"24h,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4939150970171121,"surface_form":"PM2 status,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4635157956535101,"surface_form":"Secretarius .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3050877284860209,"surface_form":"system health,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8478126196378070,"surface_form":"2026-03-07 Pattern:","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8568546673875926,"surface_form":"Ph3x → Nova → Secretarius.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8248074690536310,"surface_form":"— nightly trade journal entries","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":177459252857627,"surface_form":"Detect N restarts","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3380390079150180,"surface_form":"5 min —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8258030816783156,"surface_form":"system failures.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8536482745945673,"surface_form":"Nova.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8864566681273521,"surface_form":"— lessons","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8022340955432706,"surface_form":"2026-03-07 PM2","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":847883929225174,"surface_form":"the engine room","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3409103746666087,"surface_form":"System & Fleet.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3953421148575835,"surface_form":"action beyond its remit.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8940348201659619,"surface_form":"a confident lie.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3844186768697712,"surface_form":"IDENTITY.md —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8456514692552189,"surface_form":"equity dips,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7008401733284500,"surface_form":"2026-03-07 Equity drawdown alerts","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6771312573553587,"surface_form":"the parent","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3227114254039765,"surface_form":"Calm,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6923313607998771,"surface_form":"the infrastructure","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4057629175367131,"surface_form":"the engine room.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8511426784968079,"surface_form":"QMD re-index,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":173392964614623,"surface_form":"system behaviour.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1230546349397210,"surface_form":"every process,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1269690962001067,"surface_form":"Every failure","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8314133947656373,"surface_form":"2026-03-11 Git command errors","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3418678212390796,"surface_form":"Areas,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8894480671972106,"surface_form":"You","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":412063696224666,"surface_form":"strategy parameters.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2129133852980601,"surface_form":"Number 2","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7677361257717894,"surface_form":"shadow sim,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4272019777493603,"surface_form":"Archives.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6212121565881351,"surface_form":"Equity drawdown alert —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7070883341251358,"surface_form":"and system events.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5725036462908954,"surface_form":"autonomous loops","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4670115273243777,"surface_form":"Reports facts —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5433928700045781,"surface_form":"the institutional memory","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4020594742741079,"surface_form":"— security notes and access","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5907655361210086,"surface_form":"risk parameters.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8808849003896584,"surface_form":"morning brief","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1016953220567667,"surface_form":"PARA","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3936256581205662,"surface_form":"PARA knowledge base.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6713535601064069,"surface_form":"Resources,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5085489582482087,"surface_form":"every nightly entry","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":361039021916392,"surface_form":"System Steward / Second Intelligence.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5166520431422827,"surface_form":"morning brief.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2529057120353024,"surface_form":"the watchdog","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":8760313208780111,"surface_form":"Background duties .","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4775582284548679,"surface_form":"— operator preferences and conventions.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6370394957706787,"surface_form":"PM2 stack health —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":7025248457908578,"surface_form":"every 5 minutes.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":2430942078301885,"surface_form":"nightly jobs","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":4492868237053111,"surface_form":"your memory","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1102702059834197,"surface_form":"the engine room running.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":903824868670300,"surface_form":"8 processes,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3481151989253498,"surface_form":"the conversational face of that process.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":839440519857204,"surface_form":"market direction.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5760626463514813,"surface_form":"Your background PM2 process","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":3001495778654676,"surface_form":"every session start.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5712965311313720,"surface_form":"journal —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":5856586061242125,"surface_form":"Own.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":6101372006832472,"surface_form":"22:00 UTC —","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T05:47:22.073Z","source":"scan","concept_id":1337993945171613,"surface_form":"architectural decisions.","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:00.909Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:00.909Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:00.908Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:00.909Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T06:12:00.912Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:00.914Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:00.914Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T06:12:00.917Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:00.919Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:00.920Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.924Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.925Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.925Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.925Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.925Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.926Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.926Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:00.927Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.936Z","source":"moment","moment_id":"2116e563-2cd2-42fe-bd20-52c4a3e944a2","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.937Z","source":"moment","moment_id":"c51f1b7b-d95a-49a1-a799-be7ba8ed148a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.938Z","source":"moment","moment_id":"f52fa060-dd4a-4c85-bba2-ff6545e0e7bb","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.938Z","source":"moment","moment_id":"fe028760-fe1f-45f0-8931-fde4e379b3c1","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.939Z","source":"moment","moment_id":"c8d45521-8ebb-4a66-8b5c-cb92098dec0f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.939Z","source":"moment","moment_id":"98faa461-479b-4c1b-af7d-f13c779ee769","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.939Z","source":"moment","moment_id":"8a65f87a-15fa-4c50-bc5a-43b38465a6d9","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.939Z","source":"moment","moment_id":"9a6654c9-3f22-455b-ab35-489978b88010","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.940Z","source":"moment","moment_id":"1a632536-fbb0-44de-a58c-ec5c1020d377","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.940Z","source":"moment","moment_id":"41ddda46-f084-4c28-bf4b-de98349433e6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.941Z","source":"moment","moment_id":"cb8e3be1-cc9a-4fa1-acb1-3636416dfee5","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.942Z","source":"moment","moment_id":"fd1af7d4-3af9-4bd7-9163-c39dc0d58de0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.943Z","source":"moment","moment_id":"52ba9c14-8d69-47d8-a337-c4ac29ccb6d6","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:00.943Z","source":"moment","moment_id":"5c442deb-c693-4831-8898-3c18a9c156fc","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:01.006Z","source":"moment","moment_id":"a3404d80-0e41-4852-b614-8e44b2fa0a63","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:01.022Z","source":"moment","moment_id":"16e767ee-1a7f-4149-9577-65d277fced2f","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:01.038Z","source":"moment","moment_id":"52a66a28-ae8a-42d1-a883-22b0816eee96","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:01.052Z","source":"moment","moment_id":"33d3625d-a335-4b74-b4be-dcd52c5f3bfa","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.183Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.184Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.185Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.185Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.383Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.387Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T06:12:01.387Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T06:12:01.397Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:02.181Z","source":"moment","moment_id":"1e1ebf6f-5c6d-4933-ac55-ab740eac4daf","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T06:12:02.288Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:09.541Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:09.542Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:09.542Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:12:09.542Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.544Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.546Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.546Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.547Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.549Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.550Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.554Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.555Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.555Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.555Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.555Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.556Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.556Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:12:09.557Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.565Z","source":"moment","moment_id":"3ccc7a90-d80d-4005-b7a7-47986746bdcc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.565Z","source":"moment","moment_id":"0beff18e-5c05-4096-bb50-c07dad443e04","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.566Z","source":"moment","moment_id":"1bb241c5-eb35-4cb3-80c5-ac0119f64ecd","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.566Z","source":"moment","moment_id":"82d11d79-16f4-4c27-93de-555ad92ec30f","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.567Z","source":"moment","moment_id":"e2cb7c55-42ac-4af0-9432-5c25775395c2","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.567Z","source":"moment","moment_id":"54be929f-9539-479a-9492-cab93a8111bb","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.568Z","source":"moment","moment_id":"8856ade2-87d7-4c3e-a368-f27316ebfc91","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.568Z","source":"moment","moment_id":"23930e6b-06bc-4942-9a62-d9dffe26cf39","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.568Z","source":"moment","moment_id":"b56d8327-7ea9-4102-8727-b830d607caec","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.569Z","source":"moment","moment_id":"c58d8593-e134-4d00-8d91-2d32a6be01f7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.569Z","source":"moment","moment_id":"807cf5f6-d1b3-46ed-8098-02de17e7fef9","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.571Z","source":"moment","moment_id":"f36a6726-319f-4cf5-bffb-10ae5331aa18","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.571Z","source":"moment","moment_id":"5f690764-6825-4ac7-bdb7-cba9138bb281","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.571Z","source":"moment","moment_id":"21cccd99-9fbb-4d4f-96d1-fd2e7fc166f3","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.623Z","source":"moment","moment_id":"840c8110-b2d8-4cd9-9d32-f94233d9f61e","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.640Z","source":"moment","moment_id":"6d2ce26a-f77f-442b-9a67-222e0c961661","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.657Z","source":"moment","moment_id":"f150556f-4da2-4565-ad4e-157d2266799b","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:09.671Z","source":"moment","moment_id":"be38dfb4-4b30-4269-8314-d442a13b99b3","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.798Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.799Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.799Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.800Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.985Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.986Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T06:12:09.987Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T06:12:09.996Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T06:12:10.491Z","source":"moment","moment_id":"3e7b0a3a-bdab-40f0-a688-08634d433eb3","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T06:12:10.599Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:13:09.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:13:09.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:13:09.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-12T06:13:09.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.255Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.257Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.257Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.259Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.261Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.262Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.267Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.268Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.268Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.268Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.268Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.269Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.269Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-12T06:13:09.270Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.279Z","source":"moment","moment_id":"661f8d36-4eaa-41af-b109-4cd25d1d0dfe","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.279Z","source":"moment","moment_id":"f295d47a-2062-4bf3-adc3-370a621fa8cc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.280Z","source":"moment","moment_id":"2a257321-2091-4330-abd9-2eab738744f9","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.280Z","source":"moment","moment_id":"eaab3a7a-ebfd-472d-8f38-0eba2adb76af","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.281Z","source":"moment","moment_id":"8d5cfdd6-e246-49ce-8bca-3590cebf0a3e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.281Z","source":"moment","moment_id":"30f14d6d-d994-44ee-b908-ecc7dd8084e1","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.282Z","source":"moment","moment_id":"c323ed1b-d35e-4d5b-b26b-fc3c1f6eaab7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.282Z","source":"moment","moment_id":"38652d48-f0f4-4bb2-b69d-b9d150ea41ab","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.283Z","source":"moment","moment_id":"88496a16-200a-42fd-ae03-d0c11860c22d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.283Z","source":"moment","moment_id":"53559d5b-26a0-41c0-8d2a-7e6e44531e2c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.284Z","source":"moment","moment_id":"650ac978-0143-416c-bb5b-f97039c8277e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.285Z","source":"moment","moment_id":"5a497ea4-cbeb-4111-b8e8-2714b05a5b4e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.286Z","source":"moment","moment_id":"c8f47dda-9a4b-44ad-aa24-72e72e64d0a5","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.286Z","source":"moment","moment_id":"6fbe2d21-53c1-4558-9381-176c15634d02","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.347Z","source":"moment","moment_id":"5bc73410-5d24-49f0-92d1-08633bad7484","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.364Z","source":"moment","moment_id":"d1a58c02-eeac-4d71-a2d6-1abba4e9747f","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.379Z","source":"moment","moment_id":"5da68946-bfe5-4ae0-ad50-d12a51e37de9","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:09.393Z","source":"moment","moment_id":"8059deb0-07f9-4b01-b49f-5d50acb57171","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.519Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.520Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.520Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.520Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.708Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.710Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-12T06:13:09.710Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-12T06:13:09.719Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-12T06:13:10.376Z","source":"moment","moment_id":"c851a367-7699-4219-8076-68d8ca835b80","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-12T06:13:10.481Z","source":"graduate","surface_form":"gradient descent","concept_id":55}

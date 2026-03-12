@@ -105,7 +105,7 @@ export async function pruneAxon(
       surface_form: attrs.surface_form,
     }, config.eventsPath ?? "data/events.jsonl").catch(() => {});
     // Phase 4: clean embedding store so it doesn't grow without bound (RAG-03)
-    await deleteEmbedding(config.ragEmbeddingStorePath, attrs.concept_id);
+    if (config.ragEmbeddingStorePath) await deleteEmbedding(config.ragEmbeddingStorePath, attrs.concept_id);
   }
 
   // Atomic write of updated graph

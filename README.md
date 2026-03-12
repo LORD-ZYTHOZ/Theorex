@@ -23,19 +23,52 @@ Not adapted from human tools — built for how agents actually think.
 
 ---
 
-## The Problem
+## What Is This?
+
+Theorex gives AI agents **persistent memory that thinks like they do**.
+
+An **axon** is each agent's personal concept web — a graph of ideas, decisions, and patterns that gets smarter over time. Concepts that matter rise to the top. Concepts that go unused fade and disappear. The ones that really matter get shared across your whole agent fleet.
+
+Every time an agent starts a new session, Theorex **injects its most important active concepts at boot** — so the agent already knows what matters before the first message. No prompting required. No searching. Just context, ready.
+
+---
+
+## What It Feels Like
+
+> You spend a session debugging an auth bug. Theorex watches silently via hooks.  
+> Next session, before you type a word, your agent already has:
+>
+> ```
+> # Active Memory
+> - authentication      [ACTIVE · 2 days ago]
+> - session_token       [ACTIVE · 2 days ago]  
+> - middleware          [ACTIVE · 3 days ago]
+> - validateSession()   [ACTIVE · code · 2 days ago]
+> ```
+>
+> It remembers where you left off. Every session.
+
+That file — `SHARED_CONTEXT.md` — is the **boot injection**: a compact snapshot of what your agents collectively know, regenerated automatically, loaded at every session start.
+
+---
+
+## The Problem With Existing Solutions
 
 Most AI memory systems are **human tools with an AI wrapper** — static documents, flat vector search, query-retrieve cycles. They treat memory like a filing cabinet.
 
-Agents don't think that way.
+The problems:
+- **RAG retrieves** — but only when you ask. If you don't know to ask, the memory is lost.
+- **No decay** — stale information from 6 months ago weighs the same as yesterday's decision.
+- **No shared understanding** — agent A learns something, agent B never knows.
+- **No boot context** — every session starts cold. The agent has no idea what's been happening.
 
-Theorex starts from scratch: a **living concept web** where importance is earned through experience, knowledge decays when forgotten, and insights shared across an entire fleet of agents.
+Theorex fixes all four.
 
 ---
 
 ## How It Works
 
-Every concept gets a node. Every node earns its score.
+Every concept gets a **node** in a graph. Every node has a **score** that changes with experience.
 
 ```
                          ┌─────────────────┐
@@ -54,20 +87,42 @@ Every concept gets a node. Every node earns its score.
             └──────────[momentum:004]────────────────┘
                         score: 0.63
                         tier:  MILD
-                        
+
     ● ACTIVE   — injected at boot, always in context
     ○ MILD     — available on query
     · LESS     — fading, scheduled for pruning
 ```
 
-Concepts **earn their place** or get pruned:
+The **score** is a composite of three signals:
+
+| Signal | What it measures |
+|--------|-----------------|
+| **Recency** | How recently was this concept seen? Decays with half-life. |
+| **Frequency** | How often does it appear? Log-normalized. |
+| **Connections** | Is it co-occurring with other important concepts? Activation propagates through edges. |
+
+Concepts **earn their place** or disappear:
 
 - **First encounter** → enters NEUTRAL, score 0.0
 - **Seen again** → frequency score rises
 - **Co-occurs with important concepts** → edge forms, activation propagates
-- **Not seen for 14 days** → score halves *(configurable half-life)*
-- **Not seen for 30 days** → pruned from graph
-- **Survives long enough** → promoted to shared multi-agent web
+- **Not seen for 14 days** → score halves *(configurable)*
+- **Not seen for 30 days** → pruned
+- **Consistently high score** → promoted to the shared multi-agent web
+
+---
+
+## Key Concepts Explained
+
+**Axon** — each agent's private concept web. A JSON graph file. No database needed. Lives at `~/.theorex/agents/<id>/theorex/axon.json`.
+
+**Boot injection** — at the start of every session, Theorex reads your agent's ACTIVE-tier concepts and writes them into `SHARED_CONTEXT.md`. Add that file to your agent's memory paths once, and your agent wakes up informed every time.
+
+**Decay** — importance is not permanent. A concept unseen for 14 days has its score halved. Unseen for 30 days, it's pruned. Your agent naturally forgets what stopped mattering — like you do.
+
+**Promotion** — when a concept's score crosses a threshold, it gets pushed to the shared web. This is how agent A's discovery becomes agent B's knowledge.
+
+**Moments** — episodic memories. Not concepts — events. "Fixed the session bug at 3am" is a moment. Moments are permanent and never pruned. They anchor history.
 
 ---
 
@@ -76,7 +131,7 @@ Concepts **earn their place** or get pruned:
 ```
 ┌──────────────────────────────────────────────────────────────────┐
 │                         FLASH  BUFFER                            │
-│           Per-session ring buffer · hooks-driven capture         │
+│  Hooks watch every tool call · captures significant events live  │
 └────────────────────────────┬─────────────────────────────────────┘
                              │ significant events (score ≥ 0.5)
                              ▼
@@ -87,7 +142,7 @@ Concepts **earn their place** or get pruned:
                              │ graduate after 7 consecutive active days
                              ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                     LONG-TERM  AXON                              │
+│                     LONG-TERM  AXON  (per agent)                 │
 │   Graphology concept web · decay scoring · tier classification   │
 │                                                                  │
 │   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐    │
@@ -96,23 +151,23 @@ Concepts **earn their place** or get pruned:
 │   │+sentiment│   │strength  │   │permanent │   │AST nodes │    │
 │   └──────────┘   └──────────┘   └──────────┘   └──────────┘    │
 └────────────────────────────┬─────────────────────────────────────┘
-                             │ promote (composite_score > threshold)
+                             │ promote when score > threshold
                              ▼
 ┌──────────────────────────────────────────────────────────────────┐
-│                    SHARED  AXON  (multi-agent)                   │
-│         Aggregated web across all agents · source-weighted       │
+│                    SHARED  AXON  (all agents)                    │
+│         Best concepts from every agent · source-weighted         │
 └────────────────────────────┬─────────────────────────────────────┘
-                             │ boot-inject
+                             │ boot-inject (runs automatically)
                              ▼
-                   SHARED_CONTEXT.md
-              injected at every agent session start
+                    SHARED_CONTEXT.md
+         ← loaded at the start of every agent session →
 ```
 
 ### Phases
 
 | # | Phase | What it adds |
 |---|-------|-------------|
-| 0 | **Significance** | Core scoring — importance × recency × frequency |
+| 0 | **Significance** | Core scoring — recency × frequency × co-occurrence |
 | 1 | **Long-Term Memory** | Graphology concept web, typed nodes + edges |
 | 2 | **Short-Term Memory** | Flash → STM → graduation pipeline |
 | 3 | **Flash + Hooks** | Claude Code hooks for zero-friction capture |
@@ -141,12 +196,13 @@ mkdir -p ~/.theorex/agents/main/theorex
 # Write your first concept
 bun run src/cli/index.ts write --agent main "semantic memory beats keyword search"
 
-# See what the agent knows
+# See what your agent knows
 bun run src/cli/index.ts status --agent main
 ```
 
+At end of a session:
+
 ```bash
-# Session workflow
 bun run src/cli/index.ts session-summary --agent main \
   --investigated "looked at auth middleware" \
   --learned "session tokens not invalidated on logout" \
@@ -154,23 +210,31 @@ bun run src/cli/index.ts session-summary --agent main \
   --next "deploy and monitor"
 ```
 
+Then promote and regenerate boot context:
+
+```bash
+bun run src/cli/index.ts promote --agent main
+bun run src/cli/index.ts boot-inject
+# → SHARED_CONTEXT.md is now ready to inject at next session start
+```
+
 ---
 
 ## CLI Reference
 
 ```
-theorex <command> --agent <id> [options]
+bun run src/cli/index.ts <command> --agent <id> [options]
 
 Commands:
-  write          Write a concept or observation
-  status         Show top concepts by score
-  search         Hybrid BM25 + vector search
-  scan-agent     Score all concepts (decay + frequency)
-  prune-agent    Remove LESS-tier concepts past threshold
-  promote        Push qualifying concepts to shared web
-  boot-inject    Regenerate SHARED_CONTEXT.md
-  ingest-code    Parse codebase into code_function nodes
-  session-summary  Bulk end-of-session write
+  write            Write a concept or observation
+  status           Show top concepts by composite score
+  search           Hybrid BM25 + vector search
+  scan-agent       Re-score all concepts (apply decay + frequency)
+  prune-agent      Remove LESS-tier concepts past threshold
+  promote          Push qualifying concepts to shared web
+  boot-inject      Regenerate SHARED_CONTEXT.md from shared axon
+  ingest-code      Parse codebase into code_function nodes
+  session-summary  Bulk end-of-session write with typed observations
 
 Observation types (--type):
   Conceptual:  decision | discovery | bugfix | feature | refactor | change
@@ -181,7 +245,7 @@ Observation types (--type):
 
 ## Configuration
 
-Drop a `config.json` in the project root. All fields are optional — defaults work out of the box.
+Drop a `config.json` in the project root. All fields are optional.
 
 ```json
 {
@@ -199,17 +263,17 @@ Drop a `config.json` in the project root. All fields are optional — defaults w
 | Key | Default | What it controls |
 |-----|---------|-----------------|
 | `halfLifeDays` | `14` | Days before an unseen concept's score halves |
-| `activeThreshold` | `0.6` | Score floor for ACTIVE tier (boot-injected) |
-| `pruneThresholdDays` | `30` | Days in LESS tier before pruning |
+| `activeThreshold` | `0.6` | Score floor for ACTIVE tier (auto-injected at boot) |
+| `pruneThresholdDays` | `30` | Days in LESS tier before a concept is deleted |
 | `promotionThreshold` | `0.5` | Score required to enter the shared multi-agent web |
 | `lmStudioUrl` | `http://localhost:1234` | LM Studio OpenAI-compatible endpoint |
-| `agentAxonDir` | `~/.theorex/agents` | Root for all per-agent axon stores |
+| `agentAxonDir` | `~/.theorex/agents` | Root directory for all per-agent axon files |
 
 ---
 
 ## Multi-Agent Setup
 
-Each agent owns a private axon. High-scoring concepts are promoted to a shared web that all agents boot with.
+Each agent owns a private axon. High-scoring concepts are promoted to a shared web that every agent boots with.
 
 ```
 ~/.theorex/
@@ -219,8 +283,10 @@ Each agent owns a private axon. High-scoring concepts are promoted to a shared w
 │   └── researcher/theorex/axon.json     ← Researcher's concepts
 └── shared/
     ├── shared-axon.json                 ← Promoted concepts, all agents
-    └── SHARED_CONTEXT.md                ← Boot injection file
+    └── SHARED_CONTEXT.md                ← Injected at every session start
 ```
+
+Add `SHARED_CONTEXT.md` to your agent's memory search paths once. Theorex handles the rest.
 
 **Automate with PM2:**
 
@@ -228,25 +294,17 @@ Each agent owns a private axon. High-scoring concepts are promoted to a shared w
 # Auto-promote idle agents every 10 minutes
 pm2 start theorex-idle-flush.sh --name theorex-idle-flush --cron "*/10 * * * *"
 
-# Full nightly decay cycle at 3am
+# Full nightly decay + prune + promote at 3am
 pm2 start theorex-nightly.sh --name theorex-nightly --cron "0 3 * * *"
 
 pm2 save
-```
-
-Set `AGENTS` to match your agent IDs:
-
-```bash
-AGENTS="nova secretarius researcher" pm2 restart theorex-idle-flush
 ```
 
 ---
 
 ## Claude Code Hooks
 
-Theorex integrates with [Claude Code](https://claude.ai/code) hooks to capture concepts automatically — no manual writes needed during a session.
-
-Add to `.claude/settings.json`:
+Add to `.claude/settings.json` to capture concepts automatically during sessions — no manual writes needed.
 
 ```json
 {
@@ -269,11 +327,13 @@ Add to `.claude/settings.json`:
 }
 ```
 
+The `Stop` hook runs `synthesize → promote → boot-inject` automatically when your session ends. Next session starts informed.
+
 ---
 
 ## Axon Integration
 
-Theorex pairs with [Axon](AXON-INTEGRATION.md) — a code-indexing system built on pgvector — to give agents both **conceptual memory** and **code memory** in the same vector space.
+Theorex pairs with [Axon](AXON-INTEGRATION.md) for code-level memory. Together they give agents the full picture.
 
 ```
    Theorex                          Axon
@@ -281,12 +341,28 @@ Theorex pairs with [Axon](AXON-INTEGRATION.md) — a code-indexing system built 
    What matters to the agent   ←→   Where it lives in code
    Decisions & patterns             Symbols & call graphs
    Concept web (JSON)               pgvector (PostgreSQL)
-   
-   Both use nomic-embed-text-v1.5 via LM Studio
-   Same 768-dim space · compatible similarity scores
+
+   Both use nomic-embed-text-v1.5 — same 768-dim vector space
 ```
 
 → [AXON-INTEGRATION.md](./AXON-INTEGRATION.md)
+
+---
+
+## Why Not RAG?
+
+RAG retrieves. Theorex **knows**.
+
+| | RAG | Theorex |
+|-|-----|---------|
+| **How it works** | You query → it finds relevant chunks | Concepts live, decay, and surface automatically |
+| **Relevance** | Cosine similarity at query time | Score earned through repeated experience |
+| **Stale information** | Stays forever unless manually deleted | Decays naturally — half-life removes the noise |
+| **Cross-agent knowledge** | Not built in | Native shared web, source-weighted |
+| **Session start** | Cold — agent knows nothing | Warm — ACTIVE concepts injected automatically |
+| **Code memory** | Embeds raw source files | AST → typed concept nodes + call edges |
+
+RAG is still used inside Theorex — as a cold-start edge seeder (Phase 4). A tool, not the foundation.
 
 ---
 
@@ -310,28 +386,11 @@ bun test
 | Graph | [Graphology](https://graphology.github.io) 0.26 |
 | NLP | [compromise](https://github.com/spencermountain/compromise) |
 | Search | [wink-bm25-text-search](https://github.com/winkjs/wink-bm25-text-search) |
-| Embeddings | [@huggingface/transformers](https://huggingface.co/docs/transformers.js) (ONNX local) |
+| Embeddings | [@huggingface/transformers](https://huggingface.co/docs/transformers.js) (ONNX, runs locally) |
 | LM Studio | [nomic-embed-text-v1.5](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5) |
 | Storage | JSON files — no database required |
 
 </div>
-
----
-
-## Why Not RAG?
-
-RAG retrieves. Theorex **knows**.
-
-| | RAG | Theorex |
-|-|-----|---------|
-| **Memory model** | Query → retrieve chunks | Living concept web |
-| **Relevance** | Cosine similarity at query time | Earned score over time |
-| **Decay** | None — stale docs stay forever | Half-life decay, automatic pruning |
-| **Cross-agent** | Not built in | Native shared web |
-| **Boot context** | Manual prompt injection | Automatic from ACTIVE tier |
-| **Code memory** | Embed source files | AST → concept nodes + call edges |
-
-RAG is still useful for cold-start edge seeding (Phase 4) — but as a tool, not the foundation.
 
 ---
 

@@ -78,13 +78,13 @@ Every concept gets a **node** in a graph. Every node has a **score** that change
               ┌───────────────────┼───────────────────┐
               │                   │                   │
               ▼                   ▼                   ▼
-       [trading:001]        [signal:003]        [risk:002]
+       [memory:001]        [context:003]        [agents:002]
        score: 0.91          score: 0.78         score: 0.85
        tier: ACTIVE         tier: ACTIVE        tier: ACTIVE
             │                    │                   │
           0.92                 0.71                0.87
             │                    │                   │
-            └──────────[momentum:004]────────────────┘
+            └──────────[decay:004]────────────────┘
                         score: 0.63
                         tier:  MILD
 

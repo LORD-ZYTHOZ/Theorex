@@ -2,7 +2,6 @@
   "name": "theorex",
   "module": "index.ts",
   "type": "module",
-  "private": true,
   "scripts": {
     "test": "bun test"
   },
@@ -17,5 +16,19 @@
     "compromise": "^14.15.0",
     "graphology": "^0.26.0",
     "wink-bm25-text-search": "^3.1.2"
-  }
+  },
+  "description": "AI-native memory for multi-agent systems. Concept web with decay, promotion, and boot injection.",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/LORD-ZYTHOZ/theorex"
+  },
+  "license": "MIT",
+  "keywords": [
+    "ai",
+    "memory",
+    "agents",
+    "multi-agent",
+    "concept-graph",
+    "llm"
+  ]
 }

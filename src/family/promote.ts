@@ -16,6 +16,7 @@ import { AxonStore } from "../axon/store";
 import { compositeScore } from "../axon/scorer";
 import { resolvedSharedAxonPath, agentAxonPath } from "./paths";
 import type { Config } from "../config";
+import type { NodeType } from "../types";
 
 export interface PromoteResult {
   readonly agentId: string;
@@ -89,7 +90,7 @@ export async function promoteToShared(
         frequency_count: attrs.frequency_count,
         composite_score: score,
         source_weight: attrs.source_weight,
-        node_type: "concept",
+        node_type: (attrs.node_type || "concept") as NodeType,
         timestamp: new Date(nowMs).toISOString(),
       },
       agentId,

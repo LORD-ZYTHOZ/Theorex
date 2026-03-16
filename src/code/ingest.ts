@@ -12,6 +12,7 @@ import { join, extname } from "node:path";
 import { mkdir, stat } from "node:fs/promises";
 import { dirname } from "node:path";
 import { parseFile } from "./parse";
+import { parsePython, parseGo } from "./parse-multi";
 import { AxonStore } from "../axon/store";
 import { agentAxonPath, sourceWeightForAgent } from "../family/paths";
 import type { ConceptEvent } from "../types";
@@ -39,7 +40,7 @@ function codeEvent(name: string, sourceWeight: number, timestamp: string): Conce
   };
 }
 
-const CODE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs"]);
+const CODE_EXTENSIONS = new Set([".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".py", ".go"]);
 const SKIP_DIRS = new Set(["node_modules", ".git", "dist", "build", ".cache", "coverage"]);
 
 /** Recursively collect all code files under a directory. */

@@ -13,7 +13,6 @@ import { buildTemporalContext, formatTemporalContext } from "../temporal/context
 import { loadConfig, type Config } from "../config";
 import { loadProfessionPack, formatPackContext } from "../profession/loader";
 
-const AXON_PATH = "data/axon.json";
 const MAX_ACTIVE_NODES = 10;
 const MAX_RECENT_ENTRIES = 5;
 const MAX_RELEVANT_MOMENTS = 5;
@@ -27,7 +26,10 @@ export async function injectContext(
     loadConfig?: () => Promise<Config | null>;
   }
 ): Promise<string> {
-  const _loadAxon = options?.loadAxon ?? (() => AxonStore.load(AXON_PATH));
+  const _loadAxon = options?.loadAxon ?? (async () => {
+    const cfg = await loadConfig().catch(() => null);
+    return AxonStore.load(cfg?.axonPath ?? "data/axon.json");
+  });
   const _readShortTermFiles = options?.readShortTermFiles ?? readShortTermFiles;
   const _readMoments = options?.readMoments ?? readMoments;
   const _loadConfig = options?.loadConfig ?? (() => loadConfig().catch(() => null));

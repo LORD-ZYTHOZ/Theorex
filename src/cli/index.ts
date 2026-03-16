@@ -30,7 +30,6 @@ import {
   classifyTrend,
 } from "../audit/scorer";
 
-const AXON_PATH = "data/axon.json";
 const ARCHIVE_DIR = "data/archive";
 const MEMORY_PATH = "data/MEMORY.md";
 
@@ -613,11 +612,11 @@ if (import.meta.main) {
     }
 
     case "scan":
-      await runScan(AXON_PATH, config);
+      await runScan(config.axonPath ?? "data/axon.json", config);
       break;
 
     case "status":
-      await runStatus(AXON_PATH, config);
+      await runStatus(config.axonPath ?? "data/axon.json", config);
       break;
 
     case "ref": {
@@ -626,12 +625,12 @@ if (import.meta.main) {
         console.error("Usage: theorex ref <keyword>");
         process.exit(1);
       }
-      await runRef(AXON_PATH, keyword, config);
+      await runRef(config.axonPath ?? "data/axon.json", keyword, config);
       break;
     }
 
     case "prune":
-      await runPrune(AXON_PATH, ARCHIVE_DIR, config);
+      await runPrune(config.axonPath ?? "data/axon.json", ARCHIVE_DIR, config);
       break;
 
     case "search": {
@@ -692,7 +691,7 @@ if (import.meta.main) {
         console.error("Usage: theorex moment <story>");
         process.exit(1);
       }
-      await runMoment(story, AXON_PATH, config, rawRefs);
+      await runMoment(story, config.axonPath ?? "data/axon.json", config, rawRefs);
       break;
     }
 
@@ -846,7 +845,7 @@ if (import.meta.main) {
     }
 
         case "drift":
-      await runDrift(AXON_PATH, config.eventsPath, config);
+      await runDrift(config.axonPath ?? "data/axon.json", config.eventsPath, config);
       break;
 
     case "audit": {
@@ -936,7 +935,7 @@ if (import.meta.main) {
 
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>>");
       process.exit(1);
   }
 }

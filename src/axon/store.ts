@@ -106,7 +106,10 @@ export class AxonStore {
       const existing = this._graph.getNodeAttributes(key);
       this._graph.setNodeAttribute(key, "frequency_count", existing.frequency_count + event.frequency_count);
       this._graph.setNodeAttribute(key, "last_seen", event.timestamp);
-      if (observationType) this._graph.setNodeAttribute(key, "observation_type", observationType);
+      // Always update observation_type and node_type when the caller provides them —
+      // re-encounters with a richer/more-specific type should win over the old value.
+      if (observationType !== "") this._graph.setNodeAttribute(key, "observation_type", observationType);
+      if (event.node_type) this._graph.setNodeAttribute(key, "node_type", event.node_type);
       if (agentId) this._graph.setNodeAttribute(key, "agent_id", agentId);
     } else {
       this._graph.addNode(key, {

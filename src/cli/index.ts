@@ -902,9 +902,41 @@ if (import.meta.main) {
       break;
     }
 
+    case "ingest-video": {
+      // Usage: theorex ingest-video <path> [--context "text"] [--agent <id>]
+      const { values: ivValues, positionals: ivPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          context: { type: "string" },
+          agent:   { type: "string" },
+        },
+        allowPositionals: true,
+        strict: false,
+      });
+      const ivPath = ivPos[0];
+      if (!ivPath) {
+        console.error("Usage: theorex ingest-video <path> [--context \"text\"] [--agent <id>]");
+        process.exit(1);
+      }
+      const { ingestVideo } = await import("../vision/ingest-video");
+      const ivResult = await ingestVideo(ivPath, config, {
+        userContext: typeof ivValues.context === "string" ? ivValues.context : undefined,
+        agentId: typeof ivValues.agent === "string" ? ivValues.agent : "main",
+      });
+      if (!ivResult) {
+        console.error("Video ingestion failed. Ensure ffmpeg is installed and ANTHROPIC_API_KEY is set (or config.visionEndpoint).");
+        process.exit(1);
+      }
+      console.log(`Video ingested: ${ivResult.memory.id}`);
+      console.log(`  Duration: ${Math.round(ivResult.memory.duration_seconds)}s, ${ivResult.framesProcessed} anchors`);
+      console.log(`  Summary: ${ivResult.memory.summary.slice(0, 100)}...`);
+      console.log(`  +${ivResult.conceptsAdded} concepts, +${ivResult.edgesAdded} edges`);
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject>");
       process.exit(1);
   }
 }

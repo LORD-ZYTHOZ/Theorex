@@ -49,6 +49,10 @@ export interface Config {
   visionModel: string;                 // default: "claude-haiku-4-5-20251001"
   visionEndpoint: string;              // default: "" — local LM Studio URL; uses Anthropic API if empty
   axonPath: string;                    // default: "data/axon.json" — used by ingest-image
+  // Phase 11: Video Memory
+  videosDir: string;                   // default: "data/videos"
+  videoFrameIntervalSec: number;       // default: 5 — extract one frame every N seconds
+  ffmpegPath: string;                  // default: "ffmpeg" — path to ffmpeg binary
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -98,6 +102,10 @@ export const DEFAULT_CONFIG: Config = {
   visionModel: "claude-haiku-4-5-20251001",
   visionEndpoint: "",
   axonPath: "data/axon.json",
+  // Phase 11: Video Memory
+  videosDir: "data/videos",
+  videoFrameIntervalSec: 5,
+  ffmpegPath: "ffmpeg",
 };
 
 /**

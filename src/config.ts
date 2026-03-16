@@ -29,6 +29,26 @@ export interface Config {
   promotionThreshold: number;          // default: 0.7 — composite_score required to auto-promote to shared
   sharedAxonPath: string;              // default: "~/.openclaw/workspace/theorex/shared-axon.json"
   agentAxonDir: string;                // default: "~/.openclaw/agents"
+  // Phase 14: Temporal Awareness
+  location: string;                    // default: "" — e.g. "Sydney"
+  temporalAgentId: string;             // default: "main" — agent to write temporal summaries to
+  temporalStorePath: string;           // default: "data/temporal.json"
+  // Phase 15: Auto-Sliding Context Window
+  contextSlideThreshold: number;       // default: 0.50 — used_pct >= this triggers compression
+  contextSlideCooldownCalls: number;   // default: 20 — min tool calls between compressions
+  synthEndpoint: string;               // default: "http://localhost:1234" — local LLM for synthesis
+  // Phase 9: Memory Compression
+  coldStorePath: string;               // default: "data/cold.db" — SQLite cold storage path
+  compressAfterDays: number;           // default: 30 — compress LESS nodes older than this many days
+  // Phase 12: Deployment Mode + Profession Packs
+  deploymentMode: "personal" | "business"; // default: "personal"
+  professionPack: string;              // default: "" — pack name to load in business mode (e.g. "trading")
+  professionPacksDir: string;          // default: "" — custom packs directory; falls back to built-in
+  // Phase 10: Visual Memory
+  imagesDir: string;                   // default: "data/images"
+  visionModel: string;                 // default: "claude-haiku-4-5-20251001"
+  visionEndpoint: string;              // default: "" — local LM Studio URL; uses Anthropic API if empty
+  axonPath: string;                    // default: "data/axon.json" — used by ingest-image
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -58,6 +78,26 @@ export const DEFAULT_CONFIG: Config = {
   promotionThreshold: 0.5,
   sharedAxonPath: "",   // empty = resolved at runtime via homedir()
   agentAxonDir: "",     // empty = resolved at runtime via homedir()
+  // Phase 14: Temporal Awareness
+  location: "",
+  temporalAgentId: "main",
+  temporalStorePath: "data/temporal.json",
+  // Phase 15: Auto-Sliding Context Window
+  contextSlideThreshold: 0.50,
+  contextSlideCooldownCalls: 20,
+  synthEndpoint: "http://localhost:1234",
+  // Phase 9: Memory Compression
+  coldStorePath: "data/cold.db",
+  compressAfterDays: 30,
+  // Phase 12: Deployment Mode + Profession Packs
+  deploymentMode: "personal",
+  professionPack: "",
+  professionPacksDir: "",
+  // Phase 10: Visual Memory
+  imagesDir: "data/images",
+  visionModel: "claude-haiku-4-5-20251001",
+  visionEndpoint: "",
+  axonPath: "data/axon.json",
 };
 
 /**

@@ -56,9 +56,16 @@ export async function runStatus(axonPath: string, config: Config): Promise<void>
     attrs: store.graph.getNodeAttributes(key),
   }));
 
-  nodes.sort((a, b) => b.attrs.importance_weight - a.attrs.importance_weight);
+  // Phase 9: separate sleeping nodes from live nodes
+  const sleepingNodes = nodes.filter((n) => n.attrs.relevance_tier === "SLEEPING");
+  const liveNodes = nodes.filter((n) => n.attrs.relevance_tier !== "SLEEPING");
 
-  console.log(`Concept Web — ${nodes.length} nodes\n`);
+  liveNodes.sort((a, b) => b.attrs.importance_weight - a.attrs.importance_weight);
+
+  const sleepingSuffix = sleepingNodes.length > 0
+    ? ` (${sleepingNodes.length} sleeping in cold storage)`
+    : "";
+  console.log(`Concept Web — ${nodes.length} nodes${sleepingSuffix}\n`);
 
   // Column widths
   const COL_ID = 12;
@@ -87,7 +94,7 @@ export async function runStatus(axonPath: string, config: Config): Promise<void>
 
   const nowMs = Date.now();
 
-  for (const { key, attrs } of nodes) {
+  for (const { key, attrs } of liveNodes) {
     // Lazy elapsed-time correction (REL-03): recompute tier at read time using current clock.
     // This is read-only — no disk write. axon.json is unchanged.
     const neighborStrengths = store.graph
@@ -480,6 +487,7 @@ import { ingestCode } from "../code/ingest";
 import { recordFlashEvent } from "../flash/record.ts";
 import { flushFlash } from "../flash/flush.ts";
 import { injectContext } from "../flash/inject.ts";
+import { runContextSlide } from "../context-slide/slide.ts";
 
 /**
  * flash-write: Parse PostToolUse stdin JSON and record to flash ring buffer.
@@ -513,6 +521,26 @@ export async function runFlashInject(sessionId: string): Promise<void> {
   const context = await injectContext(sessionId);
   if (context.trim()) {
     process.stdout.write(context + "\n");
+  }
+}
+
+/**
+ * context-monitor: Check context usage and trigger compression if threshold crossed.
+ * Called by PostToolUse hook (async: true — non-blocking).
+ * Outputs JSON with additionalContext when compression fires; exits silently otherwise.
+ */
+export async function runContextMonitor(sessionId: string): Promise<void> {
+  const config = await loadConfig();
+  const result = await runContextSlide(sessionId, config);
+
+  if (result.triggered && result.additionalContext) {
+    const output = {
+      hookSpecificOutput: {
+        hookEventName: "PostToolUse",
+        additionalContext: result.additionalContext,
+      },
+    };
+    process.stdout.write(JSON.stringify(output));
   }
 }
 
@@ -645,6 +673,15 @@ if (import.meta.main) {
       const sessionFlag = rest.indexOf("--session");
       const sid = sessionFlag >= 0 ? rest[sessionFlag + 1] : "unknown";
       await runFlashInject(sid ?? "unknown");
+      break;
+    }
+
+    case "context-monitor": {
+      // Usage: theorex context-monitor --session <id>
+      // Called by PostToolUse hook — outputs additionalContext JSON if compression fires
+      const sessionFlag = rest.indexOf("--session");
+      const sid = sessionFlag >= 0 ? rest[sessionFlag + 1] : "unknown";
+      await runContextMonitor(sid ?? "unknown");
       break;
     }
 
@@ -833,9 +870,41 @@ if (import.meta.main) {
       break;
     }
 
+    case "ingest-image": {
+      // Usage: theorex ingest-image <path> [--context "text"] [--agent <id>]
+      const { values: iiValues, positionals: iiPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          context: { type: "string" },
+          agent:   { type: "string" },
+        },
+        allowPositionals: true,
+        strict: false,
+      });
+      const iiPath = iiPos[0];
+      if (!iiPath) {
+        console.error("Usage: theorex ingest-image <path> [--context \"text\"] [--agent <id>]");
+        process.exit(1);
+      }
+      const { ingestImage } = await import("../vision/ingest");
+      const iiResult = await ingestImage(iiPath, config, {
+        userContext: typeof iiValues.context === "string" ? iiValues.context : undefined,
+        agentId: typeof iiValues.agent === "string" ? iiValues.agent : "main",
+      });
+      if (!iiResult) {
+        console.error("Vision model unavailable. Set ANTHROPIC_API_KEY or config.visionEndpoint.");
+        process.exit(1);
+      }
+      console.log(`Image ingested: ${iiResult.memory.id}`);
+      console.log(`  Description: ${iiResult.memory.description.slice(0, 80)}...`);
+      console.log(`  Elements: ${iiResult.memory.elements.slice(0, 5).join(", ")}`);
+      console.log(`  +${iiResult.conceptsAdded} concepts, +${iiResult.edgesAdded} edges`);
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject>");
       process.exit(1);
   }
 }

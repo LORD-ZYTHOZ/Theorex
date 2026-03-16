@@ -17,8 +17,8 @@ interface TierChangeEvent extends BaseAuditEvent {
   readonly type: "tier_change";
   readonly concept_id: number;
   readonly surface_form: string;
-  readonly from: "ACTIVE" | "MILD" | "LESS";
-  readonly to: "ACTIVE" | "MILD" | "LESS";
+  readonly from: "ACTIVE" | "MILD" | "LESS" | "SLEEPING";
+  readonly to: "ACTIVE" | "MILD" | "LESS" | "SLEEPING";
 }
 
 interface SentimentFlipEvent extends BaseAuditEvent {

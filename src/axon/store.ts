@@ -11,6 +11,8 @@
 import { UndirectedGraph } from "graphology";
 import { rename } from "node:fs/promises";
 import type { ConceptEvent } from "../types";
+import { ColdStore } from "./cold";
+import { decompressNode } from "./decompress";
 
 // ---------------------------------------------------------------------------
 // Typed attribute interfaces (Phase 1 graph layer)
@@ -20,7 +22,8 @@ export interface AxonNodeAttrs {
   concept_id: number;
   surface_form: string;
   importance_weight: number;
-  relevance_tier: "ACTIVE" | "MILD" | "LESS";
+  relevance_tier: "ACTIVE" | "MILD" | "LESS" | "SLEEPING";
+  archive_id: string;       // Phase 9: archive_id in ColdStore; "" when not sleeping
   sentiment_tier: "PREFERRED" | "NEUTRAL" | "DISPREFERRED";
   last_seen: string;       // ISO 8601
   frequency_count: number;
@@ -44,9 +47,23 @@ export interface AxonEdgeAttrs {
 
 export class AxonStore {
   private _graph: UndirectedGraph<AxonNodeAttrs, AxonEdgeAttrs>;
+  private _cold: ColdStore | null = null;
 
   constructor() {
     this._graph = new UndirectedGraph<AxonNodeAttrs, AxonEdgeAttrs>();
+  }
+
+  /**
+   * Open cold storage for this store. Call once after load() when Phase 9 is active.
+   * If not opened, SLEEPING nodes are left as-is (backward compatible).
+   */
+  openCold(coldPath: string): void {
+    this._cold = new ColdStore(coldPath);
+  }
+
+  /** Read-only access to the ColdStore (for scan.ts compression). */
+  get cold(): ColdStore | null {
+    return this._cold;
   }
 
   /** Read-only access to the underlying graph for external iteration. */
@@ -55,15 +72,37 @@ export class AxonStore {
   }
 
   /**
+   * Wake a SLEEPING node back to LESS tier (Phase 9).
+   * Restores full attrs from cold storage and writes them back to the graph.
+   * No-op if node is not SLEEPING or cold storage is not open.
+   */
+  wakeNode(key: string): void {
+    if (!this._cold || !this._graph.hasNode(key)) return;
+    const attrs = this._graph.getNodeAttributes(key);
+    if (attrs.relevance_tier !== "SLEEPING") return;
+
+    const restored = decompressNode(attrs, this._cold);
+    // Restore to LESS tier so the next scan can re-score it organically
+    const woken = { ...restored, relevance_tier: "LESS" as const };
+    for (const [attr, val] of Object.entries(woken) as [keyof AxonNodeAttrs, AxonNodeAttrs[keyof AxonNodeAttrs]][]) {
+      this._graph.setNodeAttribute(key, attr, val);
+    }
+  }
+
+  /**
    * Upsert a node from a ConceptEvent.
    * - If node does not exist: creates with all attrs; sentiment_tier: "NEUTRAL", relevance_tier: "ACTIVE"
    * - If node exists: increments frequency_count and updates last_seen; preserves tiers
+   * - If node is SLEEPING: wakes it first, then upserts (transparent re-activation)
    * Returns the node key (always String(concept_id)).
    */
   mergeNode(event: ConceptEvent, agentId = "", observationType = ""): string {
     const key = String(event.concept_id);
 
     if (this._graph.hasNode(key)) {
+      // Wake sleeping node before any upsert (Phase 9)
+      this.wakeNode(key);
+
       const existing = this._graph.getNodeAttributes(key);
       this._graph.setNodeAttribute(key, "frequency_count", existing.frequency_count + event.frequency_count);
       this._graph.setNodeAttribute(key, "last_seen", event.timestamp);
@@ -82,6 +121,7 @@ export class AxonStore {
         agent_id: agentId,
         node_type: event.node_type ?? "",
         observation_type: observationType,
+        archive_id: "",
       });
     }
 

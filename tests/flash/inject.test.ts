@@ -75,18 +75,22 @@ function makeShortTermEntry(surfaceForm: string): ShortTermEntry {
 describe("injectContext", () => {
   test("returns empty string when axon.json does not exist (cold start)", async () => {
     // loadAxon succeeds but with empty axon (AxonStore.load returns empty on ENOENT)
+    // loadConfig: null disables temporal + profession pack injection for isolation
     const result = await injectContext("cold-sess", {
       loadAxon: async () => makeEmptyAxon(),
       readShortTermFiles: async () => [],
+      loadConfig: async () => null,
     });
 
     expect(result).toBe("");
   });
 
   test("returns empty string when axon has no ACTIVE nodes", async () => {
+    // loadConfig: null disables temporal + profession pack injection for isolation
     const result = await injectContext("mild-sess", {
       loadAxon: async () => makeAxonWithMild(),
       readShortTermFiles: async () => [],
+      loadConfig: async () => null,
     });
 
     // No ACTIVE nodes and no short-term entries → empty output

@@ -11,6 +11,7 @@ import { compositeScore, classifyTier } from "./scorer";
 import type { Config } from "../config";
 import { dissolveSeededEdges } from "../rag/dissolution";
 import { appendAuditEvent } from "../audit/logger";
+import { compressNode } from "./compress";
 
 /**
  * Re-score all nodes with compositeScore, update relevance_tier on every node.
@@ -31,6 +32,11 @@ export async function scanAxon(
     return;
   }
 
+  // Phase 9: Open cold storage if configured
+  if (config.coldStorePath) {
+    store.openCold(config.coldStorePath);
+  }
+
   const scoringConfig = {
     halfLifeDays: config.halfLifeDays,
     activeThreshold: config.activeThreshold,
@@ -43,6 +49,10 @@ export async function scanAxon(
 
   for (const key of nodeKeys) {
     const attrs = store.graph.getNodeAttributes(key);
+
+    // Phase 9: skip sleeping nodes — they are archived, not subject to rescoring
+    if (attrs.relevance_tier === "SLEEPING") continue;
+
     const oldTier = attrs.relevance_tier;
 
     // Gather neighbor edge strengths for co-occurrence score
@@ -77,6 +87,34 @@ export async function scanAxon(
         surface_form: attrs.surface_form,
         from: oldTier,
         to: tier,
+      }, config.eventsPath ?? "data/events.jsonl").catch(() => {});
+    }
+  }
+
+  // ── Phase 9: Compress old LESS nodes into cold storage ─────────────────────
+  if (store.cold && config.compressAfterDays > 0) {
+    const compressThresholdMs = config.compressAfterDays * 86_400_000;
+
+    for (const key of nodeKeys) {
+      const attrs = store.graph.getNodeAttributes(key);
+      if (attrs.relevance_tier !== "LESS") continue;
+
+      const ageSinceLastSeen = nowMs - new Date(attrs.last_seen).getTime();
+      if (ageSinceLastSeen < compressThresholdMs) continue;
+
+      const stub = compressNode(key, attrs, store.cold, nowMs);
+      for (const [attr, val] of Object.entries(stub) as [keyof typeof stub, (typeof stub)[keyof typeof stub]][]) {
+        store.graph.setNodeAttribute(key, attr, val);
+      }
+
+      void appendAuditEvent({
+        type: "tier_change",
+        timestamp: new Date(nowMs).toISOString(),
+        source: "scan",
+        concept_id: attrs.concept_id,
+        surface_form: attrs.surface_form,
+        from: "LESS",
+        to: "SLEEPING",
       }, config.eventsPath ?? "data/events.jsonl").catch(() => {});
     }
   }

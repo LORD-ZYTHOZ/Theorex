@@ -1019,6 +1019,20 @@ if (import.meta.main) {
           }
         }
       }
+
+      // Phase 20: GEPA-style trace review — run after pattern analysis
+      {
+        const { reviewAllFailures } = await import("../evolve/trace-review");
+        const trReviewed = await reviewAllFailures(
+          erAgentArg,
+          config,
+          outcomesDir,
+        );
+        if (trReviewed.length > 0) {
+          const written = trReviewed.filter((r) => r.written_to_axon).length;
+          console.log(`\nTrace Review (Phase 20): ${trReviewed.length} failure(s) reviewed, ${written} fix(es) written to axon`);
+        }
+      }
       break;
     }
 
@@ -1365,9 +1379,50 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 20: Trace Review — review failed outcomes with LLM diagnosis
+    case "trace-review": {
+      // Usage: theorex trace-review [--agent <id|all>]
+      const { values: trValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const trAgent = typeof trValues.agent === "string" ? trValues.agent : "main";
+      const trOutcomesDir = config.outcomesDir ?? "data/outcomes";
+      const { reviewAllFailures } = await import("../evolve/trace-review");
+      console.log(`Running trace review for agent "${trAgent}"...`);
+      const trResults = await reviewAllFailures(trAgent, config, trOutcomesDir);
+      if (trResults.length === 0) {
+        console.log("No failed outcomes below review threshold. Nothing to review.");
+        break;
+      }
+      const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+      const COL_ID = 12;
+      const COL_MODEL = 16;
+      const COL_SCORE = 8;
+      const COL_AXON = 8;
+      console.log(`\nTrace Review Results — ${trResults.length} failure(s)\n`);
+      console.log(pad("outcome_id", COL_ID) + pad("model", COL_MODEL) + pad("score", COL_SCORE) + pad("axon", COL_AXON) + "fix_description");
+      console.log("-".repeat(COL_ID + COL_MODEL + COL_SCORE + COL_AXON + 40));
+      for (const r of trResults) {
+        const fixPreview = r.fix_description.slice(0, 60) + (r.fix_description.length > 60 ? "…" : "");
+        console.log(
+          pad(r.outcome_id.slice(0, 11), COL_ID) +
+          pad(r.model_used, COL_MODEL) +
+          pad(r.score.toFixed(2), COL_SCORE) +
+          pad(r.written_to_axon ? "yes" : "no", COL_AXON) +
+          fixPreview,
+        );
+      }
+      const written = trResults.filter((r) => r.written_to_axon).length;
+      console.log(`\n${written}/${trResults.length} fixes written to axon.`);
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]>");
       process.exit(1);
   }
 }

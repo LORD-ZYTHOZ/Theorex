@@ -24,7 +24,9 @@ export async function flushFlash(
   const buffer = await _readFlash(sessionId);
 
   // FLH-04: filter events by significance threshold
-  const significant = buffer.events.filter(
+  // Guard against corrupt buffer (missing/non-array events field)
+  const events = Array.isArray(buffer.events) ? buffer.events : [];
+  const significant = events.filter(
     (e) => e.significance_score >= SIGNIFICANCE_THRESHOLD
   );
 

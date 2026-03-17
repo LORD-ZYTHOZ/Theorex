@@ -1,8 +1,8 @@
 // src/rag/embedding-store.ts
 // Persists concept embeddings to data/concept-embeddings.json.
-// Kept separate from axon.json (384 floats/node = ~3KB — too large for the main graph file).
+// Kept separate from axon.json (768 floats/node = ~6KB — too large for the main graph file).
 //
-// Shape: Record<string, number[]>  // key = String(concept_id), value = 384-dim float[]
+// Shape: Record<string, number[]>  // key = String(concept_id), value = 768-dim float[]
 //
 // ATOMIC WRITE: Bun.write to .tmp then rename — never corrupts the store.
 // IMMUTABLE: loadEmbeddingStore returns a new object; saveEmbedding creates updated copy.
@@ -14,7 +14,12 @@ export async function loadEmbeddingStore(
 ): Promise<Record<string, number[]>> {
   try {
     return await Bun.file(storePath).json() as Record<string, number[]>;
-  } catch {
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    if (!msg.includes("ENOENT")) {
+      // Non-ENOENT means corruption — warn so data loss is visible
+      console.warn(`[embedding-store] Failed to load ${storePath}: ${msg}. Starting from empty store.`);
+    }
     return {}; // ENOENT or invalid JSON — cold start
   }
 }

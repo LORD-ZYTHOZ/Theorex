@@ -5,7 +5,7 @@
 // Cold start (all lobes empty): returns empty string — never throws.
 
 import { AxonStore } from "../axon/store";
-import { readShortTermFiles } from "../short-term/store";
+import { readShortTermFiles, rotateStm } from "../short-term/store";
 import type { ShortTermEntry } from "../short-term/store";
 import { readMoments } from "../moments/store";
 import type { MomentNode } from "../moments/store";
@@ -30,7 +30,10 @@ export async function injectContext(
     const cfg = await loadConfig().catch(() => null);
     return AxonStore.load(cfg?.axonPath ?? "data/axon.json");
   });
-  const _readShortTermFiles = options?.readShortTermFiles ?? readShortTermFiles;
+  const _readShortTermFiles = options?.readShortTermFiles ?? (async () => {
+    await rotateStm().catch(() => {}); // prune stale entries before reading
+    return readShortTermFiles();
+  });
   const _readMoments = options?.readMoments ?? readMoments;
   const _loadConfig = options?.loadConfig ?? (() => loadConfig().catch(() => null));
 

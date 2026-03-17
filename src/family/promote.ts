@@ -85,13 +85,16 @@ export async function promoteToShared(
         const merged_last = existing.last_seen > attrs.last_seen ? existing.last_seen : attrs.last_seen;
         sharedStore.graph.setNodeAttribute(sharedKey, "frequency_count", merged_freq);
         sharedStore.graph.setNodeAttribute(sharedKey, "last_seen", merged_last);
-        promotedIds.add(attrs.concept_id);
-        promoted++;
+        // NOTE: do NOT add to promotedIds here — the node already exists in shared,
+        // so edge promotion would be based on stale data. Edges are only promoted for
+        // newly upserted nodes (below).
+        skipped++;
         continue;
       }
     }
 
     // Promote node (reuse mergeNode with a synthetic ConceptEvent)
+    // Use original last_seen (not nowMs) so shared axon reflects true recency.
     sharedStore.mergeNode(
       {
         concept_id: attrs.concept_id,
@@ -101,9 +104,10 @@ export async function promoteToShared(
         composite_score: score,
         source_weight: attrs.source_weight,
         node_type: (attrs.node_type || "concept") as NodeType,
-        timestamp: new Date(nowMs).toISOString(),
+        timestamp: attrs.last_seen,
       },
       agentId,
+      attrs.observation_type || "",
     );
 
     promotedIds.add(attrs.concept_id);

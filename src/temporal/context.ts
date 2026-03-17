@@ -180,7 +180,9 @@ export async function buildTemporalContext(config: Config): Promise<TemporalCont
 export function formatTemporalContext(ctx: TemporalContext): string {
   const lines: string[] = [];
 
-  const utcSign = ctx.utc_offset_minutes <= 0 ? "+" : "-";
+  // JS getTimezoneOffset() returns negative for UTC+ zones (e.g. UTC+11 → -660).
+  // Invert: negative offset_minutes means we are AHEAD of UTC → display "+"
+  const utcSign = ctx.utc_offset_minutes < 0 ? "+" : "-";
   const utcAbs = Math.abs(ctx.utc_offset_minutes);
   const utcHours = Math.floor(utcAbs / 60);
   const utcLabel = `UTC${utcSign}${utcHours}`;

@@ -27,7 +27,7 @@ export function buildFlashEvent(hookInput: Record<string, unknown>): FlashEvent 
   try {
     const events = processText(textToScore, 1.0, "concept", new Date().toISOString());
     if (events.length > 0) {
-      significance_score = Math.max(...events.map((e) => e.composite_score));
+      significance_score = Math.min(1.0, Math.max(...events.map((e) => e.composite_score)));
     }
   } catch {
     significance_score = 0;

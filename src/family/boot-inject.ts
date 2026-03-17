@@ -50,6 +50,8 @@ export async function generateBootContext(
 ): Promise<BootInjectResult> {
   const sharedPath = resolvedSharedAxonPath(config.sharedAxonPath);
   const store = await AxonStore.load(sharedPath);
+  // Phase 9: wake SLEEPING nodes so they can score and appear in boot context
+  if (config.coldStorePath) store.openCold(config.coldStorePath);
 
   const totalConcepts = store.graph.order;
 
@@ -75,9 +77,9 @@ export async function generateBootContext(
     const label = attrs.surface_form.replace(/[:.!,;]+\s*$/, "").replace(/\s+/g, " ").trim();
     if (!label || label.length < 4) continue;
     if (label.endsWith("-")) continue;
-    const BOOT_NOISE = new Set(["Despite","However","Therefore","Still","It","This","That",
-      "Read","Rate","Check","Floor","Day","Time","Way","Here","There","Now","Then"]);
-    if (BOOT_NOISE.has(label)) continue;
+    const BOOT_NOISE = new Set(["despite","however","therefore","still","it","this","that",
+      "read","rate","check","floor","day","time","way","here","there","now","then"]);
+    if (BOOT_NOISE.has(label.toLowerCase())) continue;
 
     const agent = attrs.agent_id || "unknown";
     if (!activeByAgent.has(agent)) activeByAgent.set(agent, []);

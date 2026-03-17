@@ -16,8 +16,10 @@ export function recencyScore(
   nowMs: number,
   halfLifeDays: number,
 ): number {
+  const lastSeenMs = new Date(lastSeen).getTime();
+  if (!Number.isFinite(lastSeenMs)) return 0.0; // invalid timestamp → treat as unseen
   const lambda = Math.LN2 / halfLifeDays;
-  const daysElapsed = (nowMs - new Date(lastSeen).getTime()) / 86_400_000;
+  const daysElapsed = Math.max(0, (nowMs - lastSeenMs) / 86_400_000); // clamp clock skew
   return Math.exp(-lambda * daysElapsed);
 }
 

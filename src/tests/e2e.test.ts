@@ -7,7 +7,9 @@ import { mkdir, rm } from "node:fs/promises";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 
-const PROJECT_ROOT = "/Users/eoh/theorex";
+// Derive project root from this file's location (src/tests/ → two levels up)
+import { join as pathJoin, dirname } from "node:path";
+const PROJECT_ROOT = pathJoin(dirname(import.meta.path), "../..");
 
 // ---------------------------------------------------------------------------
 // Helper: spawn CLI and capture stdout, stderr, exit code

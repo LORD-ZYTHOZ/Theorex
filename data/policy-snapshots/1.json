@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "timestamp": "2026-03-17T10:25:04.056Z",
+  "metrics": {
+    "promotion_count": 0,
+    "avg_composite_score": 0,
+    "success_rate": 0,
+    "sample_count": 0
+  },
+  "config_hash": "d740aaac224fda1c"
+}

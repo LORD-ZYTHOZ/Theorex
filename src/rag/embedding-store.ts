@@ -60,6 +60,12 @@ async function migrateIfNeeded(storePath: string): Promise<Map<string, number[]>
 
   if (firstByte !== "{" && firstByte !== "[") return null;
 
+  // Check if it's already JSONL (first line has "id" field = new format)
+  try {
+    const firstLine = (await Bun.file(storePath).text()).split("\n")[0]?.trim() ?? "";
+    if (firstLine && JSON.parse(firstLine)?.id !== undefined) return null; // already JSONL
+  } catch { /* fall through to migration */ }
+
   // Old format detected — migrate
   let old: Record<string, number[]> = {};
   try {

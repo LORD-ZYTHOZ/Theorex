@@ -1254,9 +1254,120 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 18: Formal Agent Roles — list all profiles
+    case "roles": {
+      // Usage: theorex roles
+      const { loadProfiles } = await import("../roles/index");
+      const profiles = await loadProfiles();
+      const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+      const COL_ID = 16;
+      const COL_ROLE = 14;
+      const COL_CAPS = 36;
+      const COL_MODEL = 20;
+      const header =
+        pad("agent_id", COL_ID) +
+        pad("role", COL_ROLE) +
+        pad("capabilities", COL_CAPS) +
+        pad("model", COL_MODEL) +
+        "active";
+      console.log(`Agent Profiles — ${profiles.length} registered\n`);
+      console.log(header);
+      console.log("-".repeat(header.length + 6));
+      for (const p of profiles) {
+        const row =
+          pad(p.agent_id, COL_ID) +
+          pad(p.role, COL_ROLE) +
+          pad(p.capabilities.join(", "), COL_CAPS) +
+          pad(p.model_preference, COL_MODEL) +
+          (p.active ? "yes" : "no");
+        console.log(row);
+      }
+      break;
+    }
+
+    // Phase 18: Formal Agent Roles — show which agent handles a query
+    case "role-route": {
+      // Usage: theorex role-route <query>
+      const rrQuery = rest.join(" ").trim();
+      if (!rrQuery) {
+        console.error("Usage: theorex role-route <query>");
+        process.exit(1);
+      }
+      const { classifyQuery } = await import("../router/heuristic");
+      const { loadProfiles, routeToAgent } = await import("../roles/index");
+      const profiles = await loadProfiles();
+      const queryType = classifyQuery(rrQuery);
+      const agent = routeToAgent(queryType, profiles);
+      console.log(`Query:      "${rrQuery}"`);
+      console.log(`Query type: ${queryType}`);
+      if (agent) {
+        console.log(`Routed to:  ${agent.agent_id} (${agent.role})`);
+        console.log(`Model:      ${agent.model_preference}`);
+        console.log(`Caps:       ${agent.capabilities.join(", ")}`);
+      } else {
+        console.log("Routed to:  (no matching agent)");
+      }
+      break;
+    }
+
+    // Phase 19: MCP server — start HTTP JSON-RPC server
+    case "mcp-start": {
+      // Usage: theorex mcp-start [--port <n>] [--agent <id>]
+      const { values: mcpValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          port:  { type: "string" },
+          agent: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const mcpPort = typeof mcpValues.port === "string" ? parseInt(mcpValues.port, 10) : 18800;
+      const mcpAgent = typeof mcpValues.agent === "string" ? mcpValues.agent : "main";
+      const { startMcpServer } = await import("../mcp/server");
+      const server = startMcpServer({ port: mcpPort, agentId: mcpAgent });
+      console.log(`Theorex MCP server listening at http://${server.hostname}:${server.port}/mcp`);
+      console.log(`Agent: ${mcpAgent} | POST /mcp for JSON-RPC 2.0`);
+      // keep process alive
+      await new Promise(() => {});
+      break;
+    }
+
+    // Phase 19: A2A tasks — list pending tasks for an agent
+    case "a2a-tasks": {
+      // Usage: theorex a2a-tasks [--agent <id>]
+      const { values: a2aValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const a2aAgent = typeof a2aValues.agent === "string" ? a2aValues.agent : "main";
+      const { listPendingTasks } = await import("../a2a/tasks");
+      const pending = await listPendingTasks(a2aAgent);
+      if (pending.length === 0) {
+        console.log(`No pending A2A tasks for agent "${a2aAgent}".`);
+        break;
+      }
+      console.log(`Pending A2A tasks for agent "${a2aAgent}" (${pending.length}):\n`);
+      const padA2A = (s: string, n: number) => s.padEnd(n).slice(0, n);
+      console.log(padA2A("ID", 28) + padA2A("FROM", 16) + padA2A("TYPE", 16) + padA2A("STATUS", 10) + "SUBMITTED");
+      console.log("-".repeat(82));
+      for (const t of pending) {
+        console.log(
+          padA2A(t.id, 28) +
+          padA2A(t.from_agent, 16) +
+          padA2A(t.task_type, 16) +
+          padA2A(t.status, 10) +
+          t.submitted_at.slice(0, 19).replace("T", " "),
+        );
+      }
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]>");
       process.exit(1);
   }
 }

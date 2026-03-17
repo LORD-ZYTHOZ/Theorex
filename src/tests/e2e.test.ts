@@ -11,6 +11,9 @@ import { tmpdir } from "node:os";
 import { join as pathJoin, dirname } from "node:path";
 const PROJECT_ROOT = pathJoin(dirname(import.meta.path), "../..");
 
+// Resolve bun executable — works regardless of whether bun is in PATH
+const BUN_BIN = process.execPath; // the bun binary running this test suite
+
 // ---------------------------------------------------------------------------
 // Helper: spawn CLI and capture stdout, stderr, exit code
 // ---------------------------------------------------------------------------
@@ -22,7 +25,7 @@ interface CliResult {
 }
 
 async function cli(args: string[], tmpDir: string): Promise<CliResult> {
-  const proc = Bun.spawn(["bun", "src/cli/index.ts", ...args], {
+  const proc = Bun.spawn([BUN_BIN, "src/cli/index.ts", ...args], {
     cwd: PROJECT_ROOT,
     env: { ...process.env, DATA_DIR: tmpDir },
     stdout: "pipe",

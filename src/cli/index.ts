@@ -1055,9 +1055,174 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 15.5: Trace stats — show summary of data/traces/
+    case "trace-stats": {
+      // Usage: theorex trace-stats
+      try {
+        const { readTraces } = await import("../trace/index");
+        const traces = await readTraces();
+        const total = traces.length;
+        const successes = traces.filter((t) => t.success).length;
+        const successRate = total > 0 ? successes / total : 0;
+        const byModel: Record<string, number[]> = {};
+        for (const t of traces) {
+          (byModel[t.model] ??= []).push(t.latency_ms);
+        }
+        console.log(`Trace Stats — ${total} trace file(s)`);
+        console.log(`  Success rate: ${(successRate * 100).toFixed(1)}%`);
+        if (Object.keys(byModel).length > 0) {
+          console.log("\n  Avg latency by model:");
+          for (const [model, latencies] of Object.entries(byModel)) {
+            const avg = latencies.reduce((a, b) => a + b, 0) / latencies.length;
+            console.log(`    ${model}: ${avg.toFixed(0)}ms`);
+          }
+        }
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
+    // Phase 15.5: Route — show routing decision for a query
+    case "route": {
+      // Usage: theorex route <query>
+      const routeQuery = rest.join(" ");
+      if (!routeQuery) {
+        console.error("Usage: theorex route <query>");
+        process.exit(1);
+      }
+      try {
+        const { route, classifyQuery } = await import("../router/heuristic");
+        const decision = route({ agent_id: "cli", query: routeQuery, context_pct: 0, query_tokens: routeQuery.split(" ").length });
+        console.log(`Routing decision for: "${routeQuery}"`);
+        console.log(`  Model:      ${decision.model_name}`);
+        console.log(`  Tier:       ${decision.model_tier}`);
+        console.log(`  Query type: ${decision.query_type}`);
+        console.log(`  Reason:     ${decision.reason}`);
+        console.log(`  Confidence: ${decision.confidence.toFixed(2)}`);
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
+    // Phase 15.5: Matrix build — build confidence matrix from traces
+    case "matrix-build": {
+      // Usage: theorex matrix-build
+      try {
+        const { buildMatrix, saveMatrix } = await import("../router/confidence-matrix");
+        const matrix = await buildMatrix();
+        await saveMatrix(matrix);
+        const models = [...new Set(matrix.cells.map((c) => c.model_name))];
+        console.log(`Confidence matrix built and saved. ${matrix.cells.length} cell(s).`);
+        if (models.length > 0) console.log(`  Models: ${models.join(", ")}`);
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
+    // Phase 15.5: Matrix show — print confidence matrix as a readable table
+    case "matrix-show": {
+      // Usage: theorex matrix-show
+      try {
+        const { loadMatrix } = await import("../router/confidence-matrix");
+        const matrix = await loadMatrix();
+        if (!matrix || matrix.cells.length === 0) {
+          console.log("No confidence matrix found. Run: theorex matrix-build");
+          break;
+        }
+        console.log(`Confidence Matrix (built ${matrix.built_at})\n`);
+        const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+        const header = pad("query_type", 14) + pad("model", 20) + pad("success%", 10) + pad("latency", 10) + "samples";
+        console.log(header);
+        console.log("-".repeat(header.length));
+        for (const cell of matrix.cells) {
+          const row = pad(cell.query_type, 14) + pad(cell.model_name, 20) +
+            pad((cell.success_rate * 100).toFixed(1) + "%", 10) +
+            pad(cell.avg_latency_ms.toFixed(0) + "ms", 10) +
+            cell.sample_count;
+          console.log(row);
+        }
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
+    // Phase 17: Energy check — show power state and dispatch advice
+    case "energy-check": {
+      // Usage: theorex energy-check
+      try {
+        const { readPowerState, getDispatchAdvice } = await import("../router/energy");
+        const reading = await readPowerState();
+        const advice = getDispatchAdvice(reading, "medium");
+        console.log(`Source:   ${reading.on_battery ? "Battery" : "AC Power"} (via ${reading.source})`);
+        console.log(`Battery:  ${reading.battery_pct !== undefined ? reading.battery_pct + "%" : "N/A"}`);
+        console.log(`Large model allowed: ${advice.allow_large_model}`);
+        console.log(`Reason:   ${advice.reason}`);
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
+    // Phase 13 / Gated Learning: policy snapshot — evaluate current policy and save snapshot
+    case "policy-snapshot": {
+      // Usage: theorex policy-snapshot
+      try {
+        const { evaluateCurrentPolicy, saveSnapshot } = await import("../evolve/gated-learning");
+        const metrics = await evaluateCurrentPolicy();
+        const snapshot = await saveSnapshot(metrics);
+        console.log(`Policy snapshot saved: v${snapshot.version}`);
+        console.log(`  Samples:       ${metrics.sample_count}`);
+        console.log(`  Success rate:  ${(metrics.success_rate * 100).toFixed(1)}%`);
+        console.log(`  Avg composite: ${metrics.avg_composite_score.toFixed(3)}`);
+        console.log(`  Promotions:    ${metrics.promotion_count}`);
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
+    // Phase 22: Boot-aware — generate context-aware boot context
+    case "boot-aware": {
+      // Usage: theorex boot-aware [--model <name>] [--agent <id>]
+      const { values: baValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          model: { type: "string" },
+          agent: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const baModel = typeof baValues.model === "string" ? baValues.model : undefined;
+      const baAgent = typeof baValues.agent === "string" ? baValues.agent : "main";
+      try {
+        const { buildContextAwareBootContext } = await import("../memory/boot-aware");
+        const context = await buildContextAwareBootContext(baAgent, baModel);
+        const estTokens = Math.ceil(context.length / 4);
+        console.log(`Boot-aware context for agent "${baAgent}"${baModel ? ` (model: ${baModel})` : ""}`);
+        console.log(`  Estimated tokens: ${estTokens}`);
+        console.log(`  Length:           ${context.length} chars`);
+        console.log("\n" + context.slice(0, 500) + (context.length > 500 ? "\n…" : ""));
+      } catch {
+        console.error("Module not ready — build Phase 16 first");
+        process.exit(1);
+      }
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]>");
       process.exit(1);
   }
 }

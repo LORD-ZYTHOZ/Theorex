@@ -253,7 +253,7 @@ describe("dispatch command", () => {
       await mkdir(tmp, { recursive: true });
 
       // Spawn with a short timeout — LM Studio may hang the connection
-      const proc = Bun.spawn(["bun", "src/cli/index.ts", "dispatch", "test task", "--context", "60"], {
+      const proc = Bun.spawn([BUN_BIN, "src/cli/index.ts", "dispatch", "test task", "--context", "60"], {
         cwd: PROJECT_ROOT,
         env: { ...process.env, DATA_DIR: tmp },
         stdout: "pipe",

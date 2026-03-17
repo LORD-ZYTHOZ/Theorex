@@ -83,7 +83,11 @@ export async function refineFromReport(
   }
 
   // Save axon
-  await store.save(axonPath);
+  try {
+    await store.save(axonPath);
+  } catch (err) {
+    console.warn(`[refine] Failed to save axon for ${report.agent_id}: ${err instanceof Error ? err.message : String(err)}`);
+  }
 
   // 4. Append to evolution log
   const entry: EvolutionEntry = {

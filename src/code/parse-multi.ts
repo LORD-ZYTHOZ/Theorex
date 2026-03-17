@@ -62,7 +62,7 @@ export async function parsePython(filePath: string, rootDir = ""): Promise<Parse
 
       // Collect calls in the next lines until next def/class at same or lower indent
       const defIndent = defMatch[1]!.length;
-      for (let j = i + 1; j < lines.length && j < i + 80; j++) {
+      for (let j = i + 1; j < lines.length; j++) {
         const bodyLine = lines[j]!;
         const bodyIndent = bodyLine.match(/^(\s*)/)?.[1].length ?? 0;
         if (bodyLine.trim() && bodyIndent <= defIndent) break;
@@ -70,9 +70,11 @@ export async function parsePython(filePath: string, rootDir = ""): Promise<Parse
         callPat.lastIndex = 0;
         while ((m = callPat.exec(bodyLine)) !== null) {
           const callee = m[1]!;
-          if (callee !== rawName && callee !== "def" && callee !== "class" && callee !== "if" &&
-              callee !== "for" && callee !== "while" && callee !== "return" && callee !== "print" &&
-              callee !== "len" && callee !== "range" && callee !== "super" && callee !== "isinstance") {
+          const PY_SKIP = new Set(["def","class","if","elif","else","for","while","return","print",
+            "len","range","super","isinstance","async","await","yield","lambda","with","try",
+            "except","finally","raise","assert","pass","break","continue","del","global",
+            "nonlocal","import","from","as","is","in","and","or","not",rawName]);
+          if (!PY_SKIP.has(callee)) {
             calls.push({ callerName: name, calleeName: callee, filePath: displayPath });
           }
         }
@@ -100,8 +102,9 @@ export async function parseGo(filePath: string, rootDir = ""): Promise<ParseResu
   const funcPat   = /^func\s+([A-Z][A-Za-z0-9_]*|[a-z][A-Za-z0-9_]*)\s*\(/;
   // func (recv Type) Name(  — method
   const methodPat = /^func\s+\([^)]+\)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/;
-  // type Name struct  — struct type (like a class)
-  const structPat = /^type\s+([A-Za-z_][A-Za-z0-9_]*)\s+struct/;
+  // type Name struct / type Name interface
+  const structPat    = /^type\s+([A-Za-z_][A-Za-z0-9_]*)\s+struct/;
+  const interfacePat = /^type\s+([A-Za-z_][A-Za-z0-9_]*)\s+interface/;
   const callPat   = /\b([a-z][A-Za-z0-9_]*)\s*\(/g;
 
   // Track current function for call extraction
@@ -116,6 +119,10 @@ export async function parseGo(filePath: string, rootDir = ""): Promise<ParseResu
     const structMatch = line.match(structPat);
     if (structMatch) {
       symbols.push({ name: structMatch[1]!, filePath: displayPath, line: lineNum, kind: "class" });
+    }
+    const interfaceMatch = line.match(interfacePat);
+    if (interfaceMatch) {
+      symbols.push({ name: interfaceMatch[1]!, filePath: displayPath, line: lineNum, kind: "class" });
     }
 
     const methodMatch = line.match(methodPat);

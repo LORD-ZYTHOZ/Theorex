@@ -117,6 +117,6 @@ export function buildOutcome(params: {
     result: params.result,
     success: params.success,
     concept_ids: params.conceptIds ?? [],
-    tags: params.tags ?? [],
+    tags: (params.tags ?? []).filter(Boolean),
   };
 }

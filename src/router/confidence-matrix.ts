@@ -41,9 +41,13 @@ export interface DataDrivenDecision {
 // Internal trace shape (read from data/traces/*.json)
 // ---------------------------------------------------------------------------
 
+// The live TraceRecord from bus.ts stores query_type in tags[0], not as a
+// standalone field. We accept both layouts so buildMatrix works with both
+// legacy traces (if any) and live EventBus-assembled traces.
 interface TraceRecord {
   model: string;
-  query_type?: string;
+  query_type?: string;   // optional — set by legacy or injected below
+  tags?: string[];       // live traces carry [query_type, model] here
   success: boolean;
   latency_ms: number;
   total_tokens: number;
@@ -175,7 +179,14 @@ export async function buildMatrix(
           "latency_ms" in item &&
           "total_tokens" in item
         ) {
-          records.push(item as TraceRecord);
+          const rec = item as TraceRecord;
+          // Live EventBus traces store query_type in tags[0].
+          // If the standalone field is missing, promote tags[0] into it.
+          const resolved: TraceRecord =
+            rec.query_type
+              ? rec
+              : { ...rec, query_type: rec.tags?.[0] };
+          records.push(resolved);
         }
       }
     } catch {

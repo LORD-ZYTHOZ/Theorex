@@ -17,6 +17,7 @@ import { readPowerState, getDispatchAdvice } from "../router/energy.ts";
 import { emit } from "../trace/bus.ts";
 import { writeToAgent } from "../family/write.ts";
 import { loadConfig } from "../config.ts";
+import { loadProfiles, routeToAgent } from "../roles/index.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -146,7 +147,7 @@ export async function dispatch(
 ): Promise<DispatchResult> {
   const cfg: DispatchConfig = { ...DEFAULT_DISPATCH_CONFIG, ...config };
 
-  // 1. Route: pick model tier
+  // 1. Route: pick model tier via HeuristicRouter
   const routingInput: RoutingInput = {
     agent_id: task.agent_id,
     query: task.task,
@@ -155,12 +156,26 @@ export async function dispatch(
   };
   const decision = route(routingInput);
 
+  // 1b. Role registry override: if a registered operative prefers a specific
+  //     model for this query type, honour it over the heuristic choice.
+  const profiles = await loadProfiles().catch(() => []);
+  const roleMatch = routeToAgent(decision.query_type, profiles);
+  let heuristicTier = decision.model_tier;
+  if (roleMatch) {
+    const pref = roleMatch.model_preference.toLowerCase();
+    if (pref.includes("qwen3") || pref.includes("large")) {
+      heuristicTier = "large";
+    } else if (pref.includes("ministral") || pref.includes("medium") || pref.includes("small")) {
+      heuristicTier = "medium";
+    }
+  }
+
   // 2. Energy check: downgrade large → medium on low battery
   const powerState = await readPowerState();
-  const advice = getDispatchAdvice(powerState, decision.model_tier === "large" ? "high" : "medium");
-  const effectiveTier = (!advice.allow_large_model && decision.model_tier === "large")
+  const advice = getDispatchAdvice(powerState, heuristicTier === "large" ? "high" : "medium");
+  const effectiveTier = (!advice.allow_large_model && heuristicTier === "large")
     ? ("medium" as const)
-    : decision.model_tier;
+    : heuristicTier;
 
   const modelName = resolveModelName(effectiveTier);
   const endpoint = resolveEndpoint(effectiveTier, cfg);

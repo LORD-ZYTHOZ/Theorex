@@ -141,6 +141,8 @@ export class AxonStore {
     const keyA = String(idA);
     const keyB = String(idB);
 
+    if (!this._graph.hasNode(keyA) || !this._graph.hasNode(keyB)) return;
+
     const existingEdge = this._graph.edge(keyA, keyB);
 
     if (existingEdge === undefined) {

@@ -975,7 +975,7 @@ if (import.meta.main) {
 
     // Phase 13: Living Code — nightly evolution review
     case "evolve-review": {
-      // Usage: theorex evolve-review [--agent <id>] [--days <n>]
+      // Usage: theorex evolve-review [--agent <id|all>] [--days <n>]
       const { values: erValues } = parseArgs({
         args: Bun.argv.slice(3),
         options: {
@@ -985,21 +985,38 @@ if (import.meta.main) {
         allowPositionals: false,
         strict: false,
       });
-      const erAgent = typeof erValues.agent === "string" ? erValues.agent : "main";
+      const erAgentArg = typeof erValues.agent === "string" ? erValues.agent : "all";
       const erDays = typeof erValues.days === "string" ? parseInt(erValues.days, 10) : (config.evolveWindowDays ?? 7);
       const outcomesDir = config.outcomesDir ?? "data/outcomes";
       const { reviewOutcomes } = await import("../evolve/review");
       const { refineFromReport } = await import("../evolve/refine");
-      const erReport = await reviewOutcomes(erAgent, erDays, outcomesDir);
-      const erAxonPath = config.axonPath ?? "data/axon.json";
-      const erEntry = await refineFromReport(erReport, config, erAxonPath);
-      console.log(`Evolution review complete for agent "${erAgent}" (last ${erDays} days)`);
-      console.log(`  Outcomes: ${erReport.total_outcomes} | Win rate: ${Math.round(erReport.overall_win_rate * 100)}%`);
-      console.log(`  Concepts reinforced: ${erEntry.concepts_reinforced} | Decayed: ${erEntry.concepts_decayed}`);
-      if (erReport.insights.length > 0) {
-        console.log("\nInsights:");
-        for (const insight of erReport.insights) {
-          console.log(`  • ${insight}`);
+
+      // Discover agent IDs: glob ~/.openclaw/agents/*/theorex/axon.json
+      let erAgents: string[];
+      if (erAgentArg === "all") {
+        const { readdir } = await import("node:fs/promises");
+        const agentBaseDir = config.agentAxonDir;
+        const entries = await readdir(agentBaseDir, { withFileTypes: true }).catch(() => []);
+        const discovered = entries
+          .filter((e) => e.isDirectory())
+          .map((e) => e.name);
+        erAgents = discovered.length > 0 ? discovered : ["main"];
+      } else {
+        erAgents = [erAgentArg];
+      }
+
+      for (const erAgent of erAgents) {
+        const erAxonPath = agentAxonPath(erAgent, config.agentAxonDir);
+        const erReport = await reviewOutcomes(erAgent, erDays, outcomesDir);
+        const erEntry = await refineFromReport(erReport, config, erAxonPath);
+        console.log(`Evolution review complete for agent "${erAgent}" (last ${erDays} days)`);
+        console.log(`  Outcomes: ${erReport.total_outcomes} | Win rate: ${Math.round(erReport.overall_win_rate * 100)}%`);
+        console.log(`  Concepts reinforced: ${erEntry.concepts_reinforced} | Decayed: ${erEntry.concepts_decayed}`);
+        if (erReport.insights.length > 0) {
+          console.log("\nInsights:");
+          for (const insight of erReport.insights) {
+            console.log(`  • ${insight}`);
+          }
         }
       }
       break;

@@ -39,6 +39,7 @@ export async function promoteToShared(
   const sharedPath = resolvedSharedAxonPath(config.sharedAxonPath);
 
   const privateStore = await AxonStore.load(privatePath);
+  privateStore.openCold(config.coldStorePath);
   await mkdir(dirname(sharedPath), { recursive: true });
   const sharedStore = await AxonStore.load(sharedPath);
 
@@ -48,6 +49,9 @@ export async function promoteToShared(
   const promotedIds = new Set<number>();
 
   for (const key of privateStore.graph.nodes()) {
+    // Wake SLEEPING nodes so they can be scored and promoted (Phase 9 compat)
+    privateStore.wakeNode(key);
+
     const attrs = privateStore.graph.getNodeAttributes(key);
 
     const neighborStrengths = privateStore.graph
@@ -71,12 +75,18 @@ export async function promoteToShared(
       continue;
     }
 
-    // Conflict resolution: existing node with higher source_weight wins
+    // Conflict resolution: merge frequency and take latest timestamp; higher source_weight wins for weight field
     const sharedKey = String(attrs.concept_id);
     if (sharedStore.graph.hasNode(sharedKey)) {
       const existing = sharedStore.graph.getNodeAttributes(sharedKey);
       if (existing.source_weight > attrs.source_weight) {
-        skipped++;
+        // Merge frequency and recency into the existing node instead of skipping
+        const merged_freq = existing.frequency_count + attrs.frequency_count;
+        const merged_last = existing.last_seen > attrs.last_seen ? existing.last_seen : attrs.last_seen;
+        sharedStore.graph.setNodeAttribute(sharedKey, "frequency_count", merged_freq);
+        sharedStore.graph.setNodeAttribute(sharedKey, "last_seen", merged_last);
+        promotedIds.add(attrs.concept_id);
+        promoted++;
         continue;
       }
     }

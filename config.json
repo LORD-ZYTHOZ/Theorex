@@ -4,5 +4,5 @@
   "ragOnnxModel": "",
   "agentAxonDir": "/Users/eoh/.openclaw/agents",
   "sharedAxonPath": "/Users/eoh/.openclaw/workspace/theorex/shared-axon.json",
-  "promotionThreshold": 0.5
+  "promotionThreshold": 0.4
 }

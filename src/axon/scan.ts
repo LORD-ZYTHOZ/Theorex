@@ -148,4 +148,5 @@ export async function scanAxon(
 
   // ── Atomic write ───────────────────────────────────────────────────────────
   await store.save(axonPath);
+  if (store.cold) store.cold.close();
 }

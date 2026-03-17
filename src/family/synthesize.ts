@@ -90,11 +90,13 @@ async function extractLessons(
     if (!Array.isArray(parsed)) return null;
 
     return parsed.filter((item): item is Lesson => {
+      if (typeof item !== "object" || item === null) return false;
+      const l = item as Record<string, unknown>;
       return (
-        typeof item === "object" &&
-        item !== null &&
-        typeof (item as Lesson).lesson === "string" &&
-        (item as Lesson).lesson.length > 0
+        typeof l.lesson === "string" && l.lesson.length > 0 &&
+        typeof l.domain === "string" &&
+        ["positive", "negative", "neutral"].includes(l.outcome as string) &&
+        typeof l.confidence === "number" && (l.confidence as number) >= 0 && (l.confidence as number) <= 1
       );
     });
   } catch {

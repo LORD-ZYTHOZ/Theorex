@@ -185,7 +185,13 @@ export class AxonStore {
     const key = this.mergeNode(event, agentId);
 
     if (isNew && bootstrapFn) {
-      setImmediate(() => bootstrapFn(event.concept_id, event.surface_form));
+      setImmediate(() => {
+        try {
+          bootstrapFn(event.concept_id, event.surface_form);
+        } catch (err) {
+          console.warn(`[seedEdges] Failed for concept ${event.concept_id}: ${err instanceof Error ? err.message : String(err)}`);
+        }
+      });
     }
 
     return key;

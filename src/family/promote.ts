@@ -135,6 +135,7 @@ export async function promoteToShared(
   await copyFile(sharedPath, sharedPath + ".bak").catch(() => {});
 
   await sharedStore.save(sharedPath);
+  if (privateStore.cold) privateStore.cold.close();
 
   return { agentId, promoted, edgesPromoted, skipped };
 }

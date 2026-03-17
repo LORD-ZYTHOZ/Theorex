@@ -101,7 +101,7 @@ export async function parseGo(filePath: string, rootDir = ""): Promise<ParseResu
   // func Name(      — top-level function
   const funcPat   = /^func\s+([A-Z][A-Za-z0-9_]*|[a-z][A-Za-z0-9_]*)\s*\(/;
   // func (recv Type) Name(  — method
-  const methodPat = /^func\s+\([^)]+\)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/;
+  const methodPat = /^func\s+\([^)]*\b([A-Za-z_][A-Za-z0-9_]*)\s*\)\s+([A-Za-z_][A-Za-z0-9_]*)\s*\(/;
   // type Name struct / type Name interface
   const structPat    = /^type\s+([A-Za-z_][A-Za-z0-9_]*)\s+struct/;
   const interfacePat = /^type\s+([A-Za-z_][A-Za-z0-9_]*)\s+interface/;
@@ -127,7 +127,7 @@ export async function parseGo(filePath: string, rootDir = ""): Promise<ParseResu
 
     const methodMatch = line.match(methodPat);
     if (methodMatch) {
-      const name = methodMatch[1]!;
+      const name = `${methodMatch[1]!}.${methodMatch[2]!}`;
       symbols.push({ name, filePath: displayPath, line: lineNum, kind: "method" });
       currentFunc = name;
       inFunc = true;

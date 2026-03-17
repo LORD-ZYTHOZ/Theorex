@@ -26,6 +26,7 @@ export const AGENT_SOURCE_WEIGHTS: Record<string, number> = {
   "qwen-sage": 0.8,
   secretarius: 0.7,
   "claude-code-agent": 1.0,
+  "m4-engineer": 0.9,
   "pi-coding-agent": 0.7,
   "ag-coding-agent": 0.7,
 };

@@ -185,8 +185,8 @@ func (f *Foo) Baz() {
     await writeFile(path, src);
     const result = await parseGo(path);
     const names = result.symbols.map((s) => s.name);
-    expect(names).toContain("Bar");
-    expect(names).toContain("Baz");
+    expect(names).toContain("Foo.Bar");
+    expect(names).toContain("Foo.Baz");
     const kinds = result.symbols.map((s) => s.kind);
     expect(kinds).toContain("method");
   });

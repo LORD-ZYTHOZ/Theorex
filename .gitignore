@@ -42,3 +42,6 @@ data/flash/
 data/axon.json
 data/archive/
 data/MEMORY.md
+
+# Runtime data — never commit
+data/

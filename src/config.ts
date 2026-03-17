@@ -53,6 +53,10 @@ export interface Config {
   videosDir: string;                   // default: "data/videos"
   videoFrameIntervalSec: number;       // default: 5 — extract one frame every N seconds
   ffmpegPath: string;                  // default: "ffmpeg" — path to ffmpeg binary
+  // Phase 13: Living Code / Self-Refinement
+  outcomesDir: string;                 // default: "data/outcomes" — outcome records
+  evolutionLogPath: string;            // default: "data/evolution.jsonl" — nightly refinement log
+  evolveWindowDays: number;            // default: 7 — rolling window for outcome review
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -106,6 +110,10 @@ export const DEFAULT_CONFIG: Config = {
   videosDir: "data/videos",
   videoFrameIntervalSec: 5,
   ffmpegPath: "ffmpeg",
+  // Phase 13: Living Code / Self-Refinement
+  outcomesDir: "data/outcomes",
+  evolutionLogPath: "data/evolution.jsonl",
+  evolveWindowDays: 7,
 };
 
 /**

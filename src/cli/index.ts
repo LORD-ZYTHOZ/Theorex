@@ -933,9 +933,113 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 13: Living Code — record an outcome
+    case "outcome": {
+      // Usage: theorex outcome --agent <id> --decision "text" --result "text" [--success|--fail] [--tags tag1,tag2]
+      const { values: ocValues, positionals: ocPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:    { type: "string" },
+          decision: { type: "string" },
+          result:   { type: "string" },
+          success:  { type: "boolean" },
+          fail:     { type: "boolean" },
+          tags:     { type: "string" },
+        },
+        allowPositionals: true,
+        strict: false,
+      });
+      const ocAgent = typeof ocValues.agent === "string" ? ocValues.agent : "main";
+      const ocDecision = typeof ocValues.decision === "string" ? ocValues.decision : ocPos.join(" ");
+      const ocResult = typeof ocValues.result === "string" ? ocValues.result : "";
+      if (!ocDecision) {
+        console.error("Usage: theorex outcome --agent <id> --decision \"text\" --result \"text\" [--success|--fail] [--tags tag1,tag2]");
+        process.exit(1);
+      }
+      const ocSuccess = ocValues.fail === true ? false : (ocValues.success !== false);
+      const ocTags = typeof ocValues.tags === "string" ? ocValues.tags.split(",").map((t) => t.trim()).filter(Boolean) : [];
+      const { buildOutcome, recordOutcome } = await import("../evolve/outcome");
+      const ocRecord = buildOutcome({
+        agentId: ocAgent,
+        decision: ocDecision,
+        result: ocResult,
+        success: ocSuccess,
+        tags: ocTags,
+      });
+      await recordOutcome(ocRecord, config.outcomesDir ?? "data/outcomes");
+      console.log(`Outcome recorded: ${ocRecord.id}`);
+      console.log(`  Agent: ${ocAgent} | Success: ${ocSuccess} | Tags: ${ocTags.join(", ") || "(none)"}`);
+      break;
+    }
+
+    // Phase 13: Living Code — nightly evolution review
+    case "evolve-review": {
+      // Usage: theorex evolve-review [--agent <id>] [--days <n>]
+      const { values: erValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent: { type: "string" },
+          days:  { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const erAgent = typeof erValues.agent === "string" ? erValues.agent : "main";
+      const erDays = typeof erValues.days === "string" ? parseInt(erValues.days, 10) : (config.evolveWindowDays ?? 7);
+      const outcomesDir = config.outcomesDir ?? "data/outcomes";
+      const { reviewOutcomes } = await import("../evolve/review");
+      const { refineFromReport } = await import("../evolve/refine");
+      const erReport = await reviewOutcomes(erAgent, erDays, outcomesDir);
+      const erAxonPath = config.axonPath ?? "data/axon.json";
+      const erEntry = await refineFromReport(erReport, config, erAxonPath);
+      console.log(`Evolution review complete for agent "${erAgent}" (last ${erDays} days)`);
+      console.log(`  Outcomes: ${erReport.total_outcomes} | Win rate: ${Math.round(erReport.overall_win_rate * 100)}%`);
+      console.log(`  Concepts reinforced: ${erEntry.concepts_reinforced} | Decayed: ${erEntry.concepts_decayed}`);
+      if (erReport.insights.length > 0) {
+        console.log("\nInsights:");
+        for (const insight of erReport.insights) {
+          console.log(`  • ${insight}`);
+        }
+      }
+      break;
+    }
+
+    // Phase 13: Living Code — show evolution history
+    case "evolve-status": {
+      // Usage: theorex evolve-status [--agent <id>] [--n <count>]
+      const { values: esValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent: { type: "string" },
+          n:     { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const esAgent = typeof esValues.agent === "string" ? esValues.agent : "";
+      const esN = typeof esValues.n === "string" ? parseInt(esValues.n, 10) : 5;
+      const { readEvolutionLog } = await import("../evolve/refine");
+      const esLog = await readEvolutionLog(config.evolutionLogPath ?? "data/evolution.jsonl");
+      const filtered = esAgent ? esLog.filter((e) => e.agent_id === esAgent) : esLog;
+      const recent = filtered.slice(-esN);
+      if (recent.length === 0) {
+        console.log("No evolution history yet. Run `theorex evolve-review` to start.");
+      } else {
+        console.log(`Evolution history (last ${recent.length} entries${esAgent ? ` for agent "${esAgent}"` : ""}):`);
+        for (const entry of recent) {
+          const date = new Date(entry.timestamp).toLocaleDateString();
+          console.log(`\n[${date}] ${entry.agent_id} — ${entry.total_outcomes} outcomes, ${Math.round(entry.overall_win_rate * 100)}% WR`);
+          for (const insight of entry.insights) {
+            console.log(`  • ${insight}`);
+          }
+        }
+      }
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]>");
       process.exit(1);
   }
 }

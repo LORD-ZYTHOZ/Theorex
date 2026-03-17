@@ -6,7 +6,8 @@ export type AuditEventType =
   | "sentiment_flip"
   | "graduation"
   | "prune"
-  | "moment_capture";
+  | "moment_capture"
+  | "outcome_record";
 
 interface BaseAuditEvent {
   readonly timestamp: string; // ISO 8601
@@ -48,12 +49,21 @@ interface MomentCaptureEvent extends BaseAuditEvent {
   readonly concept_ids: readonly number[];
 }
 
+interface OutcomeRecordEvent extends BaseAuditEvent {
+  readonly type: "outcome_record";
+  readonly outcome_id: string;
+  readonly agent_id: string;
+  readonly success: boolean;
+  readonly decision_preview: string; // first 60 chars of decision
+}
+
 export type AuditEvent =
   | TierChangeEvent
   | SentimentFlipEvent
   | GraduationEvent
   | PruneEvent
-  | MomentCaptureEvent;
+  | MomentCaptureEvent
+  | OutcomeRecordEvent;
 
 export const EVENTS_PATH = "data/events.jsonl";
 

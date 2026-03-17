@@ -1002,3 +1002,1085 @@
 {"type":"prune","timestamp":"2026-03-12T06:13:09.719Z","source":"prune","concept_id":200,"surface_form":"old concept"}
 {"type":"moment_capture","timestamp":"2026-03-12T06:13:10.376Z","source":"moment","moment_id":"c851a367-7699-4219-8076-68d8ca835b80","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
 {"type":"graduation","timestamp":"2026-03-12T06:13:10.481Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:14:19.234Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:14:19.234Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:14:19.234Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:14:19.234Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:14:19.237Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:14:19.239Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:14:19.239Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:14:19.240Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:14:19.243Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:14:19.245Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.249Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.249Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.249Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.250Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.250Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.251Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.251Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:14:19.251Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.258Z","source":"moment","moment_id":"bda9905e-2909-4700-8a89-e8d7c52c2318","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.258Z","source":"moment","moment_id":"f43993d3-0b36-48b3-b534-85293081f4e4","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.259Z","source":"moment","moment_id":"288ab878-8a0b-4ac1-9c81-d959f72ea55c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.259Z","source":"moment","moment_id":"fe70ff9f-b2ab-47ce-8a21-45b4d711791a","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.260Z","source":"moment","moment_id":"8af4bbfa-a8f8-466a-8db9-92281780ea23","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.260Z","source":"moment","moment_id":"d33034f9-cedf-4182-b9ba-c4009de5a78d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.260Z","source":"moment","moment_id":"bce69bb6-db46-4f6c-a8cc-273db2d1e29e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.260Z","source":"moment","moment_id":"761e5b89-aae2-4e94-a4da-660ab40d6a71","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.261Z","source":"moment","moment_id":"d82411f7-0fdf-4bc7-a753-53428ffc046c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.261Z","source":"moment","moment_id":"4f3497ac-287f-4296-9d46-bf514fafd169","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.262Z","source":"moment","moment_id":"e7d3d3d4-c5d2-41ff-b169-d70d6553681c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.263Z","source":"moment","moment_id":"97a14251-1fbd-47ad-bbc9-c9da668f8269","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.264Z","source":"moment","moment_id":"c04d5ee0-ce09-4379-81ea-15ea0521f50f","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.264Z","source":"moment","moment_id":"4fe267fa-7f60-4765-94be-3ca078970767","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.322Z","source":"moment","moment_id":"c114333c-5b75-40ae-a838-26c3cc9aa5c2","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.337Z","source":"moment","moment_id":"3f0c35d7-f951-4b0e-9340-94c5d0062277","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.351Z","source":"moment","moment_id":"74982481-5883-49fa-88a8-a475424e9e66","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:19.366Z","source":"moment","moment_id":"99a308d9-9ccb-4bc8-8e96-11a52095e9d5","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T10:14:19.457Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:14:19.457Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T10:14:19.458Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:14:19.458Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:14:20.109Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:14:20.110Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T10:14:20.111Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T10:14:20.119Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T10:14:20.660Z","source":"moment","moment_id":"a8a9ecdf-65be-47d9-ba09-3c97a77c165c","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T10:14:20.764Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:38:26.980Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:38:26.980Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:38:26.980Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:38:26.981Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:38:26.983Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:38:26.984Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:38:26.984Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:38:26.986Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:38:26.987Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:38:26.988Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.991Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.992Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.992Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.993Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.993Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.993Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.993Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:38:26.994Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:39:25.129Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:39:25.129Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:39:25.129Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:39:25.129Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:39:25.132Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:39:25.133Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:39:25.133Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:39:25.134Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:39:25.136Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:39:25.137Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.156Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.157Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.157Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.158Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.158Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.158Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.158Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:39:25.159Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:45.352Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:45.352Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:45.352Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:45.352Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.354Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.356Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.356Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.357Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.358Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.359Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.379Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.380Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.380Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.380Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.380Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.381Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.381Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:45.382Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.388Z","source":"moment","moment_id":"8eefabb7-93f1-4c63-8f49-6cc65e907bb1","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.389Z","source":"moment","moment_id":"22ca2723-5d6a-4e0a-a892-e78605513f7f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.390Z","source":"moment","moment_id":"d98e4a0b-14c5-4c79-ba00-b60f9d3a9496","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.390Z","source":"moment","moment_id":"c0bdee51-8135-424d-9a57-bc32289b80d1","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.390Z","source":"moment","moment_id":"c56b062c-4dce-44be-babf-c0257687f16e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.390Z","source":"moment","moment_id":"9d8b308c-8fde-4d3b-ac69-7e3bd52537f1","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.391Z","source":"moment","moment_id":"6e78f3df-ec08-4b05-bba7-d743553d6b82","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.391Z","source":"moment","moment_id":"a6594d73-5773-4e85-8ea1-4433b4b8cb65","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.392Z","source":"moment","moment_id":"750f2c03-4580-499c-997b-7226119c3ae6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.392Z","source":"moment","moment_id":"8cd9f805-24b7-4e36-98fa-fb4af0354fb0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.393Z","source":"moment","moment_id":"7c4844cc-8e91-45fb-a222-ecd41d7d7836","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.394Z","source":"moment","moment_id":"a980617a-9569-4e74-a504-bd060fbb8770","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.395Z","source":"moment","moment_id":"b60b5162-7ef0-4d23-b4a8-2604fd663134","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.395Z","source":"moment","moment_id":"bc74d187-53f7-4079-80f7-ab14a5add9f0","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.441Z","source":"moment","moment_id":"02263322-0c1b-4ce5-8a57-469151603ae1","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.456Z","source":"moment","moment_id":"b35fb270-c0c5-4d74-b355-df45c1f0a690","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.472Z","source":"moment","moment_id":"9b50dc9e-e374-4464-928a-47b4b85c9492","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:45.487Z","source":"moment","moment_id":"f390987e-0bfc-4693-ad16-f1da85a61a8c","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.580Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.580Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.581Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.581Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.808Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.810Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T10:45:45.811Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T10:45:45.818Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T10:45:46.324Z","source":"moment","moment_id":"bdc15fb6-5dcf-4722-9440-9657bca8bd14","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T10:45:46.428Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:52.858Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:52.858Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:52.858Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:45:52.858Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:45:52.860Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:52.861Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:52.861Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:45:52.862Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:52.864Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:45:52.865Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.883Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.884Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.884Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.885Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.885Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.885Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.885Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:45:52.886Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:53:36.337Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:53:36.337Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:53:36.337Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:53:36.337Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:53:36.339Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:53:36.341Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:53:36.341Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:53:36.342Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:53:36.344Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:53:36.345Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.365Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.366Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.366Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.367Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.367Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.367Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.367Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:53:36.368Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:56:40.639Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:56:40.639Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:56:40.639Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T10:56:40.639Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T10:56:40.641Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:56:40.643Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T10:56:40.643Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T10:56:40.644Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:56:40.646Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T10:56:40.646Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.667Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.667Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.667Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.668Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.668Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.669Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.669Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T10:56:40.669Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:02.503Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:02.503Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:02.503Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:02.503Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:39:02.506Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:02.508Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:02.508Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:39:02.510Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:02.511Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:02.512Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.534Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.535Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.535Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.536Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.536Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.536Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.536Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:02.537Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.542Z","source":"moment","moment_id":"d658adec-d7b3-42c3-977a-00e57da7f9ac","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.543Z","source":"moment","moment_id":"c60e426e-3580-46e4-8010-7729c4b2b5b7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.543Z","source":"moment","moment_id":"b62435ad-9a42-48b1-a4e9-6c6e8cac619e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.544Z","source":"moment","moment_id":"57f5a4d2-4116-4101-801b-d199304a47cb","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.544Z","source":"moment","moment_id":"f1bbfbff-6323-4411-b514-23c2a896149f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.544Z","source":"moment","moment_id":"2f749ca3-37e9-462e-bc41-f0aabda68b77","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.545Z","source":"moment","moment_id":"6fccc107-03b6-4c6b-8dcb-6d3c5beb8d23","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.545Z","source":"moment","moment_id":"dbbf2c8e-873f-4e97-a1e0-4d76781acce4","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.545Z","source":"moment","moment_id":"b44332dc-8ecc-4be6-ba22-ff8d65c8819f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.546Z","source":"moment","moment_id":"25c9a8e8-1fab-45a2-b431-01be787767b3","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.546Z","source":"moment","moment_id":"5b45dfad-0378-4280-9efd-c4bfab2a5565","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.548Z","source":"moment","moment_id":"f21a362e-7489-42d4-99fb-dd627723333b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.548Z","source":"moment","moment_id":"47affe55-8568-4a3d-b6ec-d4fa4a8a771f","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.548Z","source":"moment","moment_id":"b4744fb4-cd32-4ad9-9ab6-83d3cb031b80","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.597Z","source":"moment","moment_id":"f7ab6faf-e4d3-4d1c-9d88-ea650b477386","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.613Z","source":"moment","moment_id":"b4cce49e-e3ae-4e15-b236-0281f7027d06","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.628Z","source":"moment","moment_id":"89ceec20-bade-4f1d-9eff-0d57ebf7f5d9","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:02.643Z","source":"moment","moment_id":"936e34c6-af95-4dee-a00e-2bb9b214cdec","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:39:02.738Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:02.739Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:39:02.739Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:02.740Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:03.385Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:03.387Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:39:03.387Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:39:03.395Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:03.961Z","source":"moment","moment_id":"e4babf06-ff20-4a51-a858-caf14ea1b898","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:39:04.065Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:11.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:11.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:11.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:11.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.093Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.094Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.094Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.095Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.096Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.097Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.119Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.119Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.119Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.120Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.120Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.120Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.120Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:11.121Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.126Z","source":"moment","moment_id":"f181e895-377a-41ee-bb8b-5cdab3174913","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.127Z","source":"moment","moment_id":"eab2ce3a-f628-4475-bd0e-d2be0aa8e03b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.127Z","source":"moment","moment_id":"ccc0ec41-7e8b-46d9-8e59-468bd1cd7848","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.127Z","source":"moment","moment_id":"c916c523-cbc6-40d6-a2bd-ce9352beab4f","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.128Z","source":"moment","moment_id":"59dfa96c-5c60-4afb-816e-4cc4110ef652","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.128Z","source":"moment","moment_id":"9896c877-e4fd-469b-8c15-e1842007ff2b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.129Z","source":"moment","moment_id":"3b5e7b2d-28cf-43d0-8e5f-fab63473bd7e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.129Z","source":"moment","moment_id":"497c8684-ae08-47b7-bbdb-ee08ed8f1c92","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.129Z","source":"moment","moment_id":"467cce4a-b595-4c58-8669-f562860f4289","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.130Z","source":"moment","moment_id":"fb8ea03e-e191-410d-8155-bc78e026690d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.130Z","source":"moment","moment_id":"2a9d308b-f0e6-4311-9930-67d31e822683","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.131Z","source":"moment","moment_id":"78933b4e-d331-46be-9f8c-b0ffdcbbc45e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.131Z","source":"moment","moment_id":"50e8ee0a-b18c-4d49-bb32-979f1cd67beb","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.131Z","source":"moment","moment_id":"6a21d1b8-2c96-4731-a9d3-e228189731a6","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.173Z","source":"moment","moment_id":"c4513e30-d76c-4042-8729-80058c704a7d","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.188Z","source":"moment","moment_id":"64d4a3a1-8fb8-48f7-8b76-7bb23ec645c7","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.202Z","source":"moment","moment_id":"00b41786-3399-4ecb-80be-9048761a03d0","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.216Z","source":"moment","moment_id":"559dc05f-dc73-4294-992d-3d668009ca5e","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.309Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.309Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.310Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.310Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.606Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.608Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:39:11.608Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:39:11.615Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:11.984Z","source":"moment","moment_id":"2eec4e48-1b8c-4407-a5ee-a8ea6e009dac","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:39:12.088Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:18.057Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:18.057Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:18.057Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:39:18.057Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.059Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.060Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.060Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.061Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.063Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.064Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.086Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.086Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.086Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.087Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.087Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.088Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.088Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:39:18.088Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.093Z","source":"moment","moment_id":"e9de4cda-db56-4033-a5be-9e9e08e7cf72","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.094Z","source":"moment","moment_id":"0a33c64e-643c-468a-b10f-8b028a42b7e0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.095Z","source":"moment","moment_id":"e7c52a80-43fc-45ce-9bdf-26ece846d154","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.095Z","source":"moment","moment_id":"0baf2cb3-14da-48e2-9d8b-4211b214432d","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.095Z","source":"moment","moment_id":"a99114e5-15b5-4650-9a80-f5ab0ae31b0c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.095Z","source":"moment","moment_id":"feb2a879-ccf7-48a6-be85-e8b147595bef","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.096Z","source":"moment","moment_id":"a9bbda6b-ac12-4e1b-a49e-53b8a31f262c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.096Z","source":"moment","moment_id":"c45cbab7-4200-473e-9138-fc37e13e5521","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.097Z","source":"moment","moment_id":"dbac04d8-57ec-46ce-9ade-fecd732df0b7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.097Z","source":"moment","moment_id":"a03df8b3-4e78-4faa-8e16-b73584e8d73e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.098Z","source":"moment","moment_id":"a5935cd1-8319-462d-9c65-e47938f8ee09","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.099Z","source":"moment","moment_id":"af38b490-780e-465e-a59d-bc1b5c354348","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.099Z","source":"moment","moment_id":"19a7e910-3177-4705-81f3-d4f703f0847a","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.099Z","source":"moment","moment_id":"2e3122ff-375c-4ac1-9b1a-293a5cf8ad94","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.140Z","source":"moment","moment_id":"f30a9bc8-02c5-4e25-bc7f-a0a56261e357","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.156Z","source":"moment","moment_id":"baae06b6-39d3-44da-9082-977f69ced5ad","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.170Z","source":"moment","moment_id":"2e0ea731-6542-4978-8230-35e2c19177ea","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.184Z","source":"moment","moment_id":"cb18eb20-7b59-46bc-b18d-aa6f0294d3e2","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.274Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.275Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.275Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.276Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.563Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.564Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:39:18.564Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:39:18.572Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:39:18.941Z","source":"moment","moment_id":"757e6265-f0b4-4f0a-9bc4-02b83ec15625","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:39:19.045Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:11.866Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:11.866Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:11.866Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:11.866Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:52:11.869Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:11.871Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:11.871Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:52:11.873Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:11.875Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:11.875Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.900Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.900Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.900Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.901Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.901Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.902Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.902Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:11.903Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.909Z","source":"moment","moment_id":"58597835-69f1-4ce4-b78b-0196644d158e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.910Z","source":"moment","moment_id":"bc679d52-0b6d-4298-b7be-f3900057efea","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.910Z","source":"moment","moment_id":"dff647f2-3e95-4bbd-941d-665518bcadb7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.911Z","source":"moment","moment_id":"90e49b9e-ae3a-47c1-b6d4-dccd4f15f270","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.911Z","source":"moment","moment_id":"c3ecb527-e0ff-498b-962f-9626f5cf2ed1","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.911Z","source":"moment","moment_id":"7916f246-3fef-4eb0-a20e-74b919d49346","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.912Z","source":"moment","moment_id":"bd0ebe41-db1b-49f9-b73d-6679dce0aa93","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.912Z","source":"moment","moment_id":"c1604b9d-beb4-4cfa-b73d-a091a33b19eb","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.912Z","source":"moment","moment_id":"a2d7d1de-9242-4ef4-8f6a-9d6f3bf16f25","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.913Z","source":"moment","moment_id":"6af08275-0295-414e-9ec2-6188ac457604","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.913Z","source":"moment","moment_id":"ccb2f886-6405-46c9-a238-1f4df24e7a37","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.915Z","source":"moment","moment_id":"d7e376b3-287d-4398-8996-6df6ff745679","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.916Z","source":"moment","moment_id":"0c91cd34-1fae-4654-9ca5-024b94216c7d","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.916Z","source":"moment","moment_id":"f4b619f3-9abf-43d0-b7a0-c1d700b18ebc","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.969Z","source":"moment","moment_id":"299657fb-3285-4e15-834f-e8d4ca7d9c9d","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:11.985Z","source":"moment","moment_id":"beaa3d1c-22ea-4e7f-9b53-5b0b842bc8d4","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:12.000Z","source":"moment","moment_id":"0c44464a-5cec-42cb-8bb1-3f7cebfb38ed","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:12.015Z","source":"moment","moment_id":"f2d7bba3-8658-44d5-806d-fa486ea41e92","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.115Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.116Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.116Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.116Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.419Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.421Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.421Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:52:12.430Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:12.882Z","source":"moment","moment_id":"3a169c38-672d-4df1-9f1c-5e36eb9079bc","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:52:12.986Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:18.149Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:18.149Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:18.149Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:52:18.149Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.151Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.152Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.152Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.153Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.155Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.156Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.177Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.178Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.178Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.178Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.178Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.179Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.179Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:52:18.179Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.185Z","source":"moment","moment_id":"54b871df-af1a-4675-887f-f2ddf8a29b04","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.185Z","source":"moment","moment_id":"74229dd7-b546-4f00-8587-28abd3c71358","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.186Z","source":"moment","moment_id":"4009a331-d10b-43c6-8b53-c8f86413fb32","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.186Z","source":"moment","moment_id":"d3343d93-ecf2-4473-9ad0-afba10d72cc7","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.187Z","source":"moment","moment_id":"4170a88c-cb7d-46d3-b2a3-d51b5aac1018","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.187Z","source":"moment","moment_id":"dac702d4-8c88-4f91-9639-098c555b6e25","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.187Z","source":"moment","moment_id":"789bbdc5-a59b-4372-b38c-7b228207faba","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.187Z","source":"moment","moment_id":"534c5f72-bc35-445e-aa70-65f60c32958d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.188Z","source":"moment","moment_id":"6a6e45cf-636a-414c-8b43-f8e290ebaeba","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.188Z","source":"moment","moment_id":"5eaab7bd-d150-48a9-806d-491d2ff3e0c0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.189Z","source":"moment","moment_id":"c27c6cf1-fe64-40cc-a098-3200a7703952","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.190Z","source":"moment","moment_id":"f607b09e-c69f-496f-90d8-1e18598b3fb5","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.190Z","source":"moment","moment_id":"4fa58c19-b23a-4028-8e09-54949831440e","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.190Z","source":"moment","moment_id":"3cfe0773-f40a-4f84-84c3-bb83ef8339c7","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.232Z","source":"moment","moment_id":"42529d7a-c56f-45d4-a57e-68c4c3522d51","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.247Z","source":"moment","moment_id":"6c403c99-fc20-435b-a70f-da97898f8648","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.262Z","source":"moment","moment_id":"0c8f443e-6e0c-47ea-9f84-0c5648e5a650","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:18.276Z","source":"moment","moment_id":"9b30bbb9-6015-4f35-b901-4c9efbced888","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.369Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.370Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.371Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.371Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.659Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.661Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:52:18.661Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:52:18.669Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:52:19.036Z","source":"moment","moment_id":"59588662-2487-401e-a564-f1e51185ff49","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:52:19.141Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:53:11.177Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:53:11.177Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:53:11.177Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:53:11.177Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.179Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.180Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.180Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.181Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.182Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.183Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.205Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.206Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.206Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.206Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.206Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.207Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.207Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:53:11.208Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.213Z","source":"moment","moment_id":"8a25ece2-f5a5-404d-a390-2f776031ecf0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.214Z","source":"moment","moment_id":"111af6b0-3e6a-4a67-a39d-50108b2c62f2","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.214Z","source":"moment","moment_id":"a9c3afa4-2732-42bc-9020-964c82fd548e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.214Z","source":"moment","moment_id":"406057cc-cd78-4c55-ac9d-ae368de952a1","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.215Z","source":"moment","moment_id":"28ca1fa9-9cfc-4986-b708-5b4d6b43578c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.215Z","source":"moment","moment_id":"ea682a87-39ca-4ccc-a780-6516b42ce52c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.216Z","source":"moment","moment_id":"741187bd-386b-43a4-8940-6b52a494d5fb","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.216Z","source":"moment","moment_id":"cce94e77-8194-42e5-8f46-a633fd03e0cb","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.216Z","source":"moment","moment_id":"7d9c80a7-2e61-4c2c-a4be-8a3958b04748","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.217Z","source":"moment","moment_id":"dc095465-869e-41b6-9f76-e1e5c77ba13e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.217Z","source":"moment","moment_id":"8c826f98-51b4-40b6-948c-290e20517a2d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.218Z","source":"moment","moment_id":"e3fa322c-2def-4763-a608-e3972509e48b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.218Z","source":"moment","moment_id":"3f6e9117-5d05-4e91-ac5f-897528cc8d13","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.218Z","source":"moment","moment_id":"f46b5647-42fe-4572-8f47-f51afcdd692f","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.260Z","source":"moment","moment_id":"9740910e-73e6-4024-a545-a9a6ed6baf24","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.277Z","source":"moment","moment_id":"ed1f7336-c666-4cba-ba71-f3b166d9750d","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.292Z","source":"moment","moment_id":"4fb49bce-114e-495f-a0e1-f24b26eca65f","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:11.306Z","source":"moment","moment_id":"1b76c458-64bd-460e-ad67-21961d451e23","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.393Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.394Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.394Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.394Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.687Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.689Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:53:11.689Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:53:11.697Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:53:12.063Z","source":"moment","moment_id":"292707b7-3cd5-4bdd-aa83-7a3a0c3afad2","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:53:12.167Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:58:02.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:58:02.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:58:02.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:58:02.091Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.093Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.094Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.094Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.095Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.097Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.098Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.119Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.119Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.119Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.120Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.120Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.121Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.121Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:58:02.121Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.126Z","source":"moment","moment_id":"22b98c73-4bf1-480f-8fde-999ad4bcf5b4","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.127Z","source":"moment","moment_id":"08485415-6f2b-4f7d-9435-cb3cc1d69542","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.128Z","source":"moment","moment_id":"e0e42249-59c0-4fc7-b38a-72096a21de56","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.128Z","source":"moment","moment_id":"7ddce193-f2bb-4bfa-954f-d68437d305bb","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.128Z","source":"moment","moment_id":"564b6188-776f-409e-abbf-eb870367a426","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.128Z","source":"moment","moment_id":"7ac7b9ff-0fcf-4ba6-bac3-40298a4bf1da","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.129Z","source":"moment","moment_id":"2d545ff1-1c62-4206-b701-603a97e5dd59","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.129Z","source":"moment","moment_id":"c6c25769-dd77-441f-8b3d-6036c6cff07a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.130Z","source":"moment","moment_id":"eeb44c8e-98b2-4742-8d5d-30699abe57b0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.130Z","source":"moment","moment_id":"ee06528d-4ff9-44be-a165-9a6b5945f87c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.130Z","source":"moment","moment_id":"4f0d64b9-c059-4924-9d90-691ac3bf290d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.131Z","source":"moment","moment_id":"31869d51-bf66-48f2-9a92-9c1c9f3b2293","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.132Z","source":"moment","moment_id":"7b5aea9b-c38c-4361-b16c-ddac2c28b945","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.132Z","source":"moment","moment_id":"c41e143c-8c18-4f2f-8153-76b62670885f","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.172Z","source":"moment","moment_id":"19a7a592-d903-405b-bc2e-8bf5cb16c49e","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.188Z","source":"moment","moment_id":"40acdc13-98a1-49e2-acaa-30e7c208a72d","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.202Z","source":"moment","moment_id":"bfbe3cd9-e671-4d6a-bbb8-39c7bb961481","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.216Z","source":"moment","moment_id":"9527af3f-b89a-443a-b87d-510a8fd30182","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.307Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.307Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.308Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.308Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.606Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.607Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:58:02.607Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:58:02.616Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:58:02.981Z","source":"moment","moment_id":"cd8f5b71-57c8-44d1-b7c6-a77cef900adb","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:58:03.084Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:59:15.290Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:59:15.290Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:59:15.290Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-16T14:59:15.290Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.292Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.293Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.293Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.294Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.296Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.297Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.319Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.320Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.320Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.321Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.321Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.322Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.322Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-16T14:59:15.322Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.328Z","source":"moment","moment_id":"c38fe01d-b192-42a0-b87f-2a474e45aadd","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.329Z","source":"moment","moment_id":"fd896c86-3e22-437c-aa25-762f840f7afc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.329Z","source":"moment","moment_id":"e29319b8-a00d-42b7-8e56-81d52cb7853d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.329Z","source":"moment","moment_id":"2e889c8b-087c-4c86-abf3-bcf160affe77","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.330Z","source":"moment","moment_id":"761b092a-2f5c-4749-b8c9-b51eab5003e4","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.330Z","source":"moment","moment_id":"ffe3e094-7777-4119-b893-02a178e2db0a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.331Z","source":"moment","moment_id":"48331f73-b32b-401f-8304-6220195e22c8","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.331Z","source":"moment","moment_id":"be4f07c0-aeef-4f43-ab4d-16455ab5211d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.331Z","source":"moment","moment_id":"8db3dfa7-e01d-40de-8e78-2034733026ff","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.332Z","source":"moment","moment_id":"72be99c0-8e41-41a9-a0ae-1b963b62e734","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.332Z","source":"moment","moment_id":"fdbf42d2-3308-4dc9-ad60-2b4c7cece1b7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.333Z","source":"moment","moment_id":"21260756-4f64-445a-81ce-e8795fc7a09a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.333Z","source":"moment","moment_id":"a55e5858-cc1d-4fbe-ad33-8be7bb2d9f04","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.333Z","source":"moment","moment_id":"07626e52-e3ff-49d1-8542-82c98ebac0be","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.375Z","source":"moment","moment_id":"631c221a-615f-44a7-9df4-eb0fbee9cafc","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.391Z","source":"moment","moment_id":"b4fe09ff-182a-46bd-8d63-64d04dac1bf6","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.405Z","source":"moment","moment_id":"b9027528-c1a8-48a8-9ddf-9e7a600ba8ab","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:15.420Z","source":"moment","moment_id":"e38bf611-c478-41d3-8f8b-5fec98373a0c","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.514Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.514Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.515Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.515Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.806Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.808Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-16T14:59:15.808Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-16T14:59:15.816Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-16T14:59:16.188Z","source":"moment","moment_id":"0edecf53-b0b7-48ab-a9d6-432dd40db64c","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-16T14:59:16.292Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.386Z","source":"evolve","outcome_id":"0628e6ee-5677-405d-a501-447c2d3c4d09","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.389Z","source":"evolve","outcome_id":"f9be4066-1905-4248-aa05-6ccfdb104193","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.389Z","source":"evolve","outcome_id":"f160d68a-4a8e-4a65-aea4-abbdc8a266aa","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"1b03516b-2a24-4dca-84b4-4307113d783a","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.391Z","source":"evolve","outcome_id":"b5e5a98e-9445-4870-8783-14a37838a421","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.392Z","source":"evolve","outcome_id":"87609361-8059-4edb-8921-e943119c7547","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.392Z","source":"evolve","outcome_id":"a1bbf783-f769-47af-aa3d-f8f3466b31f6","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.392Z","source":"evolve","outcome_id":"4d737f95-3797-48e0-b5f4-47cc22f7b2f3","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.393Z","source":"evolve","outcome_id":"6e29365a-f76b-47ed-bea8-27aadb7a1e90","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.394Z","source":"evolve","outcome_id":"67fbfc9f-bfaf-4fcd-940a-17da92c3cb76","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.394Z","source":"evolve","outcome_id":"d60b101b-a706-4ea5-8ead-f13904179670","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.394Z","source":"evolve","outcome_id":"89d61b78-e157-427f-8f7b-a4c9071b62a1","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.394Z","source":"evolve","outcome_id":"e332a0c7-95c9-4ec9-b7be-2e1ffe012a21","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.395Z","source":"evolve","outcome_id":"9111822c-84c0-432d-9d66-d21bea92bf8c","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.395Z","source":"evolve","outcome_id":"e8655148-ef9b-4680-9eca-0775390195ed","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.395Z","source":"evolve","outcome_id":"7723a7e5-17fd-4c80-8190-6caae74b3d93","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.395Z","source":"evolve","outcome_id":"d0a8251f-9c97-4d01-8c31-81e860b96ac7","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.397Z","source":"evolve","outcome_id":"b5cb439e-889e-4447-9b24-9f122dd6ddde","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.398Z","source":"evolve","outcome_id":"6db631f1-a33c-4c8e-8ef0-b49adf90119e","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.398Z","source":"evolve","outcome_id":"9eec536d-c89a-43a3-bdfa-047b0f32403d","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:50.417Z","source":"evolve","outcome_id":"080f02d5-345f-4f7c-ac4d-c3548fd16d77","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:33:53.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:33:53.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:33:53.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:33:53.252Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-17T01:33:53.254Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:33:53.257Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-17T01:33:53.257Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-17T01:33:53.259Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:33:53.260Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:33:53.261Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.289Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.289Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.289Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.290Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.290Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.290Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.290Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:33:53.291Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.297Z","source":"moment","moment_id":"ee51c2c9-9538-49cf-bc8b-ed68569ebf5e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.297Z","source":"moment","moment_id":"fb24ddaa-2c25-4e4c-9530-1977f6ce4486","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.298Z","source":"moment","moment_id":"0f0118ae-2534-4208-93f8-baf186d8e7c2","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.298Z","source":"moment","moment_id":"10a6a0e2-65ff-4801-96a6-59fcdb77f66d","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.298Z","source":"moment","moment_id":"c8701716-75b0-47d9-a206-cdc80d6205e0","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.298Z","source":"moment","moment_id":"c445ebb7-fe57-4f35-8bca-03fd7ade2e5e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.299Z","source":"moment","moment_id":"f02223b7-41ec-44f4-bf3a-94179eb85a47","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.299Z","source":"moment","moment_id":"9c58c4e1-1128-46ab-adaf-2e12160ddd84","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.300Z","source":"moment","moment_id":"d0ce3671-99c6-40a9-9638-a1d30f71268d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.300Z","source":"moment","moment_id":"072bd5eb-d480-4e94-9f93-bdbd704cee43","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.301Z","source":"moment","moment_id":"fc92cad5-4cb8-4f6a-b53b-9c9278b5cd80","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.302Z","source":"moment","moment_id":"185c2188-fdb5-46f6-9625-388a89e890e7","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.303Z","source":"moment","moment_id":"b7731323-f3a3-44ee-a62b-ce50e99636ac","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.303Z","source":"moment","moment_id":"e4f45f35-7298-4518-aed9-2408b398d095","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.370Z","source":"moment","moment_id":"40da1f0b-8048-4b9f-ba44-886e5e1e3ef2","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.386Z","source":"moment","moment_id":"e43a3779-9938-40c4-815a-b00ab8a5e3ac","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.401Z","source":"moment","moment_id":"0200a8fc-e663-4520-8733-2522889199f6","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:53.416Z","source":"moment","moment_id":"3ce86806-c729-41ae-806e-698faef2c3bf","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-17T01:33:53.516Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:33:53.517Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:33:53.517Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:33:53.517Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:33:54.396Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:33:54.399Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:33:54.400Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-17T01:33:54.422Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:33:54.995Z","source":"moment","moment_id":"42b78d86-4299-4291-be00-4fc2b4ee3212","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-17T01:33:55.098Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.216Z","source":"evolve","outcome_id":"e37b30c4-4bef-4aab-99a7-f5adb71f15ff","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.217Z","source":"evolve","outcome_id":"08eaefe8-1cbd-4fea-b9aa-f08923e8d260","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.217Z","source":"evolve","outcome_id":"565d8274-bc60-4fb2-96c1-dfc899212ca5","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"996abf3e-04b1-4927-8352-c7357b5dffbc","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.217Z","source":"evolve","outcome_id":"8e3e2408-be64-4eb2-8e99-8006c19491c4","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.218Z","source":"evolve","outcome_id":"59767a64-a6bc-4031-ae62-352547dd529e","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.218Z","source":"evolve","outcome_id":"e00db702-4588-40ed-a42d-039484e7f2d0","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.218Z","source":"evolve","outcome_id":"0770148d-8b36-493e-b7c9-85295ec150ee","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.219Z","source":"evolve","outcome_id":"d08851ce-aedd-492f-adb4-50b79f594a78","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.219Z","source":"evolve","outcome_id":"ec2f33e7-b66b-4cff-a1a6-f45dc5a9c91f","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.219Z","source":"evolve","outcome_id":"9587d091-cfe8-41f5-b11f-6faf585899ff","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.219Z","source":"evolve","outcome_id":"d972c296-af41-4315-9df0-0b67aa1270e8","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.219Z","source":"evolve","outcome_id":"2ead0fb9-c173-48f9-80d9-fdffa6b37ba5","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.220Z","source":"evolve","outcome_id":"d2a0c687-8fb3-48d9-9177-3c831190f704","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.220Z","source":"evolve","outcome_id":"9c059fdd-f1ea-49f4-b85d-c2abf45e1b54","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.220Z","source":"evolve","outcome_id":"03f77352-f5e8-467c-95f2-a4ce9b29bb47","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.220Z","source":"evolve","outcome_id":"4622e5d9-e126-4cd0-8ff7-53f2c8a5e579","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.221Z","source":"evolve","outcome_id":"6809fb94-e184-4b1b-8edb-898b4e5a254a","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.221Z","source":"evolve","outcome_id":"2d36e974-8042-4276-9e43-736918dac1ff","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.221Z","source":"evolve","outcome_id":"7e4ddf93-6caf-44c5-a412-2b5019572fd6","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:55.226Z","source":"evolve","outcome_id":"977c467d-0253-4a75-b036-467fbbf37162","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.309Z","source":"evolve","outcome_id":"bdf26302-b6cf-436f-a766-0c68a1d51152","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.309Z","source":"evolve","outcome_id":"c5bd9e8e-1144-4eea-8aa2-0473424a9fbe","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.309Z","source":"evolve","outcome_id":"32ee7fbf-78bf-430e-8750-7ebb5684981e","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"be57d9b8-94a1-41c9-b06e-6b45de2fab58","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.311Z","source":"evolve","outcome_id":"007d5db9-e96c-4dad-8a54-b72713f015f4","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.312Z","source":"evolve","outcome_id":"458569fb-f55d-479e-87a2-bba627827492","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.312Z","source":"evolve","outcome_id":"a81c14e3-239d-435f-964b-dc57613734e7","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.312Z","source":"evolve","outcome_id":"09df3452-41b5-470f-a37f-fb8289bb79d1","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.312Z","source":"evolve","outcome_id":"98f11ad3-5650-449a-b71e-cd189cc2d949","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.313Z","source":"evolve","outcome_id":"979d3c6d-bc8c-4337-adea-6ee3a0d41890","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.313Z","source":"evolve","outcome_id":"252ee23b-a0bf-489f-bd18-94f86b95d216","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.313Z","source":"evolve","outcome_id":"e33ac5c7-21e5-468f-a967-8777c3ce8cf8","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.313Z","source":"evolve","outcome_id":"ff8f5660-8bb0-4486-a13c-8f0522cdd7f8","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.314Z","source":"evolve","outcome_id":"de3336fc-063e-4e40-9037-994c68b4bbfa","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.314Z","source":"evolve","outcome_id":"38eab3d6-4012-4a6c-b95d-1cf7a11eb40c","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.314Z","source":"evolve","outcome_id":"52b9e852-cfd1-475a-95c2-b404e3d6fc26","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.314Z","source":"evolve","outcome_id":"81068c91-aae5-4eb3-a981-52e83fda8647","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.315Z","source":"evolve","outcome_id":"d5e7b3d4-b106-430c-b630-965b1bd2cb30","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.315Z","source":"evolve","outcome_id":"4fe9d62d-ad11-4050-84d0-295ff5c835a4","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.315Z","source":"evolve","outcome_id":"6f145440-8689-460e-bf24-4a966be8acf9","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:33:59.335Z","source":"evolve","outcome_id":"8cf58a4e-4dec-4384-a7fd-976b7f3d44c8","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:02.874Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:02.874Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:02.874Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:02.874Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-17T01:34:02.876Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:02.877Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:02.877Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-17T01:34:02.879Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:02.880Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:02.881Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.904Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.904Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.904Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.905Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.905Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.906Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.906Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:02.907Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.912Z","source":"moment","moment_id":"ef6ea72f-7b0a-42c3-885e-3bd54fed8a35","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.912Z","source":"moment","moment_id":"f286c1e7-3858-40f9-9717-eb1d9e11a1ee","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.913Z","source":"moment","moment_id":"d3c62367-9344-4dc7-888a-184ebba4c81f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.913Z","source":"moment","moment_id":"0d6751f5-0104-43c1-8e4c-cc730bbed1f5","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.914Z","source":"moment","moment_id":"fbaac3dc-ea32-4963-bde9-a12fce998c0e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.914Z","source":"moment","moment_id":"539aafaa-7875-4c0c-8b3d-7833ee7f214d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.914Z","source":"moment","moment_id":"3e6768ba-1d08-4099-8f23-fe9f8e167d5f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.914Z","source":"moment","moment_id":"333a5594-17a1-41e3-8a43-3633e3ddfe5a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.915Z","source":"moment","moment_id":"0a772875-df92-4f4f-92cf-9fdf2daf821d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.915Z","source":"moment","moment_id":"38256edb-26a9-4402-a379-c3e3d238f488","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.916Z","source":"moment","moment_id":"7494c8d2-9b30-43b2-a197-0959de3ec4fc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.916Z","source":"moment","moment_id":"a4e23629-68bd-4521-8e49-0b2666808926","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.917Z","source":"moment","moment_id":"85dacf77-5902-4d23-890e-c21a098252ac","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.917Z","source":"moment","moment_id":"4a0c2924-d7d6-46d7-9ea7-1fb9c7fae058","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.961Z","source":"moment","moment_id":"a01a72eb-dfdc-4015-913d-53a8b2454d4e","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.979Z","source":"moment","moment_id":"04710892-5ac0-4114-8eb1-c41e7114ebde","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:02.994Z","source":"moment","moment_id":"589998ed-19ad-4141-a707-df64191824d4","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:03.009Z","source":"moment","moment_id":"d8fffccf-a3a7-4e8f-8d21-9d7373372853","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.104Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.104Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.105Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.105Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.510Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.513Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:34:03.513Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-17T01:34:03.522Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:03.897Z","source":"moment","moment_id":"49e5becc-9b22-47b9-af36-2e0422d812d7","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-17T01:34:04.001Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.118Z","source":"evolve","outcome_id":"b4268e0e-5b35-4338-b382-f0abe21763d4","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.118Z","source":"evolve","outcome_id":"67ca73ee-6957-4631-95d2-1e7efdbac24f","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.118Z","source":"evolve","outcome_id":"ba53c9a7-b5fb-4a68-86a0-e4baa3be7120","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"57c564c3-e256-480f-b301-868778f75f3b","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.119Z","source":"evolve","outcome_id":"3667cb7c-be5a-425e-9585-ab40f0cfee75","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.120Z","source":"evolve","outcome_id":"af2656f9-c910-4eea-af34-f01669929573","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.120Z","source":"evolve","outcome_id":"5c972448-b397-414e-b3b8-2d3069ea9151","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.120Z","source":"evolve","outcome_id":"0e0bd949-6543-4d09-a49a-fce41e5056a5","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.120Z","source":"evolve","outcome_id":"14c02ad7-4fad-4885-a0f3-e2a9ce257fff","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.120Z","source":"evolve","outcome_id":"86f78f62-1160-479b-934d-b916d1758862","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.121Z","source":"evolve","outcome_id":"6b64ba2e-c458-4bd7-9ef9-47b1bc8e9d80","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.121Z","source":"evolve","outcome_id":"94008dc8-30c4-41eb-b627-4c089f8432af","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.121Z","source":"evolve","outcome_id":"a3761aeb-ab08-40fb-8e5a-87efb7bd13b2","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.121Z","source":"evolve","outcome_id":"454e0263-3503-4b8f-b5f9-2596667561a6","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.121Z","source":"evolve","outcome_id":"b7801556-0031-4398-b9bd-567e50c1bedd","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.122Z","source":"evolve","outcome_id":"65cfba48-2dba-48cc-9868-19c28cceb747","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.122Z","source":"evolve","outcome_id":"a6b3b43c-5f25-4dc7-99a9-6ad3ad1da6ea","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.123Z","source":"evolve","outcome_id":"c8cec0c4-c231-49ba-aff3-aef499b6c47f","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.123Z","source":"evolve","outcome_id":"d92ddea8-427c-4817-8cb8-7365d099ef15","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.123Z","source":"evolve","outcome_id":"51ed123a-3f17-4ab7-8be3-927463d6a5eb","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:04.128Z","source":"evolve","outcome_id":"e74bd87c-ffed-4f06-b2c8-b399188de39d","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:08.031Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:08.031Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:08.031Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:08.031Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.033Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.034Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.034Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.035Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.037Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.038Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.061Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.062Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.062Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.063Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.063Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.064Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.064Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:08.064Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.070Z","source":"moment","moment_id":"7a93da0d-e636-420d-938f-2fec897a9374","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.070Z","source":"moment","moment_id":"f0bb78b6-a86e-4560-b217-1d006a6080f6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.071Z","source":"moment","moment_id":"bc9df1d1-7da7-4d6f-8704-313ce0b8d6d8","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.071Z","source":"moment","moment_id":"86af87cc-3065-4cce-9f1c-1fa4167ba0db","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.071Z","source":"moment","moment_id":"b4318af9-1eb7-4946-aa54-0d44a91a3314","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.071Z","source":"moment","moment_id":"35132fb2-d012-46a3-8d7e-57c333426b21","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.072Z","source":"moment","moment_id":"ac76b32c-b7c6-4fcf-84e1-d83d2dc3cd15","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.072Z","source":"moment","moment_id":"4cc61efe-31ef-474a-bb4c-c266bd8a73af","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.072Z","source":"moment","moment_id":"fa09807f-6f26-43e1-b670-a19011754457","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.073Z","source":"moment","moment_id":"05c94192-0ec2-4fda-bef4-1fbea8ac6c97","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.073Z","source":"moment","moment_id":"004f48a8-90b9-452a-945a-d9f022ee816c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.074Z","source":"moment","moment_id":"985c5de6-b58e-49d3-aca5-f943cd7f1c9c","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.075Z","source":"moment","moment_id":"0396112b-68ef-4cb1-95bb-7db464630f4a","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.075Z","source":"moment","moment_id":"1ca763af-017c-4cec-9831-f1d4573ef7b6","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.119Z","source":"moment","moment_id":"ab7c5c79-fc45-45b9-be4c-5af818fc6c76","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.135Z","source":"moment","moment_id":"d3399cca-b513-4cdd-ae11-b2f737948439","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.151Z","source":"moment","moment_id":"dc428a71-af34-40b3-b604-a547bb2ef93d","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:08.165Z","source":"moment","moment_id":"92feaea3-fd7a-43d1-8c10-399537819503","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.257Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.258Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.258Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.259Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.664Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.665Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:34:08.665Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-17T01:34:08.675Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:09.042Z","source":"moment","moment_id":"001eb378-e96b-443d-bde7-d396f803d70b","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-17T01:34:09.146Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.260Z","source":"evolve","outcome_id":"eef21087-c2c2-42d9-8756-4ac45d6a273e","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.261Z","source":"evolve","outcome_id":"053b59fd-78ba-4cf3-928f-e04002824d3f","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.261Z","source":"evolve","outcome_id":"eba8c207-eecf-4655-8d3c-3a9d1428a5b7","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"54b4e06a-af92-455d-9cf2-88f0b0173233","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.261Z","source":"evolve","outcome_id":"01a61ee0-4417-49cb-a46c-94c9d0b93cac","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.262Z","source":"evolve","outcome_id":"d2ff6c04-a4e8-472e-9c8c-63925573e1df","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.262Z","source":"evolve","outcome_id":"e1e26702-2623-4ac1-a9f1-0418b0835529","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.262Z","source":"evolve","outcome_id":"a1f39b43-7f32-40f2-a15f-68fae00d302b","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.263Z","source":"evolve","outcome_id":"bb6a8f9c-2e25-4912-8bef-f4738dfae469","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.263Z","source":"evolve","outcome_id":"2096daad-7874-4fc2-bc98-5c78b8173cda","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.263Z","source":"evolve","outcome_id":"d5a8fa7f-e785-4bb9-962e-7a9ce04e3a84","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.264Z","source":"evolve","outcome_id":"5ebb103b-9cf2-4f47-9381-cecefa2e30c5","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.264Z","source":"evolve","outcome_id":"22006fc5-4986-4fb7-84e4-e8a29a9b927b","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.264Z","source":"evolve","outcome_id":"466244b5-dc20-4a57-9835-668363f58261","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.264Z","source":"evolve","outcome_id":"5da2a92e-d612-4c04-beab-ef03acfba88b","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.265Z","source":"evolve","outcome_id":"890a218f-b859-4351-b93a-f30cffbf0f0b","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.265Z","source":"evolve","outcome_id":"fbcd607a-4d1d-4ef3-b071-eda49cdc4011","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.265Z","source":"evolve","outcome_id":"c2ca35b2-d347-405b-ae1a-a85ea3d7e0e6","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.265Z","source":"evolve","outcome_id":"43b972b1-5b62-41de-8445-25d35c4b0857","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.265Z","source":"evolve","outcome_id":"5f2581c4-4fd1-444c-83a7-3be7e2ad12a2","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:09.271Z","source":"evolve","outcome_id":"60c305ac-6594-43e2-b816-2179733ae52a","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:13.101Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:13.101Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:13.101Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T01:34:13.101Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.103Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.104Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.104Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.105Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.107Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.107Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.130Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.130Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.130Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.131Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.131Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.132Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.132Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T01:34:13.132Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.137Z","source":"moment","moment_id":"7b39cdb6-f443-4bca-b94d-e43fc08ace46","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.138Z","source":"moment","moment_id":"385fd82f-108d-496f-bd0c-4621a8f4be2f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.139Z","source":"moment","moment_id":"7c98d0c0-43b6-4b54-8b57-56d7a3547b1f","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.139Z","source":"moment","moment_id":"7fd65209-9a50-483d-b7f1-3c66b647f70b","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.139Z","source":"moment","moment_id":"20537e31-5239-4beb-8290-f309ec5af823","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.139Z","source":"moment","moment_id":"81e663d3-6f31-42f3-bfda-1b0c183e2b40","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.140Z","source":"moment","moment_id":"0d83430c-b8f0-4ed0-96ba-4738cd0ceb4e","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.140Z","source":"moment","moment_id":"5ced278a-0444-4554-9c54-c57412c6d753","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.141Z","source":"moment","moment_id":"23a80eb4-769f-483f-8723-992c0b8c03ab","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.141Z","source":"moment","moment_id":"bd4f2b3c-5d20-41aa-9dbf-a188b3e61c0a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.142Z","source":"moment","moment_id":"e9e26b28-33ff-4533-bd7e-820cdf847796","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.142Z","source":"moment","moment_id":"32f18dab-5b5b-4b16-9395-43ea65c7fe01","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.143Z","source":"moment","moment_id":"061e8a51-d3c1-49a2-bbb0-c1368ba9d3b9","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.143Z","source":"moment","moment_id":"2146a144-b527-455a-b107-002f6b87b039","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.185Z","source":"moment","moment_id":"7635c72b-41a8-4977-8344-d2037105b3e7","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.201Z","source":"moment","moment_id":"72bff665-ac33-4757-ac43-b2bdcefd20df","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.216Z","source":"moment","moment_id":"2afb6483-5da5-48be-bd94-c396873ca341","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:13.229Z","source":"moment","moment_id":"6d6feb0e-0b55-4dc4-91ea-069f21231a68","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.320Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.321Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.321Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.321Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.738Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.739Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T01:34:13.739Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-17T01:34:13.749Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-17T01:34:14.123Z","source":"moment","moment_id":"027e2e0b-bf20-40de-96f7-31b12cc8863d","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-17T01:34:14.227Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.342Z","source":"evolve","outcome_id":"c50f2657-21c6-4bd6-ac58-715cdf4f1133","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.342Z","source":"evolve","outcome_id":"ffc6ac00-b89f-47ea-a70a-054752841fd1","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.342Z","source":"evolve","outcome_id":"31e0677f-7908-42fc-b66c-f2cb59e39960","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"2101deb6-5043-4139-8880-85deace11a67","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.343Z","source":"evolve","outcome_id":"c9fda328-c055-4c92-b64e-9efe6dfa4d63","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.343Z","source":"evolve","outcome_id":"b54ebf88-14ca-4fd8-8420-367fd482bc91","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.344Z","source":"evolve","outcome_id":"ae22f258-b710-4690-8b90-c7484fddba99","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.344Z","source":"evolve","outcome_id":"074e8e8a-f29f-4b8e-a762-c8df3d3c05ea","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.344Z","source":"evolve","outcome_id":"7503a285-7ef8-417b-ab51-768adf181a64","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.344Z","source":"evolve","outcome_id":"2c44a4c3-a79c-431f-b61d-798d000e161d","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.345Z","source":"evolve","outcome_id":"79992e5a-e532-42e3-b925-f5aa4e509309","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.345Z","source":"evolve","outcome_id":"ffefbb60-1946-4fd0-a7a7-75003fd2df6f","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.345Z","source":"evolve","outcome_id":"73d180f6-67ad-4156-a55c-75ea04c97d18","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.345Z","source":"evolve","outcome_id":"f2486cb9-c21a-464c-a7e6-aa7d22c913cf","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.345Z","source":"evolve","outcome_id":"4e165b68-1837-40d4-bc8a-f1b42022b908","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.346Z","source":"evolve","outcome_id":"3581359b-cb00-4415-aee1-9794f87424b1","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.346Z","source":"evolve","outcome_id":"a43b5b8e-f83f-42ec-a63f-6c02fb836e95","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.346Z","source":"evolve","outcome_id":"672a4368-ed7f-49a5-85c6-6b1d6b0b7560","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.346Z","source":"evolve","outcome_id":"9844a9aa-2eb3-4985-a7f2-258f3f9d6b84","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.346Z","source":"evolve","outcome_id":"aa5372ed-60f2-4d18-a242-c32fb7442557","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T01:34:14.352Z","source":"evolve","outcome_id":"8bb7b1f7-46e0-4737-bbdd-a9fca1d4c3b0","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.980Z","source":"evolve","outcome_id":"ea198d66-e0bb-4541-a052-bb50e1f88393","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.981Z","source":"evolve","outcome_id":"f880582d-e74d-4586-9465-ac0c60ad2a8c","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.981Z","source":"evolve","outcome_id":"b4709bff-8b7b-4c59-9f87-fd2004c2caed","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"335f6d9c-65a3-4831-a10a-3f9970a99751","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.983Z","source":"evolve","outcome_id":"cad0ba93-86fe-4160-a72e-c22f56ac06a1","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.984Z","source":"evolve","outcome_id":"f784a671-930b-4c9e-b18a-2cae03342a16","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.984Z","source":"evolve","outcome_id":"beb14c99-c32b-4e7e-a494-102f535edec2","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.984Z","source":"evolve","outcome_id":"472bd030-5402-4242-aea6-15bdef488cc5","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.984Z","source":"evolve","outcome_id":"0c604705-047a-4096-883e-17a904260cb8","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.986Z","source":"evolve","outcome_id":"ef4a68f6-d0e5-4a40-a44f-2941cebc271a","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.986Z","source":"evolve","outcome_id":"1f142c6f-7a18-465a-be0c-5c30c0a573de","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.986Z","source":"evolve","outcome_id":"4b8179cb-4157-4289-8289-43b5f17238a1","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.986Z","source":"evolve","outcome_id":"798ecaba-b60a-4069-a803-d06fd498e785","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.986Z","source":"evolve","outcome_id":"f278b2f8-43e7-449a-a07f-1d6bbd7a0973","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.987Z","source":"evolve","outcome_id":"bfe5c54e-9c96-49c6-a032-1153ab848c26","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.987Z","source":"evolve","outcome_id":"e56c319a-b4e8-47cb-90cc-3fa7f3f442ef","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.987Z","source":"evolve","outcome_id":"10bcb435-a622-426c-9c2b-2a49064e967d","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.988Z","source":"evolve","outcome_id":"37e54ac3-d440-4e8b-b418-d13c35d973e0","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.988Z","source":"evolve","outcome_id":"d034f331-3d2d-443b-a03f-d3c08cee2de5","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:04.988Z","source":"evolve","outcome_id":"8960a45c-9c4b-4a5d-b6b2-8b483253ac5c","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:05.007Z","source":"evolve","outcome_id":"a551ef44-1def-4a33-82ef-51f402ca8f2d","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.214Z","source":"evolve","outcome_id":"e56f5d7a-811b-41ca-86ba-4dafc25b64fe","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.215Z","source":"evolve","outcome_id":"5de66a15-4319-41ca-8c30-483ff6d0a01b","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.215Z","source":"evolve","outcome_id":"f681f449-afe0-4264-b2ae-5094d3b82df3","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"7aee1384-db9a-4447-88d3-a8ec2dc28a5c","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.216Z","source":"evolve","outcome_id":"4fe38ee5-2f06-4b29-9c27-f2bff32e357e","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.217Z","source":"evolve","outcome_id":"d80de9c5-1979-409c-9527-e829fb01f306","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.217Z","source":"evolve","outcome_id":"3e11b9a8-3818-4ef7-a0aa-95c7b98933e6","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.218Z","source":"evolve","outcome_id":"7b29f493-882d-4a88-b06b-23206d35d06f","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.218Z","source":"evolve","outcome_id":"ff34ec2b-f92f-4a18-939f-c9d9aa767c6e","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.218Z","source":"evolve","outcome_id":"56ef9a66-aebb-4555-93e9-ea7135583ca4","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.219Z","source":"evolve","outcome_id":"324a9657-da4d-4333-a100-7d3f9419475e","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.219Z","source":"evolve","outcome_id":"5f22247d-f10b-4d10-ab69-81a7b92c17ec","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.219Z","source":"evolve","outcome_id":"c62079a4-b781-4c61-8a78-3a379d0c73e7","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.219Z","source":"evolve","outcome_id":"31ece95d-7147-4a44-9dd6-cd60bed874b8","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.219Z","source":"evolve","outcome_id":"82245c88-6576-4ac3-96c3-78789b814752","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.220Z","source":"evolve","outcome_id":"453b7766-55d9-43a3-99d9-33e7f2f974c7","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.220Z","source":"evolve","outcome_id":"e05ff081-dce5-452e-b78b-42a3032ff7b7","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.220Z","source":"evolve","outcome_id":"c11baa83-82e3-4d91-a797-093b971256f4","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.220Z","source":"evolve","outcome_id":"3f263555-0dab-420c-8608-b885f472f1e2","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.221Z","source":"evolve","outcome_id":"c3eec964-77a8-4532-b939-fc19ea6661f7","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:26:08.238Z","source":"evolve","outcome_id":"1929dc70-abc3-41ad-9507-ac150f285d7f","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"tier_change","timestamp":"2026-03-17T02:26:11.772Z","source":"scan","concept_id":7733284957631352,"surface_form":"`theorex outcome`","from":"ACTIVE","to":"MILD"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:34:44.469Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:34:44.468Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:34:44.468Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:34:44.468Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"prune","timestamp":"2026-03-17T02:34:44.472Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T02:34:44.474Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-17T02:34:44.474Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-17T02:34:44.476Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T02:34:44.477Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T02:34:44.479Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.503Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.504Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.504Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.504Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.504Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.505Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.505Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:34:44.506Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.513Z","source":"moment","moment_id":"fc85544b-c9cf-45c1-8ec1-e7f8fff237de","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.514Z","source":"moment","moment_id":"16f7f6f2-eaab-4c1e-b667-81328cbdb031","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.514Z","source":"moment","moment_id":"7913e5c1-4896-4c6b-8bd9-5ac3e676e7f6","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.515Z","source":"moment","moment_id":"c41dfc66-a74c-402f-9854-67cb6e00f364","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.515Z","source":"moment","moment_id":"af72aa18-4b14-4d79-b97e-8e797ba31f5d","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.515Z","source":"moment","moment_id":"c21c1b43-3468-49c9-829e-0de5568b58ce","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.516Z","source":"moment","moment_id":"68e192f6-5cb7-4e2e-9853-995cf6eb6c86","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.516Z","source":"moment","moment_id":"ac43b1f6-787a-465a-a852-d61f83fa7ecb","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.516Z","source":"moment","moment_id":"63ade647-d401-4268-9349-f3d7f539db46","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.518Z","source":"moment","moment_id":"944d9caa-b323-4910-b977-3d95fc8385c5","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.518Z","source":"moment","moment_id":"834d0363-35bc-4d92-9116-254347ca43fe","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.520Z","source":"moment","moment_id":"9e5281af-5680-4b5f-b0f1-9e6cd1733f9a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.520Z","source":"moment","moment_id":"88e5a2af-529d-43dd-8092-89a74b2d743d","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.520Z","source":"moment","moment_id":"7a84a908-94f2-4247-b4ea-b9a350e9bfcc","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.572Z","source":"moment","moment_id":"26bdc71e-f450-4ea4-8c17-43c8dd466557","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.589Z","source":"moment","moment_id":"f187ec16-510d-4c42-a1d3-de94709ab27c","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.606Z","source":"moment","moment_id":"9fa90bb1-bfc9-44a8-88fe-0d2cdf7668fa","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:44.622Z","source":"moment","moment_id":"03afc47c-aa79-4879-818c-1849a161a453","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-17T02:34:44.727Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:34:44.727Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T02:34:44.728Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:34:44.728Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:34:45.188Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:34:45.190Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T02:34:45.190Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-17T02:34:45.200Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-17T02:34:45.695Z","source":"moment","moment_id":"b87c1a2a-a5a6-4cc5-852b-9b77179d2838","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-17T02:34:45.799Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.918Z","source":"evolve","outcome_id":"05f2f83a-4601-49c3-82eb-476a898060ad","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.919Z","source":"evolve","outcome_id":"e3a3fef5-1e8c-4223-b536-47f00bf8cc0e","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.919Z","source":"evolve","outcome_id":"6ddb5df1-9e4d-42dd-94f1-38d617e196d0","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"4e2b48a8-6b55-4f40-bc9b-6facb01824b0","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.919Z","source":"evolve","outcome_id":"ebfd1167-1f91-42bd-a830-11cc965a106d","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.920Z","source":"evolve","outcome_id":"cf652631-4407-4b89-85e9-c7ea29aaf738","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.920Z","source":"evolve","outcome_id":"267e7fb2-9fe4-4f09-a9a5-5b309075aa72","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.921Z","source":"evolve","outcome_id":"1f96de9d-af05-4fa4-bc93-6b8dacf6b7ba","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.921Z","source":"evolve","outcome_id":"e3dc5d7f-e286-42de-88d2-554898a37d4d","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.922Z","source":"evolve","outcome_id":"f5de6a9d-bd7f-4004-be3c-bd2a224d843b","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.922Z","source":"evolve","outcome_id":"b6707cb8-79c1-4e59-8138-da3f9d91bb70","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.922Z","source":"evolve","outcome_id":"57510c1c-a57b-4569-a65d-2c5387bcace4","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.922Z","source":"evolve","outcome_id":"432e3d8c-58e8-4f77-bda2-c7e9f8a64714","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.922Z","source":"evolve","outcome_id":"5ab16d93-3036-4e30-a867-5bca94013af7","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.923Z","source":"evolve","outcome_id":"0965f986-f794-42b4-9570-0811c1b3f44b","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.923Z","source":"evolve","outcome_id":"6f16b62d-95ad-48c5-b83f-8bc5f2e8ad03","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.923Z","source":"evolve","outcome_id":"48db0354-480e-4368-a571-4080906c1011","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.923Z","source":"evolve","outcome_id":"7ae7b5d2-3bdb-4195-9236-237e50f3d048","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.924Z","source":"evolve","outcome_id":"0cebec21-bc3f-467c-a0cb-b669c3f58890","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.924Z","source":"evolve","outcome_id":"952ce3ef-8f7b-4e89-afd8-9e82978e61a4","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:34:45.929Z","source":"evolve","outcome_id":"c4ddc16a-8505-486b-b8e6-f28db0e95123","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:36:16.783Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:36:16.783Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"PREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:36:16.783Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"sentiment_flip","timestamp":"2026-03-17T02:36:16.783Z","source":"cli","concept_id":1,"surface_form":"concept_1","from":"NEUTRAL","to":"DISPREFERRED"}
+{"type":"prune","timestamp":"2026-03-17T02:36:16.785Z","source":"prune","concept_id":10,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T02:36:16.787Z","source":"prune","concept_id":20,"surface_form":"old concept"}
+{"type":"prune","timestamp":"2026-03-17T02:36:16.787Z","source":"prune","concept_id":21,"surface_form":"another old"}
+{"type":"prune","timestamp":"2026-03-17T02:36:16.788Z","source":"prune","concept_id":30,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T02:36:16.790Z","source":"prune","concept_id":50,"surface_form":"test concept"}
+{"type":"prune","timestamp":"2026-03-17T02:36:16.791Z","source":"prune","concept_id":60,"surface_form":"test concept"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.814Z","source":"scan","concept_id":2,"surface_form":"machine learning","from":"ACTIVE","to":"LESS"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.814Z","source":"scan","concept_id":10,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.814Z","source":"scan","concept_id":11,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.815Z","source":"scan","concept_id":20,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.815Z","source":"scan","concept_id":21,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.816Z","source":"scan","concept_id":30,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.816Z","source":"scan","concept_id":31,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T02:36:16.816Z","source":"scan","concept_id":40,"surface_form":"machine learning","from":"ACTIVE","to":"MILD"}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.822Z","source":"moment","moment_id":"c0da6413-4dd0-4ec2-9720-509a01985056","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.822Z","source":"moment","moment_id":"219a534d-4f7a-4979-9887-27df4a8b68b1","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.823Z","source":"moment","moment_id":"5d4949a3-f1b6-404a-bb4e-35f7f2116bbc","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.823Z","source":"moment","moment_id":"1c204ed3-ef6b-4dee-b14d-0e50f1c92a85","story_preview":"Story with \"quotes\" and newlines\nhere","concept_ids":[10,20,30]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.824Z","source":"moment","moment_id":"e6890643-193a-4ce7-8efd-0d9dd343ff11","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.824Z","source":"moment","moment_id":"b9c94065-1dd6-4413-9b06-66b1986a715b","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.824Z","source":"moment","moment_id":"ed7010cd-2342-4a39-a846-5f3ffc488d75","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.824Z","source":"moment","moment_id":"53d8c4f8-eeb8-454e-a2eb-3c91ef77d3fe","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.825Z","source":"moment","moment_id":"af89b296-593f-4560-8384-fb572f4751ea","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.826Z","source":"moment","moment_id":"48c5dd29-ebc8-4eb6-b89f-fb3728c8aa23","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.826Z","source":"moment","moment_id":"bdc0fa0b-7281-4e34-b141-d0020978d034","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.827Z","source":"moment","moment_id":"6f35504e-b021-4c21-8a93-da4aea6ef40a","story_preview":"User added a test for the moment store module","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.827Z","source":"moment","moment_id":"fb61d1ea-8872-49e5-90e0-0316e4a14f00","story_preview":"first moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.827Z","source":"moment","moment_id":"28dd4c6d-abd1-4d17-a6bf-d3727964efe7","story_preview":"second moment","concept_ids":[1,2,3]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.875Z","source":"moment","moment_id":"c900fcba-de4a-45b9-9abb-173dba452b06","story_preview":"test story about typescript","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.891Z","source":"moment","moment_id":"dfe61080-a0ce-4a77-89ab-a78b02a8fc2c","story_preview":"the quick brown fox jumped over the lazy dog","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.905Z","source":"moment","moment_id":"527f42ac-727a-4805-ab1e-249525882dd5","story_preview":"story with ref","concept_ids":[]}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:16.919Z","source":"moment","moment_id":"df06e1d6-e824-4861-a45d-5e84cedcde43","story_preview":"console output test","concept_ids":[]}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.015Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.015Z","source":"graduate","surface_form":"neural network","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.016Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.016Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.309Z","source":"graduate","surface_form":"machine learning","concept_id":1}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.310Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.311Z","source":"graduate","surface_form":"deep learning","concept_id":2}
+{"type":"prune","timestamp":"2026-03-17T02:36:17.320Z","source":"prune","concept_id":200,"surface_form":"old concept"}
+{"type":"moment_capture","timestamp":"2026-03-17T02:36:17.785Z","source":"moment","moment_id":"6079a3b2-a75e-4766-994b-885ae8aad5d5","story_preview":"Integration test: verifying moment_capture wiring works corr","concept_ids":[1,2,3]}
+{"type":"graduation","timestamp":"2026-03-17T02:36:17.889Z","source":"graduate","surface_form":"gradient descent","concept_id":55}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.006Z","source":"evolve","outcome_id":"48764776-1117-447a-bde4-fb5f005b520c","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.006Z","source":"evolve","outcome_id":"585b76f4-571e-4bf8-8118-b45dea9a14a1","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.006Z","source":"evolve","outcome_id":"db1c4891-7ed4-446d-b716-8f3798b5dc73","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"354b6e85-0005-4409-8292-5a1554cf7e51","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.007Z","source":"evolve","outcome_id":"98858457-b16d-4b67-a1ce-fb5df834af31","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.008Z","source":"evolve","outcome_id":"825a93ce-621d-4e3b-8ea3-71bd893c0946","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.008Z","source":"evolve","outcome_id":"25bde2e9-703d-4f1f-a1c1-5989857488f5","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.008Z","source":"evolve","outcome_id":"16f64bde-a639-453b-987d-d2efb23ee7b3","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.008Z","source":"evolve","outcome_id":"70f30231-24a1-4e13-8cb5-10bbe3802a44","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.009Z","source":"evolve","outcome_id":"1128d3e7-210c-4584-a38d-4ab919e42d8e","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.009Z","source":"evolve","outcome_id":"d066f43a-ee7d-4576-bb30-c8976609aeeb","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.009Z","source":"evolve","outcome_id":"dde9e94d-c352-42bf-b5aa-dd02bda86e06","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.009Z","source":"evolve","outcome_id":"5486576c-f2ab-4e8f-b1a2-d036fd141b23","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.009Z","source":"evolve","outcome_id":"a3121222-938d-4791-81f8-70b0e8bed847","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.009Z","source":"evolve","outcome_id":"6e948b23-419b-4561-a4d5-dbc8876553eb","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.010Z","source":"evolve","outcome_id":"b3e3bacf-79a0-4200-91ec-bccb247267a9","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.010Z","source":"evolve","outcome_id":"db32a332-23be-44ee-8fdd-07353a3f2223","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.011Z","source":"evolve","outcome_id":"648ad828-d4ff-4a64-bcc1-b6a2d27e688b","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.011Z","source":"evolve","outcome_id":"d10d455a-1ab6-4cd2-8a6d-d19f2d670288","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.011Z","source":"evolve","outcome_id":"14c1f8f9-be75-41f1-874e-14abf93b2219","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T02:36:18.016Z","source":"evolve","outcome_id":"addb86ea-b4ca-44e9-9015-62719fd0ff42","agent_id":"main","success":true,"decision_preview":"log test"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":3574632714566119,"surface_form":"Qwen3 32B MLX available","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":2068345091825742,"surface_form":"reliable scheduling of agent lifecycle management","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":8473899612452776,"surface_form":"PostToolUse+Stop hooks","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":1614456771078230,"surface_form":"OC","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":8102800366955527,"surface_form":"PM2 crons","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":6248101545572778,"surface_form":"Absolute paths","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":8527068176630530,"surface_form":"agent execution","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":1593834851562130,"surface_form":"Local gateway setup","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":6051933003098831,"surface_form":"direct communication","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":7275575084349753,"surface_form":"runtime errors","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":1866310863104866,"surface_form":"SessionStart).","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":1103445067787427,"surface_form":"cleanup and termination","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":8884829769390852,"surface_form":"PM2 crons running.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":7477152690063362,"surface_form":"Claude Code","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":4923887815717593,"surface_form":"Primary coding and development","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":4212360623804384,"surface_form":"(PostToolUse,","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":7489735807425654,"surface_form":"Theorex axon","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":584110136101165,"surface_form":"Apple M4 Pro 64GB.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":6481735490736803,"surface_form":"a fleet","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":7851825380845169,"surface_form":"Claude Code Sonnet 4.6","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":4362522584307282,"surface_form":"config files","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":5628014790394166,"surface_form":"M1 operations hub","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":7350287397333355,"surface_form":"M4 engineer agent.","from":"ACTIVE","to":"MILD"}
+{"type":"tier_change","timestamp":"2026-03-17T05:38:39.436Z","source":"scan","concept_id":7832397370822685,"surface_form":"Claude Code Sonnet","from":"ACTIVE","to":"MILD"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.563Z","source":"evolve","outcome_id":"a089c75e-0809-4622-8909-e11b75cce69b","agent_id":"main","success":true,"decision_preview":"test decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.564Z","source":"evolve","outcome_id":"4e9bd120-27b4-46a9-9c66-4170adfa1698","agent_id":"main","success":true,"decision_preview":"A"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.564Z","source":"evolve","outcome_id":"71210f52-6656-4ee8-8fad-64acc60fc586","agent_id":"main","success":false,"decision_preview":"B"}
+{"type":"outcome_record","timestamp":"2020-01-01T00:00:00.000Z","source":"evolve","outcome_id":"a2beea14-cd91-4886-b031-1e400c349768","agent_id":"main","success":false,"decision_preview":"old decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.566Z","source":"evolve","outcome_id":"1ede3263-5ded-40a4-a1f1-d90ae59146f1","agent_id":"main","success":true,"decision_preview":"recent decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.567Z","source":"evolve","outcome_id":"b71e4373-177a-499a-aed5-f939adbad4e3","agent_id":"main","success":true,"decision_preview":"decision-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.568Z","source":"evolve","outcome_id":"0484db70-a073-4a03-82e9-ce0de0ea6cd5","agent_id":"main","success":true,"decision_preview":"decision-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.568Z","source":"evolve","outcome_id":"6f71bd75-748a-4d05-b184-4079a3bcb7b8","agent_id":"main","success":true,"decision_preview":"decision-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.568Z","source":"evolve","outcome_id":"157663e3-b649-4c57-9400-d5d2d953b9af","agent_id":"main","success":false,"decision_preview":"decision-3"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.569Z","source":"evolve","outcome_id":"5ff576d8-4f75-4fd0-af94-419f28c7eac8","agent_id":"main","success":true,"decision_preview":"alpha-win-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.570Z","source":"evolve","outcome_id":"034f40f0-b33e-4b63-8e0d-0f842a4aabce","agent_id":"main","success":true,"decision_preview":"alpha-win-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.570Z","source":"evolve","outcome_id":"e2ff7dd4-00fb-48f0-a12f-6fab9ff79158","agent_id":"main","success":true,"decision_preview":"alpha-win-2"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.570Z","source":"evolve","outcome_id":"bef61f21-d1ba-4a73-9097-898bc7d72b4b","agent_id":"main","success":false,"decision_preview":"alpha-fail"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.570Z","source":"evolve","outcome_id":"a46f42d1-b57e-4433-b50a-48839e4d447d","agent_id":"main","success":false,"decision_preview":"beta-fail-0"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.571Z","source":"evolve","outcome_id":"aa572271-c798-4291-9bdf-ce12fe2a3270","agent_id":"main","success":false,"decision_preview":"beta-fail-1"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.571Z","source":"evolve","outcome_id":"cd419599-6d1a-4ce7-99f4-32a3a060f242","agent_id":"main","success":true,"decision_preview":"main decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.571Z","source":"evolve","outcome_id":"8846573d-0c5c-4402-89d2-2115e0561074","agent_id":"other-agent","success":false,"decision_preview":"other decision"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.572Z","source":"evolve","outcome_id":"a510e847-fd41-4a60-9b71-c75bf32478af","agent_id":"a1","success":true,"decision_preview":"d1"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.572Z","source":"evolve","outcome_id":"769a1422-6ad9-4602-b25b-5717a2302562","agent_id":"a2","success":false,"decision_preview":"d2"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.573Z","source":"evolve","outcome_id":"0f5c04c7-232c-42a1-ac2f-e9171e48e7f5","agent_id":"main","success":true,"decision_preview":"try new approach"}
+{"type":"outcome_record","timestamp":"2026-03-17T06:01:00.595Z","source":"evolve","outcome_id":"622f6d01-4f2a-4345-92f5-6d8cf0c136e7","agent_id":"main","success":true,"decision_preview":"log test"}

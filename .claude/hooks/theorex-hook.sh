@@ -45,6 +45,13 @@ case "${1:-}" in
       --session "$SESSION_ID" > /dev/null 2>&1 &
     ;;
 
+  context-monitor)
+    # Phase 15: Check context usage — outputs additionalContext JSON to stdout if compression fires.
+    # Called synchronously so the response reaches Claude before the next message.
+    "$BUN" run --cwd "$PROJECT" src/cli/index.ts context-monitor \
+      --session "$SESSION_ID" 2>/dev/null
+    ;;
+
   session-end)
     # Blocking flush — must complete before Claude Code exits (HKS-02)
     # NOTE: This hook does NOT fire on /exit (known bug #17885 — use `theorex flush` manually)

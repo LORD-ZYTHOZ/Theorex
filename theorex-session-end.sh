@@ -17,7 +17,7 @@ SUMMARY="${2:-}"
 
 if [[ -z "$AGENT" ]]; then
   echo "Usage: theorex-session-end <agent-id> [\"session summary\"]"
-  echo "Agents: main, qwen-sage, secretarius"
+  echo "Agents: claude-code-agent, main, qwen-sage, secretarius"
   exit 1
 fi
 

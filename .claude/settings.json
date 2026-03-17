@@ -9,6 +9,11 @@
             "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/theorex-hook.sh post-tool-use",
             "async": true,
             "timeout": 5
+          },
+          {
+            "type": "command",
+            "command": "\"$CLAUDE_PROJECT_DIR\"/.claude/hooks/theorex-hook.sh context-monitor",
+            "timeout": 10
           }
         ]
       }

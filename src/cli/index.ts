@@ -195,13 +195,14 @@ export async function runPrune(
 
 export async function runSearch(query: string, config: Config): Promise<void> {
   // Housekeeping: rotate stale STM files on every CLI invocation (STM-02)
-  await rotateStm();
+  const stmDir = config.stmDir || undefined;
+  await rotateStm(new Date(), stmDir);
 
   const results = await hybridSearch(query, 10, {
     lmStudioUrl: config.lmStudioUrl,
     lmStudioEmbedModel: config.lmStudioEmbedModel,
     lmStudioTimeoutMs: config.lmStudioTimeoutMs,
-  });
+  }, stmDir);
 
   if (results.length === 0) {
     console.log(`No results found for: ${query}`);

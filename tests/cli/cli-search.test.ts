@@ -13,6 +13,9 @@ import { rm, mkdir } from "node:fs/promises";
 // Helpers
 // ---------------------------------------------------------------------------
 
+// Isolated empty STM dir — prevents test from reading live data/short-term/
+const ISOLATED_STM_DIR = `/tmp/theorex-search-test-${Date.now()}`;
+
 const DEFAULT_CFG: Config = {
   halfLifeDays: 14,
   activeThreshold: 0.6,
@@ -24,7 +27,8 @@ const DEFAULT_CFG: Config = {
   lmStudioUrl: "http://localhost:1234",
   lmStudioEmbedModel: "nomic-embed-text-v1.5",
   lmStudioTimeoutMs: 3000,
-};
+  stmDir: ISOLATED_STM_DIR,
+} as Config;
 
 function makeTmpDir(): string {
   return `/tmp/theorex-stm-search-${Date.now()}-${Math.random().toString(36).slice(2)}`;

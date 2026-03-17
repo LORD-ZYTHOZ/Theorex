@@ -57,6 +57,8 @@ export interface Config {
   outcomesDir: string;                 // default: "data/outcomes" — outcome records
   evolutionLogPath: string;            // default: "data/evolution.jsonl" — nightly refinement log
   evolveWindowDays: number;            // default: 7 — rolling window for outcome review
+  // Short-term memory directory (Phase 2) — explicit field enables test isolation
+  stmDir: string;                      // default: "data/short-term"
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -114,6 +116,7 @@ export const DEFAULT_CONFIG: Config = {
   outcomesDir: "data/outcomes",
   evolutionLogPath: "data/evolution.jsonl",
   evolveWindowDays: 7,
+  stmDir: "data/short-term",
 };
 
 /**

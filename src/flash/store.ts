@@ -38,8 +38,10 @@ export function estimateTokens(events: readonly FlashEvent[]): number {
  *
  * Rules applied in order:
  * 1. Append incoming to existing events.
- * 2. Slice to last MAX_EVENTS (ring eviction — FLH-01).
- * 3. Trim oldest events until estimateTokens < TOKEN_CEILING OR only 1 event remains (FLH-03).
+ * 2. Evict to MAX_EVENTS by removing lowest-significance entries first.
+ *    Ties are broken by timestamp ascending (oldest evicted first). (FLH-01)
+ * 3. Trim lowest-significance events until estimateTokens < TOKEN_CEILING OR
+ *    only 1 event remains. (FLH-03)
  *
  * Never mutates the input arrays.
  */
@@ -48,17 +50,33 @@ export function enforceRingBuffer(
   incoming: FlashEvent
 ): readonly FlashEvent[] {
   // Step 1: append incoming
-  const appended: FlashEvent[] = [...events, incoming];
+  const appended: readonly FlashEvent[] = [...events, incoming];
 
-  // Step 2: ring eviction — keep only last MAX_EVENTS
-  const afterRing = appended.length > MAX_EVENTS
-    ? appended.slice(appended.length - MAX_EVENTS)
-    : appended;
+  // Step 2: significance-biased eviction — evict lowest-significance first,
+  // with timestamp as tiebreak (older evicted first).
+  let afterRing: readonly FlashEvent[] = appended;
+  if (appended.length > MAX_EVENTS) {
+    const sorted = [...appended].sort((a, b) => {
+      const scoreDiff = a.significance_score - b.significance_score;
+      if (scoreDiff !== 0) return scoreDiff; // ascending: lowest first
+      return a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0;
+    });
+    const evictCount = appended.length - MAX_EVENTS;
+    const evicted = new Set(sorted.slice(0, evictCount));
+    // Preserve original insertion order for survivors
+    afterRing = appended.filter((e) => !evicted.has(e));
+  }
 
-  // Step 3: token ceiling enforcement — trim oldest until under ceiling or min 1
-  let result: FlashEvent[] = [...afterRing];
+  // Step 3: token ceiling enforcement — evict lowest-significance until under ceiling or min 1
+  let result: readonly FlashEvent[] = afterRing;
   while (result.length > 1 && estimateTokens(result) >= TOKEN_CEILING) {
-    result = result.slice(1);
+    const sorted = [...result].sort((a, b) => {
+      const scoreDiff = a.significance_score - b.significance_score;
+      if (scoreDiff !== 0) return scoreDiff;
+      return a.timestamp < b.timestamp ? -1 : a.timestamp > b.timestamp ? 1 : 0;
+    });
+    const toRemove = sorted[0];
+    result = result.filter((e) => e !== toRemove);
   }
 
   return result;

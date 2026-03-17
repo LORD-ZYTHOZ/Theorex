@@ -1,4 +1,4 @@
-// evolve/gated-learning.ts — Gated learning for Phase 13 / OpenJarvis-inspired.
+// evolve/gated-learning.ts — Gated learning for Phase 13 / distributed inference foundations.
 // Only accepts routing/promotion policy updates when they measurably improve
 // avg_composite_score by at least a configurable threshold (default 2%).
 // All state is immutable; snapshots are written atomically via .tmp swap.

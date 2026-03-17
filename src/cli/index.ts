@@ -1220,9 +1220,43 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 16: Parallel Background Processing — dispatch task to local LLM
+    case "dispatch": {
+      // Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>]
+      const { values: dpValues, positionals: dpPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:   { type: "string" },
+          context: { type: "string" },
+        },
+        allowPositionals: true,
+        strict: false,
+      });
+      const dpAgent = typeof dpValues.agent === "string" ? dpValues.agent : "main";
+      const dpContextPct = typeof dpValues.context === "string" ? parseFloat(dpValues.context) : 50;
+      const dpTask = dpPos.join(" ").trim();
+      if (!dpTask) {
+        console.error('Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>]');
+        process.exit(1);
+      }
+      const { dispatchIfNeeded } = await import("../dispatch/index");
+      const dpResult = await dispatchIfNeeded(dpAgent, dpTask, dpContextPct);
+      if (!dpResult) {
+        console.log(`Context at ${dpContextPct}% — below trigger threshold, dispatch skipped.`);
+      } else if (dpResult.success) {
+        console.log(`Dispatched to ${dpResult.model_used} (${dpResult.latency_ms}ms)`);
+        console.log(`  Written to axon: ${dpResult.written_to_axon}`);
+        console.log(`\n${dpResult.response.slice(0, 400)}${dpResult.response.length > 400 ? "\n…" : ""}`);
+      } else {
+        console.error(`Dispatch failed: ${dpResult.error ?? "unknown error"}`);
+        process.exit(1);
+      }
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]>");
       process.exit(1);
   }
 }

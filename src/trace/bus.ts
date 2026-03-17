@@ -1,5 +1,5 @@
 // trace/bus.ts — EventBus for non-invasive pub/sub trace collection.
-// Phase 15.5 steal from OpenJarvis: captures LM inference, tool calls, and
+// Phase 15.5 distributed inference foundations: captures LM inference, tool calls, and
 // routing decisions as structured trace records without touching call sites.
 //
 // Pattern: emit() events at instrumented boundaries → bus auto-assembles

@@ -42,13 +42,25 @@ export function buildFlashEvent(hookInput: Record<string, unknown>): FlashEvent 
   };
 }
 
+/**
+ * Resolve a session ID, replacing absent/unknown values with a date-based fallback.
+ * Ensures flash files are never written to the unbounded "unknown.json" accumulator.
+ */
+export function resolveSessionId(sessionId: string | undefined | null): string {
+  if (!sessionId || sessionId === "unknown") {
+    return `session_${new Date().toISOString().slice(0, 10)}`;
+  }
+  return sessionId;
+}
+
 /** Read flash buffer, add event, enforce ring buffer + token ceiling, write back atomically. */
 export async function recordFlashEvent(
   sessionId: string,
   hookInput: Record<string, unknown>
 ): Promise<void> {
+  const resolvedId = resolveSessionId(sessionId);
   const incoming = buildFlashEvent(hookInput);
-  const buffer = await readFlash(sessionId);
+  const buffer = await readFlash(resolvedId);
   const updated = enforceRingBuffer(buffer.events, incoming);
-  await writeFlash({ session_id: sessionId, events: updated });
+  await writeFlash({ session_id: resolvedId, events: updated });
 }

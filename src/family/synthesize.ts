@@ -12,7 +12,7 @@
 // LLM endpoint: configurable via config.lmStudioUrl (default: http://localhost:1234)
 // On M1 the local Qwen2.5-3B runs at http://localhost:8082.
 
-import { writeToAgent } from "./write";
+import { writeToAgent, batchWriteToAgent } from "./write";
 import type { Config } from "../config";
 
 export interface Lesson {
@@ -131,21 +131,15 @@ export async function synthesizeToAgent(
     };
   }
 
-  let totalConceptsAdded = 0;
-  let totalEdgesAdded = 0;
-
-  for (const lesson of lessons) {
-    // Write the full lesson sentence — NLP extracts rich concepts from it
-    const result = await writeToAgent(agentId, lesson.lesson, config, nowMs);
-    totalConceptsAdded += result.conceptsAdded;
-    totalEdgesAdded += result.edgesAdded;
-  }
+  // Batch all lesson sentences into a single axon load+save (PERF-003)
+  const lessonTexts = lessons.map((l) => l.lesson);
+  const result = await batchWriteToAgent(agentId, lessonTexts, config, nowMs);
 
   return {
     agentId,
     lessonsExtracted: lessons.length,
-    conceptsAdded: totalConceptsAdded,
-    edgesAdded: totalEdgesAdded,
+    conceptsAdded: result.conceptsAdded,
+    edgesAdded: result.edgesAdded,
     fallbackUsed: false,
   };
 }

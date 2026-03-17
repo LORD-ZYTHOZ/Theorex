@@ -120,12 +120,36 @@ export const DEFAULT_CONFIG: Config = {
  * Load config from path.
  * If file is absent or invalid JSON, returns a copy of DEFAULT_CONFIG.
  * Merges — caller-supplied keys override defaults, missing keys use defaults.
+ * Clamps numeric fields to valid ranges to prevent silent misbehaviour.
  */
 export async function loadConfig(path = "config.json"): Promise<Config> {
   try {
     const raw = await Bun.file(path).json();
-    return { ...DEFAULT_CONFIG, ...raw };
+    return validateConfig({ ...DEFAULT_CONFIG, ...raw });
   } catch {
     return { ...DEFAULT_CONFIG };
   }
+}
+
+/**
+ * Clamp config values to their valid ranges.
+ * Returns a new config — never mutates the input.
+ */
+export function validateConfig(cfg: Config): Config {
+  return {
+    ...cfg,
+    halfLifeDays:             Math.max(1, cfg.halfLifeDays),
+    activeThreshold:          Math.min(1, Math.max(0, cfg.activeThreshold)),
+    mildThreshold:            Math.min(1, Math.max(0, cfg.mildThreshold)),
+    pruneThresholdDays:       Math.max(1, cfg.pruneThresholdDays),
+    edgePruneThreshold:       Math.min(1, Math.max(0, cfg.edgePruneThreshold)),
+    promotionThreshold:       Math.min(1, Math.max(0, cfg.promotionThreshold)),
+    contextSlideThreshold:    Math.min(1, Math.max(0, cfg.contextSlideThreshold)),
+    contextSlideCooldownCalls:Math.max(1, cfg.contextSlideCooldownCalls),
+    compressAfterDays:        Math.max(1, cfg.compressAfterDays),
+    ragBootstrapK:            Math.max(0, cfg.ragBootstrapK),
+    ragBootstrapMinSimilarity:Math.min(1, Math.max(0, cfg.ragBootstrapMinSimilarity)),
+    evolveWindowDays:         Math.max(1, cfg.evolveWindowDays),
+    videoFrameIntervalSec:    Math.max(1, cfg.videoFrameIntervalSec),
+  };
 }

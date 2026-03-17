@@ -242,4 +242,75 @@ describe("refineFromReport", () => {
     const log = await readEvolutionLog(join(TMP, "nonexistent.jsonl"));
     expect(log).toEqual([]);
   });
+
+  test("readEvolutionLog skips malformed lines without crashing", async () => {
+    const logPath = join(TMP, "malformed-evolution.jsonl");
+    const { appendFile } = await import("node:fs/promises");
+    await appendFile(logPath, '{"timestamp":"2026-01-01T00:00:00Z","agent_id":"main","window_days":7,"total_outcomes":1,"overall_win_rate":1,"insights":[],"concepts_reinforced":0,"concepts_decayed":0}\n');
+    await appendFile(logPath, 'NOT VALID JSON\n');
+    await appendFile(logPath, '{"timestamp":"2026-01-02T00:00:00Z","agent_id":"main","window_days":7,"total_outcomes":2,"overall_win_rate":0.5,"insights":[],"concepts_reinforced":0,"concepts_decayed":0}\n');
+    const log = await readEvolutionLog(logPath);
+    expect(log.length).toBe(2);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// validateConfig
+// ---------------------------------------------------------------------------
+
+describe("validateConfig", () => {
+  test("clamps negative halfLifeDays to 1", async () => {
+    const { validateConfig, DEFAULT_CONFIG } = await import("../config");
+    const result = validateConfig({ ...DEFAULT_CONFIG, halfLifeDays: -5 });
+    expect(result.halfLifeDays).toBe(1);
+  });
+
+  test("clamps promotionThreshold > 1 to 1", async () => {
+    const { validateConfig, DEFAULT_CONFIG } = await import("../config");
+    const result = validateConfig({ ...DEFAULT_CONFIG, promotionThreshold: 2.5 });
+    expect(result.promotionThreshold).toBe(1);
+  });
+
+  test("clamps contextSlideCooldownCalls to minimum 1", async () => {
+    const { validateConfig, DEFAULT_CONFIG } = await import("../config");
+    const result = validateConfig({ ...DEFAULT_CONFIG, contextSlideCooldownCalls: 0 });
+    expect(result.contextSlideCooldownCalls).toBe(1);
+  });
+
+  test("valid values pass through unchanged", async () => {
+    const { validateConfig, DEFAULT_CONFIG } = await import("../config");
+    const result = validateConfig({ ...DEFAULT_CONFIG });
+    expect(result.halfLifeDays).toBe(DEFAULT_CONFIG.halfLifeDays);
+    expect(result.promotionThreshold).toBe(DEFAULT_CONFIG.promotionThreshold);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// batchWriteToAgent
+// ---------------------------------------------------------------------------
+
+describe("batchWriteToAgent", () => {
+  test("writes multiple texts in one axon I/O cycle", async () => {
+    const { batchWriteToAgent } = await import("../family/write");
+    const { DEFAULT_CONFIG } = await import("../config");
+    const agentDir = join(TMP, "batch-agents");
+    const config = { ...DEFAULT_CONFIG, agentAxonDir: agentDir };
+    const result = await batchWriteToAgent(
+      "batch-test",
+      ["trend following works in bull markets", "avoid reversals during high volatility"],
+      config,
+    );
+    expect(result.agentId).toBe("batch-test");
+    expect(result.conceptsAdded).toBeGreaterThan(0);
+  });
+
+  test("handles empty texts array gracefully", async () => {
+    const { batchWriteToAgent } = await import("../family/write");
+    const { DEFAULT_CONFIG } = await import("../config");
+    const agentDir = join(TMP, "batch-empty-agents");
+    const config = { ...DEFAULT_CONFIG, agentAxonDir: agentDir };
+    const result = await batchWriteToAgent("batch-empty", [], config);
+    expect(result.conceptsAdded).toBe(0);
+    expect(result.edgesAdded).toBe(0);
+  });
 });

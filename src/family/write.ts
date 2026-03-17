@@ -19,6 +19,53 @@ export interface WriteResult {
 }
 
 /**
+ * Process multiple texts and write all extracted concepts in a single axon I/O cycle.
+ * Equivalent to calling writeToAgent() for each text but with one load+save instead of N.
+ */
+export async function batchWriteToAgent(
+  agentId: string,
+  texts: readonly string[],
+  config: Config,
+  nowMs: number = Date.now(),
+  observationType = "",
+): Promise<WriteResult> {
+  if (texts.length === 0) {
+    const axonPath = agentAxonPath(agentId, config.agentAxonDir);
+    return { agentId, axonPath, conceptsAdded: 0, edgesAdded: 0 };
+  }
+
+  const sourceWeight = sourceWeightForAgent(agentId);
+  const timestamp = new Date(nowMs).toISOString();
+  const axonPath = agentAxonPath(agentId, config.agentAxonDir);
+  await mkdir(dirname(axonPath), { recursive: true });
+
+  const store = await AxonStore.load(axonPath);
+  const nodesBefore = store.graph.order;
+  const edgesBefore = store.graph.size;
+
+  for (const text of texts) {
+    const events = processText(text, sourceWeight, "concept", timestamp);
+    for (const event of events) {
+      store.mergeNode(event, agentId, observationType);
+    }
+    for (let i = 0; i < events.length; i++) {
+      for (let j = i + 1; j < events.length; j++) {
+        store.mergeEdge(events[i]!.concept_id, events[j]!.concept_id, timestamp);
+      }
+    }
+  }
+
+  await store.save(axonPath);
+
+  return {
+    agentId,
+    axonPath,
+    conceptsAdded: store.graph.order - nodesBefore,
+    edgesAdded: store.graph.size - edgesBefore,
+  };
+}
+
+/**
  * Process text and write extracted concepts into an agent's private axon store.
  * Creates the agent's theorex directory if it doesn't exist.
  */

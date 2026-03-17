@@ -6,7 +6,7 @@ import { AxonStore } from "../axon/store";
 import { processText } from "../compose";
 import type { EvolutionReport } from "./review";
 import type { Config } from "../config";
-import { mkdir } from "node:fs/promises";
+import { mkdir, appendFile } from "node:fs/promises";
 
 export const DEFAULT_EVOLUTION_LOG = "data/evolution.jsonl";
 
@@ -111,11 +111,7 @@ async function appendEvolutionEntry(entry: EvolutionEntry, logPath: string): Pro
   try {
     const dir = logPath.split("/").slice(0, -1).join("/");
     if (dir) await mkdir(dir, { recursive: true });
-    const line = JSON.stringify(entry) + "\n";
-    await Bun.write(
-      Bun.file(logPath),
-      (await Bun.file(logPath).text().catch(() => "")) + line
-    );
+    await appendFile(logPath, JSON.stringify(entry) + "\n");
   } catch {
     // Non-fatal — evolution still happened even if log write fails
   }
@@ -132,10 +128,16 @@ async function appendEvolutionEntry(entry: EvolutionEntry, logPath: string): Pro
 export async function readEvolutionLog(logPath: string = DEFAULT_EVOLUTION_LOG): Promise<EvolutionEntry[]> {
   try {
     const text = await Bun.file(logPath).text();
-    return text
-      .split("\n")
-      .filter((line) => line.trim().length > 0)
-      .map((line) => JSON.parse(line) as EvolutionEntry);
+    const entries: EvolutionEntry[] = [];
+    for (const line of text.split("\n")) {
+      if (line.trim().length === 0) continue;
+      try {
+        entries.push(JSON.parse(line) as EvolutionEntry);
+      } catch {
+        // Skip malformed lines — don't let one corrupt line break the whole log
+      }
+    }
+    return entries;
   } catch {
     return [];
   }

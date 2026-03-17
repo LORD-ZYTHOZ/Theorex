@@ -10,7 +10,7 @@
 //
 // Edges are promoted only between pairs of concepts that BOTH qualify.
 
-import { mkdir } from "node:fs/promises";
+import { mkdir, copyFile } from "node:fs/promises";
 import { dirname } from "node:path";
 import { AxonStore } from "../axon/store";
 import { compositeScore } from "../axon/scorer";
@@ -116,6 +116,9 @@ export async function promoteToShared(
       }
     }
   }
+
+  // Rotate backup before overwriting shared axon (ARCH-002)
+  await copyFile(sharedPath, sharedPath + ".bak").catch(() => {});
 
   await sharedStore.save(sharedPath);
 

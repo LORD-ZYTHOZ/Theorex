@@ -3,219 +3,364 @@
 ```
 ████████╗██╗  ██╗███████╗ ██████╗ ██████╗ ███████╗██╗  ██╗
 ╚══██╔══╝██║  ██║██╔════╝██╔═══██╗██╔══██╗██╔════╝╚██╗██╔╝
-   ██║   ███████║█████╗  ██║   ██║██████╔╝█████╗   ╚███╔╝ 
-   ██║   ██╔══██║██╔══╝  ██║   ██║██╔══██╗██╔══╝   ██╔██╗ 
+   ██║   ███████║█████╗  ██║   ██║██████╔╝█████╗   ╚███╔╝
+   ██║   ██╔══██║██╔══╝  ██║   ██║██╔══██╗██╔══╝   ██╔██╗
    ██║   ██║  ██║███████╗╚██████╔╝██║  ██║███████╗██╔╝ ██╗
    ╚═╝   ╚═╝  ╚═╝╚══════╝ ╚═════╝ ╚═╝  ╚═╝╚══════╝╚═╝  ╚═╝
 ```
 
-**AI-native memory for multi-agent systems.**  
-Not adapted from human tools — built for how agents actually think.
-
-[![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 [![Bun](https://img.shields.io/badge/Bun-1.3+-fbf0df?style=flat-square&logo=bun&logoColor=000)](https://bun.sh)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=fff)](https://www.typescriptlang.org)
-[![Tests](https://img.shields.io/badge/Tests-450_passing-22C55E?style=flat-square)](#tests)
-[![Phases](https://img.shields.io/badge/Phases-0--8_complete-22C55E?style=flat-square)](#architecture)
-[![Multi-Agent](https://img.shields.io/badge/Multi--Agent-ready-6366f1?style=flat-square)](#multi-agent-setup)
+[![Tests](https://img.shields.io/badge/Tests-826_passing-22C55E?style=flat-square)](#tests)
+[![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 
 </div>
 
----
-
-## What Is This?
-
-Theorex gives AI agents **persistent memory that thinks like they do**.
-
-An **axon** is each agent's personal concept web — a graph of ideas, decisions, and patterns that gets smarter over time. Concepts that matter rise to the top. Concepts that go unused fade and disappear. The ones that really matter get shared across your whole agent fleet.
-
-Every time an agent starts a new session, Theorex **injects its most important active concepts at boot** — so the agent already knows what matters before the first message. No prompting required. No searching. Just context, ready.
+Persistent, self-improving memory system for multi-agent LLM environments. Graph-based concept store with decay scoring, multi-agent promotion, local LLM dispatch, and a closed learning loop that diagnoses its own failures and writes fixes back into memory.
 
 ---
 
-## What It Feels Like
+## Stack
 
-> You spend a session debugging an auth bug. Theorex watches silently via hooks.  
-> Next session, before you type a word, your agent already has:
->
-> ```
-> # Active Memory
-> - authentication      [ACTIVE · 2 days ago]
-> - session_token       [ACTIVE · 2 days ago]  
-> - middleware          [ACTIVE · 3 days ago]
-> - validateSession()   [ACTIVE · code · 2 days ago]
-> ```
->
-> It remembers where you left off. Every session.
-
-That file — `SHARED_CONTEXT.md` — is the **boot injection**: a compact snapshot of what your agents collectively know, regenerated automatically, loaded at every session start.
+| Component | Technology |
+|-----------|-----------|
+| Runtime | Bun 1.3+ |
+| Graph store | Graphology 0.26 (in-memory, serialised to JSON) |
+| NLP extraction | compromise (entity/concept extraction) |
+| Full-text search | wink-bm25-text-search |
+| Semantic search | HNSW-lite (append-only JSONL embedding store) |
+| Embeddings | @huggingface/transformers ONNX, or LM Studio endpoint |
+| Local LLM (large) | Qwen3 32B via MLX — `localhost:8082` |
+| Local LLM (medium) | Ministral 3B via LM Studio — `localhost:1234` |
+| External protocol | JSON-RPC 2.0 (MCP-compatible) on `:18800` |
+| Storage | Flat JSON/JSONL files — no database |
 
 ---
 
-## The Problem With Existing Solutions
+## Core Data Model
 
-Most AI memory systems are **human tools with an AI wrapper** — static documents, flat vector search, query-retrieve cycles. They treat memory like a filing cabinet.
+### AxonNodeAttrs
 
-The problems:
-- **RAG retrieves** — but only when you ask. If you don't know to ask, the memory is lost.
-- **No decay** — stale information from 6 months ago weighs the same as yesterday's decision.
-- **No shared understanding** — agent A learns something, agent B never knows.
-- **No boot context** — every session starts cold. The agent has no idea what's been happening.
-
-Theorex fixes all four.
-
----
-
-## How It Works
-
-Every concept gets a **node** in a graph. Every node has a **score** that changes with experience.
-
-```
-                         ┌─────────────────┐
-                         │  CONCEPT  WEB   │
-                         └────────┬────────┘
-                                  │
-              ┌───────────────────┼───────────────────┐
-              │                   │                   │
-              ▼                   ▼                   ▼
-       [memory:001]        [context:003]        [agents:002]
-       score: 0.91          score: 0.78         score: 0.85
-       tier: ACTIVE         tier: ACTIVE        tier: ACTIVE
-            │                    │                   │
-          0.92                 0.71                0.87
-            │                    │                   │
-            └──────────[decay:004]────────────────┘
-                        score: 0.63
-                        tier:  MILD
-
-    ● ACTIVE   — injected at boot, always in context
-    ○ MILD     — available on query
-    · LESS     — fading, scheduled for pruning
+```typescript
+interface AxonNodeAttrs {
+  canonical_form: string;
+  concept_id: number;          // Bun.hash.wyhash of canonical_form
+  node_type: string;           // "concept" | "code_function" | ...
+  observation_type: string;    // "decision" | "discovery" | "trace_fix" | ...
+  importance_weight: number;   // composite score 0.0–1.0
+  relevance_tier: string;      // "ACTIVE" | "MILD" | "LESS" | "NEUTRAL" | "SLEEPING"
+  frequency_count: number;
+  last_seen: string;           // ISO 8601
+  sentiment: number;           // -1.0 to 1.0
+  agent_id: string;
+  source_weight: number;       // agent source credibility 0.0–1.0
+}
 ```
 
-The **score** is a composite of three signals:
-
-| Signal | What it measures |
-|--------|-----------------|
-| **Recency** | How recently was this concept seen? Decays with half-life. |
-| **Frequency** | How often does it appear? Log-normalized. |
-| **Connections** | Is it co-occurring with other important concepts? Activation propagates through edges. |
-
-Concepts **earn their place** or disappear:
-
-- **First encounter** → enters NEUTRAL, score 0.0
-- **Seen again** → frequency score rises
-- **Co-occurs with important concepts** → edge forms, activation propagates
-- **Not seen for 14 days** → score halves *(configurable)*
-- **Not seen for 30 days** → pruned
-- **Consistently high score** → promoted to the shared multi-agent web
-
----
-
-## Key Concepts Explained
-
-**Axon** — each agent's private concept web. A JSON graph file. No database needed. Lives at `~/.theorex/agents/<id>/theorex/axon.json`.
-
-**Boot injection** — at the start of every session, Theorex reads your agent's ACTIVE-tier concepts and writes them into `SHARED_CONTEXT.md`. Add that file to your agent's memory paths once, and your agent wakes up informed every time.
-
-**Decay** — importance is not permanent. A concept unseen for 14 days has its score halved. Unseen for 30 days, it's pruned. Your agent naturally forgets what stopped mattering — like you do.
-
-**Promotion** — when a concept's score crosses a threshold, it gets pushed to the shared web. This is how agent A's discovery becomes agent B's knowledge.
-
-**Moments** — episodic memories. Not concepts — events. "Fixed the session bug at 3am" is a moment. Moments are permanent and never pruned. They anchor history.
-
----
-
-## Architecture
+### Scoring
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                         FLASH  BUFFER                            │
-│  Hooks watch every tool call · captures significant events live  │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ significant events (score ≥ 0.5)
-                             ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                      SHORT-TERM  MEMORY                          │
-│        14-day rolling JSONL · BM25 + vector hybrid search        │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ graduate after 7 consecutive active days
-                             ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                     LONG-TERM  AXON  (per agent)                 │
-│   Graphology concept web · decay scoring · tier classification   │
-│                                                                  │
-│   ┌──────────┐   ┌──────────┐   ┌──────────┐   ┌──────────┐    │
-│   │  Nodes   │   │  Edges   │   │ Moments  │   │   Code   │    │
-│   │concepts  │   │co-occur  │   │episodic  │   │ symbols  │    │
-│   │+sentiment│   │strength  │   │permanent │   │AST nodes │    │
-│   └──────────┘   └──────────┘   └──────────┘   └──────────┘    │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ promote when score > threshold
-                             ▼
-┌──────────────────────────────────────────────────────────────────┐
-│                    SHARED  AXON  (all agents)                    │
-│         Best concepts from every agent · source-weighted         │
-└────────────────────────────┬─────────────────────────────────────┘
-                             │ boot-inject (runs automatically)
-                             ▼
-                    SHARED_CONTEXT.md
-         ← loaded at the start of every agent session →
+importance_weight = recency(last_seen, halfLifeDays)
+                  × frequencyAmplifier(frequency_count)   // 1 + ln(count)
+                  × coOccurrenceBoost(neighbor_strengths)
+
+recency(t, h) = exp(-ln(2) / h × daysSince(t))
+
+Tier thresholds (configurable):
+  ACTIVE  score >= 0.6   → injected at boot
+  MILD    score >= 0.3   → available on search
+  LESS    score < 0.3    → scheduled for pruning
+  SLEEPING               → cold-stored (Phase 9)
 ```
 
-### Phases
+### observation_type half-lives
 
-| # | Phase | What it adds |
-|---|-------|-------------|
-| 0 | **Significance** | Core scoring — recency × frequency × co-occurrence |
-| 1 | **Long-Term Memory** | Graphology concept web, typed nodes + edges |
-| 2 | **Short-Term Memory** | Flash → STM → graduation pipeline |
-| 3 | **Flash + Hooks** | Claude Code hooks for zero-friction capture |
-| 4 | **RAG Bootstrap** | Embedding-seeded initial edges, cold-start solved |
-| 5 | **Moment Nodes** | Episodic memory — significant events, never pruned |
-| 6 | **AI Family** | Multi-agent shared web + boot injection |
-| 7 | **Code Reading** | TypeScript / Python / Go AST → `code_function` nodes |
-| 8 | **Drift Detection** | Tier instability + sentiment flip detection |
+| Type | Half-life |
+|------|-----------|
+| All standard types | `config.halfLifeDays` (default 14) |
+| `trace_fix` | `min(config.halfLifeDays, 7)` — stale fixes decay faster |
 
 ---
 
-## Quick Start
+## Memory Pipeline
 
-**Requires:** [Bun](https://bun.sh) 1.3+ · [LM Studio](https://lmstudio.ai) with `nomic-embed-text-v1.5`
+```
+Claude Code session
+       │
+       │ PostToolUse hook
+       ▼
+data/flash/{session-id}.json          ← raw tool-use events, scored live
+       │
+       │ Stop hook (or manual: theorex flush)
+       ▼
+data/stm.jsonl                        ← Short-Term Memory, 14-day rolling JSONL
+       │
+       │ theorex graduate (score >= threshold × 7 consecutive days)
+       ▼
+~/.openclaw/agents/{id}/theorex/axon.json   ← Long-Term Axon (Graphology graph)
+       │
+       │ theorex promote (score > promotionThreshold)
+       ▼
+~/.openclaw/workspace/theorex/shared-axon.json   ← Shared multi-agent web
+       │
+       │ theorex boot-inject
+       ▼
+~/.openclaw/workspace/theorex/SHARED_CONTEXT.md  ← injected at session start
+```
+
+---
+
+## Execution Layer
+
+### Dispatch (Phase 16)
+
+Fire-and-forget to local LLM. Caller pre-generates `trace_id` — EventBus uses it so the trace file is addressable before it's written.
+
+```typescript
+// DispatchTask
+{
+  id: string;
+  agent_id: string;
+  task: string;
+  context_pct: number;        // trigger threshold (default 50%)
+  query_tokens: number;
+  tags: string[];
+  outcome_id?: string;        // if set, trace_id is patched onto this outcome on success
+}
+
+// DispatchResult
+{
+  task_id: string;
+  model_used: string;         // "qwen3-32b" | "ministral-3b"
+  response: string;
+  latency_ms: number;
+  success: boolean;
+  written_to_axon: boolean;
+  trace_id?: string;          // the EventBus trace ID (deterministic, pre-generated)
+}
+```
+
+### Routing priority (highest → lowest)
+
+1. **Role registry** (`src/roles/registry.ts`) — operative's `model_preference` wins if it matches the query type
+2. **EnergyDispatch** (`src/router/energy.ts`) — `pmset` battery check, downgrades `large→medium` below 20%
+3. **ConfidenceMatrix** (`src/router/confidence-matrix.ts`) — empirical win-rate data after ≥5 samples per `(query_type, model)` cell; composite score = `0.6 × success_rate + 0.4 × (1 − normalized_latency)`
+4. **HeuristicRouter** (`src/router/heuristic.ts`) — 7 keyword tiers: `code`, `math`, `retrieval`, `synthesis`, `creative`, `safety`, `general`
+
+### EventBus (Phase 15.5)
+
+```typescript
+// LM_INFERENCE_START → LM_INFERENCE_END auto-assembles TraceRecord
+// Caller-supplied trace_id is honoured — EventBus uses it instead of randomUUID()
+
+bus.emit("LM_INFERENCE_START", {
+  agent_id, model, prompt_tokens, query_type,
+  trace_id: preGeneratedId,   // ← pre-generated by worker.ts
+});
+// ... inference ...
+bus.emit("LM_INFERENCE_END", { agent_id, model, ..., success, latency_ms });
+// → writes data/traces/{trace_id}.json atomically (tmp → rename)
+```
+
+TraceRecord `tags[0]` = `query_type` — the ConfidenceMatrix reads this to populate cells correctly.
+
+---
+
+## Evolution Layer
+
+### Outcome recording (Phase 13)
+
+```typescript
+interface OutcomeRecord {
+  id: string;
+  agent_id: string;
+  decision: string;
+  result: string;
+  success: boolean;
+  concept_ids: number[];
+  tags: string[];
+  explicit_score?: number;    // 0.0–1.0 API-provided
+  thumbs_up?: boolean;
+  judge_score?: number;       // 0.0–1.0 async LLM judge
+  trace_id?: string;          // linked TraceRecord — set automatically by dispatch()
+}
+
+// composite score: weighted average of whichever channels are present
+// weights: explicit=40%, thumbs=20%, judge=40% (rebalanced if channels absent)
+// fallback: success → 0.6, failure → 0.0
+```
+
+### Trace Review (Phase 20)
+
+Nightly pass over `data/outcomes/` — for every failure with `compositeScore ≤ 0.3`:
+
+1. Load linked `data/traces/{trace_id}.json`
+2. Build structured prompt: `[outcome decision + result + tags] + [trace model/tokens/latency/error/events]`
+3. POST to Qwen3 32B (`localhost:8082`), fallback Ministral 3B (`localhost:1234`), 45s timeout
+4. Parse response JSON `{ score: 0.0–1.0, fix_description: string }`
+5. `writeToAgent(agent_id, "trace_fix: {fix_description}", config, Date.now(), "trace_fix")`
+6. Return `TraceReviewRecord` — always returned, even on LLM failure (stub with `written_to_axon: false`)
 
 ```bash
-git clone https://github.com/LORD-ZYTHOZ/theorex
-cd theorex
-bun install
+# Standalone
+theorex trace-review --agent main
+
+# Runs automatically inside evolve-review
+theorex evolve-review --agent all
 ```
 
+### Gated Learning (Phase 13)
+
+Policy snapshots saved to `data/policy-snapshots/`. Gate threshold: 2% improvement required before a policy update is committed. Prevents thrashing on noisy outcome data.
+
+---
+
+## MCP Server (Phase 19)
+
+JSON-RPC 2.0 HTTP server. Exposes read/write/search over the agent axon to any external tool.
+
 ```bash
-# Create your agent store
-mkdir -p ~/.theorex/agents/main/theorex
-
-# Write your first concept
-bun run src/cli/index.ts write --agent main "semantic memory beats keyword search"
-
-# See what your agent knows
-bun run src/cli/index.ts status --agent main
+theorex mcp-start --port 18800 --agent main
 ```
 
-At end of a session:
+**Supported methods** (`tools/call` with `name`):
 
-```bash
-bun run src/cli/index.ts session-summary --agent main \
-  --investigated "looked at auth middleware" \
-  --learned "session tokens not invalidated on logout" \
-  --completed "patched validateSession()" \
-  --next "deploy and monitor"
+| name | params | description |
+|------|--------|-------------|
+| `status` | — | agent name, concept count, top ACTIVE concepts |
+| `search` | `query: string` | BM25 + vector hybrid search |
+| `write` | `text: string` | extract concepts + write to axon |
+| `promote` | — | promote qualifying concepts to shared web |
+| `boot-inject` | — | regenerate SHARED_CONTEXT.md |
+
+### A2A Task Protocol (Phase 19)
+
+```typescript
+interface A2ATask {
+  id: string;
+  from_agent: string;
+  to_agent: string;
+  task_type: string;
+  payload: Record<string, unknown>;
+  status: "submitted" | "working" | "completed" | "failed";
+  submitted_at: string;
+  completed_at?: string;
+  result?: unknown;
+}
 ```
 
-Then promote and regenerate boot context:
+Tasks stored in `data/a2a/{to_agent}/`. Agents poll via `theorex a2a-tasks --agent <id>`.
 
-```bash
-bun run src/cli/index.ts promote --agent main
-bun run src/cli/index.ts boot-inject
-# → SHARED_CONTEXT.md is now ready to inject at next session start
+---
+
+## Agent Roles (Phase 18)
+
+```typescript
+interface AgentProfile {
+  agent_id: string;
+  role: "orchestrator" | "operative";
+  capabilities: QueryType[];   // "code" | "math" | "retrieval" | "synthesis" | "general"
+  model_preference: string;    // "qwen3-32b" | "ministral-3b" | "claude-sonnet"
+  active: boolean;
+}
+```
+
+`routeToAgent(queryType, profiles)` — returns the highest-priority operative whose capabilities include the query type. Used by dispatch to override heuristic model selection.
+
+---
+
+## Full Learning Loop
+
+```
+dispatch(task, {outcome_id})
+  ↓
+emit LM_INFERENCE_START (trace_id = preGeneratedUUID)
+  ↓
+callLmStudio() → success/failure
+  ↓
+emit LM_INFERENCE_END
+  ↓
+EventBus.handleInferenceEnd()
+  → TraceRecord written to data/traces/{trace_id}.json
+  ↓
+patchOutcomeTraceId(outcome_id, trace_id)   ← atomic, immutable
+  ↓
+[3am PM2 cron] theorex evolve-review --agent all
+  → reviewOutcomes() + refineFromReport()   ← pattern win-rate analysis
+  → reviewAllFailures()
+       filter: success=false AND compositeScore ≤ 0.3
+       for each:
+         loadTrace(outcome.trace_id)
+         buildTraceReviewPrompt(outcome, trace)
+         callReviewer() → Qwen3 primary / Ministral fallback
+         parseReviewerResponse() → {score, fix_description}
+         writeToAgent(agent_id, "trace_fix: ...", "trace_fix")
+  ↓
+[3am PM2 cron continues] theorex promote + boot-inject
+  → trace_fix concepts in SHARED_CONTEXT.md at next session start
+  → trace_fix half-life = 7 days (decays in scan.ts)
+```
+
+---
+
+## Configuration
+
+`config.json` in project root — all optional, merged with defaults at startup.
+
+```json
+{
+  "halfLifeDays": 14,
+  "activeThreshold": 0.6,
+  "mildThreshold": 0.3,
+  "pruneThresholdDays": 30,
+  "promotionThreshold": 0.5,
+  "evolveWindowDays": 7,
+  "lmStudioUrl": "http://localhost:1234",
+  "lmStudioEmbedModel": "nomic-embed-text-v1.5",
+  "agentAxonDir": "~/.openclaw/agents",
+  "sharedAxonPath": "~/.openclaw/workspace/theorex/shared-axon.json",
+  "outcomesDir": "data/outcomes",
+  "coldStorePath": "data/cold-store.db"
+}
+```
+
+---
+
+## File Layout
+
+```
+src/
+├── axon/           scan.ts prune.ts store.ts scorer.ts propagate.ts
+├── short-term/     store.ts search.ts graduate.ts
+├── flash/          store.ts inject.ts
+├── moments/        capture.ts store.ts search.ts
+├── family/         write.ts paths.ts
+├── rag/            semantic-index.ts bootstrap.ts
+├── trace/          bus.ts index.ts
+├── router/         heuristic.ts confidence-matrix.ts energy.ts
+├── dispatch/       worker.ts index.ts
+├── roles/          registry.ts index.ts
+├── evolve/         outcome.ts review.ts refine.ts gated-learning.ts trace-review.ts
+├── memory/         boot-aware.ts
+├── mcp/            server.ts
+├── a2a/            tasks.ts
+├── audit/          logger.ts reader.ts scorer.ts
+├── vision/         video.ts ingest.ts store.ts
+├── code/           parse.ts parse-multi.ts ingest.ts
+└── cli/            index.ts
+
+data/               (gitignored)
+├── axon.json
+├── stm.jsonl
+├── embeddings.jsonl
+├── traces/
+├── outcomes/
+├── moments/
+├── flash/
+├── traces/
+└── evolution.jsonl
+
+tests/              826 tests across all modules + e2e CLI
 ```
 
 ---
@@ -223,179 +368,102 @@ bun run src/cli/index.ts boot-inject
 ## CLI Reference
 
 ```
-bun run src/cli/index.ts <command> --agent <id> [options]
+theorex <command> [options]
 
-Commands:
-  write            Write a concept or observation
-  status           Show top concepts by composite score
-  search           Hybrid BM25 + vector search
-  scan-agent       Re-score all concepts (apply decay + frequency)
-  prune-agent      Remove LESS-tier concepts past threshold
-  promote          Push qualifying concepts to shared web
-  boot-inject      Regenerate SHARED_CONTEXT.md from shared axon
-  ingest-code      Parse codebase into code_function nodes
-  session-summary  Bulk end-of-session write with typed observations
+Memory
+  write          --agent <id> [--type <obs_type>] <text>
+  status         [--agent <id>]
+  search         <query> [--agent <id>]
+  scan / scan-agent --agent <id>
+  prune / prune-agent --agent <id>
+  promote        --agent <id>
+  boot-inject
+  session-summary --agent <id> --investigated --learned --completed --next
+  synthesize     --agent <id> <text>
 
-Observation types (--type):
-  Conceptual:  decision | discovery | bugfix | feature | refactor | change
-  Code:        function | class | method | arrow
+Ingestion
+  ingest         --agent <id> <files...>
+  ingest-code    --agent <id> <dir>
+  ingest-image   <path> [--agent <id>]
+  ingest-video   <path> [--agent <id>]
+
+Execution
+  dispatch       "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>]
+  route          <query>
+  role-route     <query>
+  roles
+  energy-check
+  boot-aware     [--model <name>] [--agent <id>]
+
+Traces
+  trace-stats
+  matrix-build
+  matrix-show
+
+Evolution
+  outcome        --agent <id> --decision <text> --result <text> [--success|--fail]
+                 [--tags tag1,tag2] [--score 0.0-1.0] [--thumbs-up|--thumbs-down]
+  evolve-review  [--agent <id|all>] [--days <n>]
+  evolve-status  [--agent <id>] [--n <count>]
+  trace-review   [--agent <id|all>]
+  policy-snapshot
+
+MCP / A2A
+  mcp-start      [--port <n>] [--agent <id>]
+  a2a-tasks      [--agent <id>]
+
+Multi-agent
+  query-shared
+  ingest         --agent <id> <files>
+  context-monitor --session <id>
 ```
-
----
-
-## Configuration
-
-Drop a `config.json` in the project root. All fields are optional.
-
-```json
-{
-  "halfLifeDays": 14,
-  "activeThreshold": 0.6,
-  "pruneThresholdDays": 30,
-  "promotionThreshold": 0.5,
-  "lmStudioUrl": "http://localhost:1234",
-  "lmStudioEmbedModel": "nomic-embed-text-v1.5",
-  "agentAxonDir": "~/.theorex/agents",
-  "sharedAxonPath": "~/.theorex/shared/shared-axon.json"
-}
-```
-
-| Key | Default | What it controls |
-|-----|---------|-----------------|
-| `halfLifeDays` | `14` | Days before an unseen concept's score halves |
-| `activeThreshold` | `0.6` | Score floor for ACTIVE tier (auto-injected at boot) |
-| `pruneThresholdDays` | `30` | Days in LESS tier before a concept is deleted |
-| `promotionThreshold` | `0.5` | Score required to enter the shared multi-agent web |
-| `lmStudioUrl` | `http://localhost:1234` | LM Studio OpenAI-compatible endpoint |
-| `agentAxonDir` | `~/.theorex/agents` | Root directory for all per-agent axon files |
-
----
-
-## Multi-Agent Setup
-
-Each agent owns a private axon. High-scoring concepts are promoted to a shared web that every agent boots with.
-
-```
-~/.theorex/
-├── agents/
-│   ├── nova/theorex/axon.json           ← Nova's private concepts
-│   ├── secretarius/theorex/axon.json    ← Secretarius' concepts
-│   └── researcher/theorex/axon.json     ← Researcher's concepts
-└── shared/
-    ├── shared-axon.json                 ← Promoted concepts, all agents
-    └── SHARED_CONTEXT.md                ← Injected at every session start
-```
-
-Add `SHARED_CONTEXT.md` to your agent's memory search paths once. Theorex handles the rest.
-
-**Automate with PM2:**
-
-```bash
-# Auto-promote idle agents every 10 minutes
-pm2 start theorex-idle-flush.sh --name theorex-idle-flush --cron "*/10 * * * *"
-
-# Full nightly decay + prune + promote at 3am
-pm2 start theorex-nightly.sh --name theorex-nightly --cron "0 3 * * *"
-
-pm2 save
-```
-
----
-
-## Claude Code Hooks
-
-Add to `.claude/settings.json` to capture concepts automatically during sessions — no manual writes needed.
-
-```json
-{
-  "hooks": {
-    "PostToolUse": [{
-      "matcher": "",
-      "hooks": [{ 
-        "type": "command",
-        "command": "cd ~/theorex && bun run src/cli/index.ts flash --agent main --session $CLAUDE_SESSION_ID"
-      }]
-    }],
-    "Stop": [{
-      "matcher": "",
-      "hooks": [{
-        "type": "command", 
-        "command": "~/.local/bin/theorex-session-end main"
-      }]
-    }]
-  }
-}
-```
-
-The `Stop` hook runs `synthesize → promote → boot-inject` automatically when your session ends. Next session starts informed.
-
----
-
-## Axon Integration
-
-Theorex pairs with [Axon](AXON-INTEGRATION.md) for code-level memory. Together they give agents the full picture.
-
-```
-   Theorex                          Axon
-   ───────                          ────
-   What matters to the agent   ←→   Where it lives in code
-   Decisions & patterns             Symbols & call graphs
-   Concept web (JSON)               pgvector (PostgreSQL)
-
-   Both use nomic-embed-text-v1.5 — same 768-dim vector space
-```
-
-→ [AXON-INTEGRATION.md](./AXON-INTEGRATION.md)
-
----
-
-## Why Not RAG?
-
-RAG retrieves. Theorex **knows**.
-
-| | RAG | Theorex |
-|-|-----|---------|
-| **How it works** | You query → it finds relevant chunks | Concepts live, decay, and surface automatically |
-| **Relevance** | Cosine similarity at query time | Score earned through repeated experience |
-| **Stale information** | Stays forever unless manually deleted | Decays naturally — half-life removes the noise |
-| **Cross-agent knowledge** | Not built in | Native shared web, source-weighted |
-| **Session start** | Cold — agent knows nothing | Warm — ACTIVE concepts injected automatically |
-| **Code memory** | Embeds raw source files | AST → typed concept nodes + call edges |
-
-RAG is still used inside Theorex — as a cold-start edge seeder (Phase 4). A tool, not the foundation.
 
 ---
 
 ## Tests
 
 ```bash
-bun test
+bun test               # 826 tests, all phases
+bun test tests/evolve  # Evolution layer only
+bun test src/tests/e2e.test.ts  # CLI integration (spawns real subprocesses)
 ```
 
-450 tests across all phases — concept scoring, decay, STM graduation, promotion, RAG bootstrap, code parsing, drift detection, multi-agent family layer.
+Tests use `process.execPath` (not `"bun"`) for subprocess spawning — works on any machine regardless of PATH.
 
 ---
 
-## Stack
+## Quick Start
 
-<div align="center">
+```bash
+git clone https://github.com/LORD-ZYTHOZ/theorex
+cd theorex
+bun install
 
-| Layer | Technology |
-|-------|-----------|
-| Runtime | [Bun](https://bun.sh) 1.3+ |
-| Graph | [Graphology](https://graphology.github.io) 0.26 |
-| NLP | [compromise](https://github.com/spencermountain/compromise) |
-| Search | [wink-bm25-text-search](https://github.com/winkjs/wink-bm25-text-search) |
-| Embeddings | [@huggingface/transformers](https://huggingface.co/docs/transformers.js) (ONNX, runs locally) |
-| LM Studio | [nomic-embed-text-v1.5](https://huggingface.co/nomic-ai/nomic-embed-text-v1.5) |
-| Storage | JSON files — no database required |
+# Write a concept
+bun run src/cli/index.ts write --agent main "TTL invalidation prevents cache stampedes"
 
-</div>
+# Record a dispatch outcome and link it
+bun run src/cli/index.ts outcome --agent main \
+  --decision "use aggressive in-process cache" \
+  --result "stale data served for 10 minutes after deploy" \
+  --fail --tags caching
+
+# Dispatch background analysis (links trace to outcome automatically)
+bun run src/cli/index.ts dispatch "diagnose cache invalidation failure" \
+  --agent main --context 60 --outcome-id <id>
+
+# Run evolution (includes trace review)
+bun run src/cli/index.ts evolve-review --agent main
+
+# Regenerate boot context
+bun run src/cli/index.ts promote --agent main
+bun run src/cli/index.ts boot-inject
+```
 
 ---
 
 <div align="center">
 
-**MIT License** · Built with [Bun](https://bun.sh)
+MIT License · [Bun](https://bun.sh) · TypeScript
 
 </div>

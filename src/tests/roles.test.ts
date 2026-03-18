@@ -226,8 +226,14 @@ describe("routeToAgent()", () => {
 // ---------------------------------------------------------------------------
 
 describe("DEFAULT_AGENT_PROFILES", () => {
-  test("contains exactly 3 profiles", () => {
-    expect(DEFAULT_AGENT_PROFILES.length).toBe(3);
+  test("contains expected agent profiles", () => {
+    const ids = DEFAULT_AGENT_PROFILES.map((p) => p.agent_id);
+    expect(ids).toContain("main");
+    expect(ids).toContain("qwen-sage");
+    expect(ids).toContain("secretarius");
+    expect(ids).toContain("m4-engineer");
+    expect(ids).toContain("claude-code-agent");
+    expect(DEFAULT_AGENT_PROFILES.length).toBe(5);
   });
 
   test("all profiles have required fields", () => {

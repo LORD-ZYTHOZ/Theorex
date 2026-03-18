@@ -64,6 +64,24 @@ export const DEFAULT_AGENT_PROFILES: readonly AgentProfile[] = [
     description: "Ministral operative — lightweight monitoring and fast retrieval",
     active: true,
   },
+  {
+    agent_id: "m4-engineer",
+    role: "operative",
+    capabilities: ["code", "analyze", "review"],
+    preferred_query_types: ["code", "synthesis"],
+    model_preference: "qwen3-32b",
+    description: "M4 engineering operative — code generation, analysis, and technical review on M4 Pro",
+    active: true,
+  },
+  {
+    agent_id: "claude-code-agent",
+    role: "operative",
+    capabilities: ["code", "suggest", "review"],
+    preferred_query_types: ["code", "general"],
+    model_preference: "claude-sonnet",
+    description: "Claude Code agent — interactive coding, suggestions, and code review via Claude Code CLI",
+    active: true,
+  },
 ] as const;
 
 const DEFAULT_PROFILES_PATH = join("data", "agent-profiles.json");

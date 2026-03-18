@@ -1036,6 +1036,47 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 21: Outcome Archive — move old reviewed outcomes to archive subdir
+    case "outcome-archive": {
+      // Usage: theorex outcome-archive [--days <n>] [--dry-run]
+      const { values: oaValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          days:      { type: "string" },
+          "dry-run": { type: "boolean" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const oaDays = typeof oaValues.days === "string" ? parseInt(oaValues.days, 10) : 30;
+      const oaDryRun = oaValues["dry-run"] === true;
+      const oaOutcomesDir = config.outcomesDir ?? "data/outcomes";
+      const { archiveOutcomes } = await import("../evolve/outcome");
+
+      if (oaDryRun) {
+        // Dry-run: read outcomes and report what would be archived without moving files
+        const { readOutcomes } = await import("../evolve/outcome");
+        const all = await readOutcomes(oaOutcomesDir);
+        const cutoffMs = oaDays * 24 * 60 * 60 * 1000;
+        const wouldArchive = all.filter((o) => {
+          const reviewed = o.trace_id !== undefined || o.judge_score !== undefined;
+          const old = Date.now() - new Date(o.timestamp).getTime() >= cutoffMs;
+          return reviewed && old;
+        });
+        console.log(`Dry-run — would archive ${wouldArchive.length} outcome(s) older than ${oaDays} days`);
+        for (const o of wouldArchive) {
+          console.log(`  ${o.id.slice(0, 8)}  ${o.timestamp.slice(0, 10)}  ${o.decision.slice(0, 50)}`);
+        }
+      } else {
+        const result = await archiveOutcomes(oaOutcomesDir, oaDays);
+        console.log(`Outcome archive complete — archived: ${result.archived}, skipped: ${result.skipped}`);
+        if (result.archived > 0) {
+          console.log(`  Archive dir: ${result.archiveDir}`);
+        }
+      }
+      break;
+    }
+
     // Phase 13: Living Code — show evolution history
     case "evolve-status": {
       // Usage: theorex evolve-status [--agent <id>] [--n <count>]

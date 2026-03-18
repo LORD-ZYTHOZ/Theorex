@@ -11,6 +11,7 @@ import {
   recordOutcome,
   readOutcomes,
   readOutcomesSince,
+  archiveOutcomes,
 } from "../evolve/outcome";
 import type { OutcomeRecord } from "../evolve/outcome";
 
@@ -312,5 +313,82 @@ describe("batchWriteToAgent", () => {
     const result = await batchWriteToAgent("batch-empty", [], config);
     expect(result.conceptsAdded).toBe(0);
     expect(result.edgesAdded).toBe(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// archiveOutcomes (Phase 21)
+// ---------------------------------------------------------------------------
+
+describe("archiveOutcomes", () => {
+  const ARCHIVE_TMP = join(TMP, "archive-test-outcomes");
+
+  beforeAll(() => mkdir(ARCHIVE_TMP, { recursive: true }));
+
+  async function writeOldOutcome(dir: string, reviewed: boolean, ageMs: number): Promise<OutcomeRecord> {
+    const o: OutcomeRecord = {
+      ...buildOutcome({ agentId: "main", decision: "test decision", result: "test result", success: true }),
+      timestamp: new Date(Date.now() - ageMs).toISOString(),
+      ...(reviewed ? { judge_score: 0.8 } : {}),
+    };
+    await recordOutcome(o, dir);
+    return o;
+  }
+
+  test("archives reviewed outcomes older than ttlDays", async () => {
+    const dir = join(ARCHIVE_TMP, "case-archive");
+    const MS_35_DAYS = 35 * 24 * 60 * 60 * 1000;
+    await writeOldOutcome(dir, true, MS_35_DAYS);
+
+    const result = await archiveOutcomes(dir, 30);
+    expect(result.archived).toBe(1);
+    expect(result.skipped).toBe(0);
+
+    // Original file should be gone, archive should have it
+    const original = await readOutcomes(dir);
+    expect(original).toHaveLength(0);
+    const archived = await readOutcomes(result.archiveDir);
+    expect(archived).toHaveLength(1);
+  });
+
+  test("does not archive unreviewed outcomes", async () => {
+    const dir = join(ARCHIVE_TMP, "case-unreviewed");
+    const MS_35_DAYS = 35 * 24 * 60 * 60 * 1000;
+    await writeOldOutcome(dir, false, MS_35_DAYS); // no judge_score, no trace_id
+
+    const result = await archiveOutcomes(dir, 30);
+    expect(result.archived).toBe(0);
+    expect(result.skipped).toBe(1);
+  });
+
+  test("does not archive outcomes newer than ttlDays", async () => {
+    const dir = join(ARCHIVE_TMP, "case-new");
+    const MS_5_DAYS = 5 * 24 * 60 * 60 * 1000;
+    await writeOldOutcome(dir, true, MS_5_DAYS); // reviewed but recent
+
+    const result = await archiveOutcomes(dir, 30);
+    expect(result.archived).toBe(0);
+    expect(result.skipped).toBe(1);
+  });
+
+  test("archives outcome with trace_id (no judge_score)", async () => {
+    const dir = join(ARCHIVE_TMP, "case-trace-id");
+    const MS_35_DAYS = 35 * 24 * 60 * 60 * 1000;
+    const o: OutcomeRecord = {
+      ...buildOutcome({ agentId: "main", decision: "trace outcome", result: "ok", success: true }),
+      timestamp: new Date(Date.now() - MS_35_DAYS).toISOString(),
+      trace_id: "abc-123",
+    };
+    await recordOutcome(o, dir);
+
+    const result = await archiveOutcomes(dir, 30);
+    expect(result.archived).toBe(1);
+  });
+
+  test("returns zero counts for empty directory", async () => {
+    const dir = join(ARCHIVE_TMP, "case-empty");
+    const result = await archiveOutcomes(dir, 30);
+    expect(result.archived).toBe(0);
+    expect(result.skipped).toBe(0);
   });
 });

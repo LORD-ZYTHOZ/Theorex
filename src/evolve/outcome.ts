@@ -228,6 +228,75 @@ export async function patchOutcomeTraceId(
 // buildJudgePrompt
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// archiveOutcomes (Phase 21)
+// ---------------------------------------------------------------------------
+
+export interface ArchiveResult {
+  readonly archived: number;
+  readonly skipped: number;
+  readonly archiveDir: string;
+}
+
+/**
+ * Move reviewed outcomes older than `ttlDays` into `{dir}/archive/`.
+ *
+ * "Reviewed" means the outcome has at least one of: trace_id, judge_score.
+ * Unreviewed outcomes are never archived regardless of age.
+ *
+ * Returns counts of archived and skipped files.
+ */
+export async function archiveOutcomes(
+  dir: string = DEFAULT_OUTCOMES_DIR,
+  ttlDays: number = 30,
+): Promise<ArchiveResult> {
+  const archiveDir = `${dir}/archive`;
+  await mkdir(archiveDir, { recursive: true });
+
+  const entries = await readdir(dir).catch(() => [] as string[]);
+  const jsonFiles = entries.filter((e) => e.endsWith(".json") && !e.endsWith(".tmp"));
+
+  const cutoffMs = Date.now() - ttlDays * 24 * 60 * 60 * 1000;
+
+  let archived = 0;
+  let skipped = 0;
+
+  for (const file of jsonFiles) {
+    const filePath = `${dir}/${file}`;
+    let outcome: OutcomeRecord;
+
+    try {
+      outcome = JSON.parse(await readFile(filePath, "utf-8")) as OutcomeRecord;
+    } catch {
+      skipped++;
+      continue;
+    }
+
+    // Only archive reviewed outcomes (trace or judge score present)
+    const isReviewed = outcome.trace_id !== undefined || outcome.judge_score !== undefined;
+    if (!isReviewed) {
+      skipped++;
+      continue;
+    }
+
+    // Only archive outcomes older than ttlDays
+    const outcomeAgeMs = Date.now() - new Date(outcome.timestamp).getTime();
+    if (outcomeAgeMs < ttlDays * 24 * 60 * 60 * 1000) {
+      skipped++;
+      continue;
+    }
+
+    try {
+      await rename(filePath, `${archiveDir}/${file}`);
+      archived++;
+    } catch {
+      skipped++;
+    }
+  }
+
+  return { archived, skipped, archiveDir };
+}
+
 /**
  * Construct the prompt to send to an LLM judge (e.g. Qwen3 or Claude) for
  * async scoring of an outcome.

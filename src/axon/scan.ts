@@ -65,12 +65,20 @@ export async function scanAxon(
       }
     });
 
+    // trace_fix concepts are actionable patches — they should fade faster than
+    // durable knowledge so stale fixes don't linger in boot context.
+    // Use a 7-day half-life instead of the global default (typically 14 days).
+    const effectiveScoringConfig =
+      attrs.observation_type === "trace_fix"
+        ? { ...scoringConfig, halfLifeDays: Math.min(scoringConfig.halfLifeDays, 7) }
+        : scoringConfig;
+
     const score = compositeScore(
       attrs.last_seen,
       attrs.frequency_count,
       neighborStrengths,
       nowMs,
-      scoringConfig,
+      effectiveScoringConfig,
     );
 
     const tier = classifyTier(score, scoringConfig);

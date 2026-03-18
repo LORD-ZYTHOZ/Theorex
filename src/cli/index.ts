@@ -1470,9 +1470,40 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 12: Notify agents of config/pack changes
+    case "notify-agents": {
+      // Usage: theorex notify-agents --reason "text" [--agents id1,id2]
+      const { values: naValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          reason:  { type: "string" },
+          agents:  { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const naReason = typeof naValues.reason === "string" ? naValues.reason.trim() : "";
+      if (!naReason) {
+        console.error('Usage: theorex notify-agents --reason "what changed" [--agents id1,id2]');
+        process.exit(1);
+      }
+      const naAgentIds = typeof naValues.agents === "string"
+        ? naValues.agents.split(",").map((s) => s.trim()).filter(Boolean)
+        : undefined;
+      const { notifyAgents } = await import("../family/notify");
+      const naSummary = await notifyAgents(naReason, naAgentIds);
+      console.log(`Notified ${naSummary.success_count} agent(s) — reason: "${naSummary.reason}"`);
+      for (const r of naSummary.notified) {
+        const status = r.success ? "✓" : `✗ ${r.error ?? "failed"}`;
+        console.log(`  ${r.agent_id}: ${status}`);
+      }
+      if (naSummary.fail_count > 0) process.exit(1);
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]>");
       process.exit(1);
   }
 }

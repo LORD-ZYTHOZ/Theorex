@@ -6,7 +6,7 @@
 //   1. route() picks model tier (large=qwen3-32b, medium=ministral-3b)
 //   2. readPowerState() + getDispatchAdvice() may downgrade large→medium on battery
 //   3. LM_INFERENCE_START emitted on EventBus
-//   4. Bun.fetch POST to LM Studio /v1/chat/completions (30s timeout)
+//   4. Bun.fetch POST to LM Studio /v1/chat/completions (120s timeout — Qwen3 can spike under load)
 //   5. LM_INFERENCE_END emitted on EventBus (trace assembled automatically)
 //   6. Result written to agent axon as a 'discovery' observation
 //   7. DispatchResult returned
@@ -61,7 +61,7 @@ export interface DispatchConfig {
 const DEFAULT_DISPATCH_CONFIG: DispatchConfig = {
   largeModelUrl: "http://localhost:8082",
   mediumModelUrl: "http://localhost:1234",
-  timeoutMs: 30_000,
+  timeoutMs: 120_000,
   contextTriggerPct: 50,
 } as const;
 

@@ -18,6 +18,7 @@ import { emit } from "../trace/bus.ts";
 import { writeToAgent } from "../family/write.ts";
 import { loadConfig } from "../config.ts";
 import { loadProfiles, routeToAgent } from "../roles/index.ts";
+import { patchOutcomeTraceId } from "../evolve/outcome.ts";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -31,6 +32,7 @@ export interface DispatchTask {
   readonly query_tokens: number;
   readonly tags: readonly string[];
   readonly created_at: string;
+  readonly outcome_id?: string; // optional — if set, trace_id is patched onto this outcome after dispatch
 }
 
 export interface DispatchResult {
@@ -41,6 +43,7 @@ export interface DispatchResult {
   readonly success: boolean;
   readonly error?: string;
   readonly written_to_axon: boolean;
+  readonly trace_id?: string; // the EventBus trace ID for this dispatch (if known)
 }
 
 export interface DispatchConfig {
@@ -180,12 +183,17 @@ export async function dispatch(
   const modelName = resolveModelName(effectiveTier);
   const endpoint = resolveEndpoint(effectiveTier, cfg);
 
-  // 3. Emit LM_INFERENCE_START
+  // Pre-generate trace_id so we can return it to the caller and link it to
+  // an outcome_id without waiting for the EventBus to assemble the trace.
+  const traceId = crypto.randomUUID();
+
+  // 3. Emit LM_INFERENCE_START — include caller-supplied trace_id
   emit("LM_INFERENCE_START", {
     agent_id: task.agent_id,
     model: modelName,
     prompt_tokens: task.query_tokens,
     query_type: decision.query_type,
+    trace_id: traceId,
   });
 
   // 4. Call LM Studio
@@ -222,6 +230,18 @@ export async function dispatch(
     ? await writeObservation(task.agent_id, inferenceText, "discovery")
     : false;
 
+  // 6b. Patch outcome_id with trace_id so trace-review can find the trace
+  if (success && task.outcome_id) {
+    const config = await loadConfig();
+    await patchOutcomeTraceId(
+      task.outcome_id,
+      traceId,
+      config.outcomesDir ?? "data/outcomes",
+    ).catch(() => {
+      // Non-fatal — don't fail the dispatch if outcome patching fails
+    });
+  }
+
   // 7. Return DispatchResult
   return {
     task_id: task.id,
@@ -231,6 +251,7 @@ export async function dispatch(
     success,
     ...(errorMsg ? { error: errorMsg } : {}),
     written_to_axon,
+    trace_id: traceId,
   };
 }
 

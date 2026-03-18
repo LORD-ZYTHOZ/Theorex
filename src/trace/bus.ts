@@ -29,6 +29,7 @@ export interface LmInferenceStartPayload {
   readonly model: string;
   readonly prompt_tokens: number;
   readonly query_type: string;
+  readonly trace_id?: string; // caller-supplied — if set, EventBus uses this ID instead of randomUUID
 }
 
 export interface LmInferenceEndPayload {
@@ -171,6 +172,7 @@ interface InFlightSession {
   readonly prompt_tokens: number;
   readonly query_type: string;
   readonly events: BusEvent[];
+  readonly trace_id?: string; // caller-supplied trace ID (from LM_INFERENCE_START payload)
 }
 
 // ---------------------------------------------------------------------------
@@ -180,7 +182,7 @@ interface InFlightSession {
 type Listener<T extends BusEventType> = (event: BusEvent<T>) => void;
 type AnyListener = (event: BusEvent) => void;
 
-class EventBus {
+export class EventBus {
   // listener map: eventType → Set<listener>
   private readonly listeners = new Map<BusEventType, Set<AnyListener>>();
   // in-flight inference sessions keyed by agent_id (one active session per agent)
@@ -247,7 +249,7 @@ class EventBus {
   }
 
   private handleInferenceStart(event: BusEvent<"LM_INFERENCE_START">): Promise<void> {
-    const { agent_id, model, prompt_tokens, query_type } = event.payload;
+    const { agent_id, model, prompt_tokens, query_type, trace_id } = event.payload;
     const session: InFlightSession = {
       agent_id,
       model,
@@ -255,6 +257,7 @@ class EventBus {
       prompt_tokens,
       query_type,
       events: [event as BusEvent],
+      ...(trace_id ? { trace_id } : {}),
     };
     this.inFlight.set(agent_id, session);
     return Promise.resolve();
@@ -269,7 +272,9 @@ class EventBus {
     const finalEvents = [...appendEvent(session, event).events];
 
     const trace: TraceRecord = {
-      id: crypto.randomUUID(),
+      // Use caller-supplied trace_id if present, otherwise generate a new one.
+      // This allows dispatch() to know the trace_id before the trace is written.
+      id: session.trace_id ?? crypto.randomUUID(),
       agent_id,
       model: session.model,
       start_time: session.start_time,

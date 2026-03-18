@@ -200,6 +200,31 @@ export async function patchOutcomeJudgeScore(
 }
 
 // ---------------------------------------------------------------------------
+// patchOutcomeTraceId
+// ---------------------------------------------------------------------------
+
+/**
+ * Read an existing outcome file and atomically write a new copy with the
+ * trace_id field set.  No-ops (does not throw) if the file is missing.
+ * Immutable — original OutcomeRecord is never mutated.
+ */
+export async function patchOutcomeTraceId(
+  outcomeId: string,
+  traceId: string,
+  dir: string = DEFAULT_OUTCOMES_DIR
+): Promise<void> {
+  const filePath = `${dir}/${outcomeId}.json`;
+  const tmpPath = `${filePath}.tmp`;
+
+  const raw = JSON.parse(await readFile(filePath, "utf-8")) as OutcomeRecord;
+
+  const patched: OutcomeRecord = { ...raw, trace_id: traceId };
+
+  await Bun.write(tmpPath, JSON.stringify(patched, null, 2));
+  await rename(tmpPath, filePath);
+}
+
+// ---------------------------------------------------------------------------
 // buildJudgePrompt
 // ---------------------------------------------------------------------------
 

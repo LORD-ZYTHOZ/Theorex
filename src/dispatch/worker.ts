@@ -89,9 +89,14 @@ async function callLmStudio(
   url: string,
   task: string,
   timeoutMs: number,
+  tier: "large" | "medium" | "small" = "medium",
 ): Promise<{ readonly text: string; readonly completion_tokens: number; readonly latency_ms: number }> {
+  // Qwen3 runs in chain-of-thought mode by default — thinking tokens exhaust the
+  // budget before the actual answer is produced, causing 60-90s response times.
+  // Prepending /no_think disables CoT and keeps responses under 10s.
+  const content = tier === "large" ? `/no_think ${task}` : task;
   const body = JSON.stringify({
-    messages: [{ role: "user", content: task }],
+    messages: [{ role: "user", content }],
     max_tokens: 1024,
     temperature: 0.3,
   });
@@ -114,7 +119,12 @@ async function callLmStudio(
     usage?: { completion_tokens?: number };
   };
 
-  const text = json.choices?.[0]?.message?.content ?? "";
+  const raw = json.choices?.[0]?.message?.content ?? "";
+  // Strip Qwen3 <think>...</think> blocks so only the actual answer reaches the axon
+  const text = raw
+    .replace(/<think>[\s\S]*?<\/think>\s*/g, "")  // Qwen3 CoT blocks
+    .replace(/<\|im_end\|>/g, "")                  // Qwen3 end-of-turn token
+    .trim();
   const completion_tokens = json.usage?.completion_tokens ?? 0;
   const latency_ms = Date.now() - start;
 
@@ -214,7 +224,7 @@ export async function dispatch(
   let errorMsg: string | undefined;
 
   try {
-    const result = await callLmStudio(endpoint, task.task, cfg.timeoutMs);
+    const result = await callLmStudio(endpoint, task.task, cfg.timeoutMs, effectiveTier);
     inferenceText = result.text;
     completionTokens = result.completion_tokens;
     latencyMs = result.latency_ms;

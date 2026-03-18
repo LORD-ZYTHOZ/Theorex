@@ -1,11 +1,12 @@
 // tests/cold-storage.test.ts — Phase 9: ColdStore, compressNode, decompressNode
 // Covers: SQLite write/read/delete, compression to stub, decompression to full attrs,
-// graceful fallback when archive is missing, AxonStore wake integration.
+// graceful fallback when archive is missing, AxonStore wake integration,
+// scanAxon end-to-end compression.
 
 import { describe, test, expect, beforeEach, afterEach } from "bun:test";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
-import { rm } from "node:fs/promises";
+import { rm, mkdir } from "node:fs/promises";
 
 import { ColdStore } from "../axon/cold";
 import { compressNode } from "../axon/compress";
@@ -303,6 +304,103 @@ describe("AxonStore.wakeNode (Phase 9 integration)", () => {
     const stub = makeAttrs({ relevance_tier: "SLEEPING", archive_id: "x_1" });
     store.graph.addNode("99", stub);
     store.wakeNode("99"); // should not throw
+    // Node is unchanged — still SLEEPING (no cold storage open)
     expect(store.graph.getNodeAttribute("99", "relevance_tier")).toBe("SLEEPING");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// scanAxon end-to-end compression (Phase 9)
+// ---------------------------------------------------------------------------
+
+describe("scanAxon compression (Phase 9 integration)", () => {
+  const TMP_BASE = join(tmpdir(), "theorex-scan-cold-test-" + Date.now());
+  const AXON_PATH = join(TMP_BASE, "axon.json");
+  const COLD_PATH = join(TMP_BASE, "cold.db");
+
+  afterEach(() => rm(TMP_BASE, { recursive: true, force: true }));
+
+  test("LESS nodes older than compressAfterDays become SLEEPING in cold storage", async () => {
+    await mkdir(TMP_BASE, { recursive: true });
+
+    // Build a store with one old LESS node
+    const store = new AxonStore();
+    const OLD_DATE = "2025-01-01T00:00:00.000Z"; // > 30 days old
+    store.graph.addNode("1", makeAttrs({
+      concept_id: 1,
+      surface_form: "old concept",
+      relevance_tier: "LESS",
+      importance_weight: 0.1,
+      last_seen: OLD_DATE,
+      frequency_count: 2,
+    }));
+    await store.save(AXON_PATH);
+
+    const { scanAxon } = await import("../axon/scan");
+    const { DEFAULT_CONFIG } = await import("../config");
+
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      axonPath: AXON_PATH,
+      coldStorePath: COLD_PATH,
+      compressAfterDays: 1, // trigger with very low threshold
+      halfLifeDays: 14,
+      activeThreshold: 0.5,
+      mildThreshold: 0.3,
+      edgePruneThreshold: 0.01,
+    };
+
+    await scanAxon(AXON_PATH, cfg);
+
+    // Reload and check
+    const reloaded = await AxonStore.load(AXON_PATH);
+    const attrs = reloaded.graph.getNodeAttributes("1");
+    expect(attrs.relevance_tier).toBe("SLEEPING");
+    expect(attrs.archive_id).toBeTruthy();
+
+    // Cold storage should have the original attrs
+    const cold = new ColdStore(COLD_PATH);
+    expect(cold.count()).toBe(1);
+    const archived = cold.restore(attrs.archive_id) as AxonNodeAttrs;
+    expect(archived.surface_form).toBe("old concept");
+    cold.close();
+  });
+
+  test("recently-seen nodes are not compressed even when compressAfterDays is low", async () => {
+    await mkdir(TMP_BASE, { recursive: true });
+
+    const store = new AxonStore();
+    // Use a very recent last_seen so the node stays above LESS after rescoring
+    const recentDate = new Date(Date.now() - 60_000).toISOString(); // 1 minute ago
+    store.graph.addNode("2", makeAttrs({
+      concept_id: 2,
+      surface_form: "active concept",
+      relevance_tier: "ACTIVE",
+      importance_weight: 0.9,
+      last_seen: recentDate,
+      frequency_count: 50,
+    }));
+    await store.save(AXON_PATH);
+
+    const { scanAxon } = await import("../axon/scan");
+    const { DEFAULT_CONFIG } = await import("../config");
+
+    const cfg = {
+      ...DEFAULT_CONFIG,
+      axonPath: AXON_PATH,
+      coldStorePath: COLD_PATH,
+      compressAfterDays: 1,
+      halfLifeDays: 14,
+      activeThreshold: 0.5,
+      mildThreshold: 0.3,
+      edgePruneThreshold: 0.01,
+    };
+
+    await scanAxon(AXON_PATH, cfg);
+
+    // Recently-seen node should NOT have been compressed
+    const reloaded = await AxonStore.load(AXON_PATH);
+    const attrs = reloaded.graph.getNodeAttributes("2");
+    expect(attrs.relevance_tier).not.toBe("SLEEPING");
   });
 });

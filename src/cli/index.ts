@@ -1236,30 +1236,34 @@ if (import.meta.main) {
 
     // Phase 16: Parallel Background Processing — dispatch task to local LLM
     case "dispatch": {
-      // Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>]
+      // Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>]
       const { values: dpValues, positionals: dpPos } = parseArgs({
         args: Bun.argv.slice(3),
         options: {
-          agent:   { type: "string" },
-          context: { type: "string" },
+          agent:        { type: "string" },
+          context:      { type: "string" },
+          "outcome-id": { type: "string" },
         },
         allowPositionals: true,
         strict: false,
       });
       const dpAgent = typeof dpValues.agent === "string" ? dpValues.agent : "main";
       const dpContextPct = typeof dpValues.context === "string" ? parseFloat(dpValues.context) : 50;
+      const dpOutcomeId = typeof dpValues["outcome-id"] === "string" ? dpValues["outcome-id"] : undefined;
       const dpTask = dpPos.join(" ").trim();
       if (!dpTask) {
-        console.error('Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>]');
+        console.error('Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>]');
         process.exit(1);
       }
       const { dispatchIfNeeded } = await import("../dispatch/index");
-      const dpResult = await dispatchIfNeeded(dpAgent, dpTask, dpContextPct);
+      const dpResult = await dispatchIfNeeded(dpAgent, dpTask, dpContextPct, {}, dpOutcomeId);
       if (!dpResult) {
         console.log(`Context at ${dpContextPct}% — below trigger threshold, dispatch skipped.`);
       } else if (dpResult.success) {
         console.log(`Dispatched to ${dpResult.model_used} (${dpResult.latency_ms}ms)`);
         console.log(`  Written to axon: ${dpResult.written_to_axon}`);
+        if (dpOutcomeId) console.log(`  Outcome patched: ${dpOutcomeId}`);
+        if (dpResult.trace_id) console.log(`  Trace ID:        ${dpResult.trace_id}`);
         console.log(`\n${dpResult.response.slice(0, 400)}${dpResult.response.length > 400 ? "\n…" : ""}`);
       } else {
         console.error(`Dispatch failed: ${dpResult.error ?? "unknown error"}`);

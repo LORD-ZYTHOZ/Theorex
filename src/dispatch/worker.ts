@@ -268,6 +268,7 @@ export async function dispatchIfNeeded(
   task: string,
   contextPct: number,
   config: Partial<DispatchConfig> = {},
+  outcomeId?: string,
 ): Promise<DispatchResult | null> {
   const cfg: DispatchConfig = { ...DEFAULT_DISPATCH_CONFIG, ...config };
 
@@ -281,6 +282,7 @@ export async function dispatchIfNeeded(
     query_tokens: Math.ceil(task.length / 4), // rough token estimate
     tags: ["background", "phase16"],
     created_at: new Date().toISOString(),
+    ...(outcomeId ? { outcome_id: outcomeId } : {}),
   };
 
   return dispatch(dispatchTask, config);

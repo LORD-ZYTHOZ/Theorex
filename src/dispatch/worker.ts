@@ -32,7 +32,8 @@ export interface DispatchTask {
   readonly query_tokens: number;
   readonly tags: readonly string[];
   readonly created_at: string;
-  readonly outcome_id?: string; // optional — if set, trace_id is patched onto this outcome after dispatch
+  readonly outcome_id?: string;    // optional — if set, trace_id is patched onto this outcome after dispatch
+  readonly tier_override?: "large" | "medium" | "small"; // optional — bypasses HeuristicRouter + energy check
 }
 
 export interface DispatchResult {
@@ -150,35 +151,44 @@ export async function dispatch(
 ): Promise<DispatchResult> {
   const cfg: DispatchConfig = { ...DEFAULT_DISPATCH_CONFIG, ...config };
 
-  // 1. Route: pick model tier via HeuristicRouter
+  // 1. Route: classify query type and pick model tier
+  // Always classify query type (for matrix tracking), but skip energy/role
+  // overrides when tier_override is explicitly set by caller.
+  let effectiveTier: "large" | "medium" | "small";
   const routingInput: RoutingInput = {
     agent_id: task.agent_id,
     query: task.task,
     context_pct: task.context_pct,
     query_tokens: task.query_tokens,
   };
-  const decision = route(routingInput);
+  const routerDecision = route(routingInput);
+  const queryType = routerDecision.query_type;
 
-  // 1b. Role registry override: if a registered operative prefers a specific
-  //     model for this query type, honour it over the heuristic choice.
-  const profiles = await loadProfiles().catch(() => []);
-  const roleMatch = routeToAgent(decision.query_type, profiles);
-  let heuristicTier = decision.model_tier;
-  if (roleMatch) {
-    const pref = roleMatch.model_preference.toLowerCase();
-    if (pref.includes("qwen3") || pref.includes("large")) {
-      heuristicTier = "large";
-    } else if (pref.includes("ministral") || pref.includes("medium") || pref.includes("small")) {
-      heuristicTier = "medium";
+  if (task.tier_override) {
+    // Caller explicitly chose a tier — use it, skip energy/role overrides
+    effectiveTier = task.tier_override;
+  } else {
+    // 1b. Role registry override: if a registered operative prefers a specific
+    //     model for this query type, honour it over the heuristic choice.
+    const profiles = await loadProfiles().catch(() => []);
+    const roleMatch = routeToAgent(routerDecision.query_type, profiles);
+    let heuristicTier = routerDecision.model_tier;
+    if (roleMatch) {
+      const pref = roleMatch.model_preference.toLowerCase();
+      if (pref.includes("qwen3") || pref.includes("large")) {
+        heuristicTier = "large";
+      } else if (pref.includes("ministral") || pref.includes("medium") || pref.includes("small")) {
+        heuristicTier = "medium";
+      }
     }
-  }
 
-  // 2. Energy check: downgrade large → medium on low battery
-  const powerState = await readPowerState();
-  const advice = getDispatchAdvice(powerState, heuristicTier === "large" ? "high" : "medium");
-  const effectiveTier = (!advice.allow_large_model && heuristicTier === "large")
-    ? ("medium" as const)
-    : heuristicTier;
+    // 2. Energy check: downgrade large → medium on low battery
+    const powerState = await readPowerState();
+    const advice = getDispatchAdvice(powerState, heuristicTier === "large" ? "high" : "medium");
+    effectiveTier = (!advice.allow_large_model && heuristicTier === "large")
+      ? ("medium" as const)
+      : heuristicTier;
+  }
 
   const modelName = resolveModelName(effectiveTier);
   const endpoint = resolveEndpoint(effectiveTier, cfg);
@@ -192,7 +202,7 @@ export async function dispatch(
     agent_id: task.agent_id,
     model: modelName,
     prompt_tokens: task.query_tokens,
-    query_type: decision.query_type,
+    query_type: queryType,
     trace_id: traceId,
   });
 
@@ -269,6 +279,7 @@ export async function dispatchIfNeeded(
   contextPct: number,
   config: Partial<DispatchConfig> = {},
   outcomeId?: string,
+  tierOverride?: "large" | "medium" | "small",
 ): Promise<DispatchResult | null> {
   const cfg: DispatchConfig = { ...DEFAULT_DISPATCH_CONFIG, ...config };
 
@@ -280,9 +291,10 @@ export async function dispatchIfNeeded(
     task,
     context_pct: contextPct,
     query_tokens: Math.ceil(task.length / 4), // rough token estimate
-    tags: ["background", "phase16"],
+    tags: tierOverride ? ["background", "phase16", `tier:${tierOverride}`] : ["background", "phase16"],
     created_at: new Date().toISOString(),
     ...(outcomeId ? { outcome_id: outcomeId } : {}),
+    ...(tierOverride ? { tier_override: tierOverride } : {}),
   };
 
   return dispatch(dispatchTask, config);

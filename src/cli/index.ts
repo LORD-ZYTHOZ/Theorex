@@ -1277,13 +1277,14 @@ if (import.meta.main) {
 
     // Phase 16: Parallel Background Processing — dispatch task to local LLM
     case "dispatch": {
-      // Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>]
+      // Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>] [--tier medium|large]
       const { values: dpValues, positionals: dpPos } = parseArgs({
         args: Bun.argv.slice(3),
         options: {
           agent:        { type: "string" },
           context:      { type: "string" },
           "outcome-id": { type: "string" },
+          tier:         { type: "string" },
         },
         allowPositionals: true,
         strict: false,
@@ -1291,13 +1292,17 @@ if (import.meta.main) {
       const dpAgent = typeof dpValues.agent === "string" ? dpValues.agent : "main";
       const dpContextPct = typeof dpValues.context === "string" ? parseFloat(dpValues.context) : 50;
       const dpOutcomeId = typeof dpValues["outcome-id"] === "string" ? dpValues["outcome-id"] : undefined;
+      const dpTierRaw = typeof dpValues.tier === "string" ? dpValues.tier : undefined;
+      const dpTier = (dpTierRaw === "large" || dpTierRaw === "medium" || dpTierRaw === "small")
+        ? dpTierRaw as "large" | "medium" | "small"
+        : undefined;
       const dpTask = dpPos.join(" ").trim();
       if (!dpTask) {
-        console.error('Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>]');
+        console.error('Usage: theorex dispatch "<task>" [--agent <id>] [--context <pct>] [--outcome-id <id>] [--tier medium|large]');
         process.exit(1);
       }
       const { dispatchIfNeeded } = await import("../dispatch/index");
-      const dpResult = await dispatchIfNeeded(dpAgent, dpTask, dpContextPct, {}, dpOutcomeId);
+      const dpResult = await dispatchIfNeeded(dpAgent, dpTask, dpContextPct, {}, dpOutcomeId, dpTier);
       if (!dpResult) {
         console.log(`Context at ${dpContextPct}% — below trigger threshold, dispatch skipped.`);
       } else if (dpResult.success) {

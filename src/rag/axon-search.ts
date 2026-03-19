@@ -9,6 +9,7 @@
 
 import { cosineSimilarity } from "../short-term/embedder";
 import type { AxonNodeAttrs } from "../axon/store";
+import { searchHNSW, type HNSWIndex } from "./hnsw";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -104,6 +105,54 @@ export function semanticSearchAxon(
 // ---------------------------------------------------------------------------
 // Merge — deduplicate text + semantic results, take max score per concept
 // ---------------------------------------------------------------------------
+
+// ---------------------------------------------------------------------------
+// HNSW semantic search — Phase 9.5: O(log n) approximate nearest neighbor
+// Drop-in replacement for semanticSearchAxon using a pre-built HNSW index.
+// Falls back to linear scan if index is empty or has no entry point.
+// ---------------------------------------------------------------------------
+
+/**
+ * Semantic search over axon concept nodes using a live HNSW index.
+ * Significantly faster than semanticSearchAxon at scale (100k+ nodes).
+ * Falls back to linear cosine scan if the index is empty.
+ */
+export function semanticSearchAxonHNSW(
+  queryEmbedding: readonly number[],
+  nodes: readonly AxonNodeAttrs[],
+  vectors: Map<string, number[]>,
+  hnswIndex: HNSWIndex,
+  topK: number,
+): readonly AxonSearchResult[] {
+  if (nodes.length === 0 || vectors.size === 0) return [];
+
+  // Fall back to linear scan if HNSW index has no nodes
+  if (!hnswIndex.entrypoint) {
+    const embStore = Object.fromEntries(vectors);
+    return semanticSearchAxon(queryEmbedding, nodes, embStore, topK);
+  }
+
+  const hnswResults = searchHNSW(hnswIndex, vectors, queryEmbedding as number[], topK);
+
+  // Build a lookup from concept_id → node for score enrichment
+  const nodeById = new Map<number, AxonNodeAttrs>();
+  for (const n of nodes) nodeById.set(n.concept_id, n);
+
+  const results: AxonSearchResult[] = [];
+  for (const { id, distance } of hnswResults) {
+    const conceptId = Number(id);
+    if (!nodeById.has(conceptId)) continue;
+    const node = nodeById.get(conceptId)!;
+    results.push({
+      concept_id: conceptId,
+      surface_form: node.surface_form,
+      score: Math.max(0, Math.min(1, 1 - distance)), // convert distance → similarity
+      source: "semantic" as const,
+    });
+  }
+
+  return results;
+}
 
 /**
  * Merge text and semantic results, deduplicating by concept_id.

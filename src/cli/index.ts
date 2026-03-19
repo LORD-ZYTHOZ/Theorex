@@ -14,8 +14,9 @@ import { compositeScore, classifyTier } from "../axon/scorer";
 import { loadConfig } from "../config";
 import type { Config } from "../config";
 import { hybridSearch } from "../short-term/search";
-import { textMatchAxon, semanticSearchAxon, mergeAxonResults } from "../rag/axon-search";
-import { loadEmbeddingStore } from "../rag/embedding-store";
+import { textMatchAxon, semanticSearchAxonHNSW, mergeAxonResults } from "../rag/axon-search";
+import { loadEmbeddingStore, loadEmbeddings } from "../rag/embedding-store";
+import { loadOrBuildHNSWIndex, buildAndSaveHNSWIndex } from "../rag/hnsw-store";
 import { embedText } from "../short-term/embedder";
 import { readShortTermFiles, rotateStm } from "../short-term/store";
 import { findGraduateCandidates, graduateToLongTerm } from "../short-term/graduate";
@@ -260,7 +261,7 @@ export async function runSearch(query: string, config: Config): Promise<void> {
     // moment search failure is non-fatal
   }
 
-  // Phase 4.5: Axon long-term concept search (text + semantic)
+  // Phase 4.5 + 9.5: Axon long-term concept search (text + HNSW semantic)
   try {
     const axon = await AxonStore.load(config.axonPath ?? "data/axon.json");
     const nodes = axon.graph
@@ -268,16 +269,21 @@ export async function runSearch(query: string, config: Config): Promise<void> {
       .map((k) => axon.graph.getNodeAttributes(k));
 
     if (nodes.length > 0) {
-      const embStore = await loadEmbeddingStore(config.ragEmbeddingStorePath ?? "data/concept-embeddings.json").catch(() => ({}));
+      const embStorePath = config.ragEmbeddingStorePath ?? "data/concept-embeddings.json";
+      const vectors = await loadEmbeddings(embStorePath).catch(() => new Map<string, number[]>());
 
       const textResults = textMatchAxon(query, nodes, 10);
 
-      // Semantic results — only if embeddings available and query can be embedded
+      // Semantic results via HNSW — only if embeddings available
       let semanticResults: Awaited<ReturnType<typeof mergeAxonResults>> = [];
-      if (Object.keys(embStore).length > 0) {
+      if (vectors.size > 0) {
         const queryVec = await embedText(query, config.lmStudioUrl, config.lmStudioEmbedModel, config.lmStudioTimeoutMs);
         if (queryVec !== null) {
-          semanticResults = semanticSearchAxon(queryVec, nodes, embStore, 10) as typeof semanticResults;
+          const hnswPath = config.hnswIndexPath ?? "data/hnsw-index.json";
+          const hnswIndex = await loadOrBuildHNSWIndex(hnswPath, vectors).catch(() => null);
+          if (hnswIndex) {
+            semanticResults = semanticSearchAxonHNSW(queryVec, nodes, vectors, hnswIndex, 10) as typeof semanticResults;
+          }
         }
       }
 
@@ -1628,9 +1634,25 @@ if (import.meta.main) {
       break;
     }
 
+    case "build-index": {
+      // Phase 9.5: Build (or rebuild) the HNSW index from the embedding store
+      const embStorePath = config.ragEmbeddingStorePath ?? "data/concept-embeddings.json";
+      const hnswPath = config.hnswIndexPath ?? "data/hnsw-index.json";
+      const vectors = await loadEmbeddings(embStorePath).catch(() => new Map<string, number[]>());
+      if (vectors.size === 0) {
+        console.log("No embeddings found — nothing to index. Run theorex scan first to populate embeddings.");
+        break;
+      }
+      console.log(`Building HNSW index from ${vectors.size} embeddings...`);
+      const built = await buildAndSaveHNSWIndex(hnswPath, vectors);
+      const nodeCount = Object.keys(built.nodes).length;
+      console.log(`HNSW index built: ${nodeCount} nodes, maxLevel=${built.maxLevel}, M=${built.M} → saved to ${hnswPath}`);
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>>");
       process.exit(1);
   }
 }

@@ -19,6 +19,7 @@ export interface Config {
   ragBootstrapMinSimilarity: number;   // default: 0.4 — min cosine similarity to seed
   ragSeedDissolutionDays: number;      // default: 7  — days before unreinforced seed dissolves
   ragEmbeddingStorePath: string;       // default: "data/concept-embeddings.json"
+  hnswIndexPath: string;               // default: "data/hnsw-index.json"
   ragOnnxModel: string;                // default: "Xenova/all-MiniLM-L6-v2"
   // Phase 5: Moment Nodes
   momentsDir: string;                  // default: "data/moments"
@@ -78,6 +79,7 @@ export const DEFAULT_CONFIG: Config = {
   ragBootstrapMinSimilarity: 0.4,
   ragSeedDissolutionDays: 7,
   ragEmbeddingStorePath: "data/concept-embeddings.json",
+  hnswIndexPath: "data/hnsw-index.json",
   ragOnnxModel: "Xenova/all-MiniLM-L6-v2",
   // Phase 5: Moment Nodes
   momentsDir: "data/moments",

@@ -1,0 +1,16 @@
+{
+  "mcpServers": {
+    "theorex": {
+      "type": "stdio",
+      "command": "bun",
+      "args": ["run", "/Users/eoh/theorex/src/cli/index.ts", "mcp-start"],
+      "description": "Theorex semantic memory — concepts, drift, moments, vaults"
+    },
+    "gitnexus": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "gitnexus@latest", "mcp"],
+      "description": "GitNexus structural code intelligence — blast radius, call chains, impact analysis"
+    }
+  }
+}

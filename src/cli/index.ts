@@ -872,20 +872,40 @@ if (import.meta.main) {
     }
 
     case "ingest-code": {
-      // Usage: theorex ingest-code --agent <id> <dir>
+      // Usage: theorex ingest-code --agent <id> <dir> [--gitnexus]
       const { values: icValues, positionals: icPos } = parseArgs({
         args: Bun.argv.slice(3),
-        options: { agent: { type: "string" } },
+        options: {
+          agent: { type: "string" },
+          gitnexus: { type: "boolean" },
+        },
         allowPositionals: true,
         strict: false,
       });
       const icAgent = typeof icValues.agent === "string" ? icValues.agent : icPos[0];
       const icDir = typeof icValues.agent === "string" ? icPos[0] : icPos[1];
       if (!icAgent || !icDir) {
-        console.error("Usage: theorex ingest-code --agent <id> <dir>");
+        console.error("Usage: theorex ingest-code --agent <id> <dir> [--gitnexus]");
         process.exit(1);
       }
       await runIngestCode(icAgent, icDir, config);
+
+      // Phase 7.5: optionally run GitNexus structural analysis after AST ingest
+      if (icValues.gitnexus) {
+        const { analyzeWithGitNexus } = await import("../code/gitnexus-bridge");
+        console.log(`\n[gitnexus] Indexing ${icDir}...`);
+        const gnResult = await analyzeWithGitNexus(icAgent, icDir, config);
+        if (gnResult.status === "unavailable") {
+          console.warn(`[gitnexus] ${gnResult.message}`);
+          console.warn(`[gitnexus] Structural index skipped — Theorex AST index still complete.`);
+        } else if (gnResult.status === "failed") {
+          console.warn(`[gitnexus] ${gnResult.message}`);
+        } else {
+          console.log(`[gitnexus] ${gnResult.message}`);
+          console.log(`[gitnexus] Marker node 'gitnexus:${icDir.split("/").pop()}' written to axon.`);
+          console.log(`[gitnexus] Run: theorex mcp-start to serve both Theorex + GitNexus via MCP.`);
+        }
+      }
       break;
     }
 

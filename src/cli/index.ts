@@ -14,6 +14,9 @@ import { compositeScore, classifyTier } from "../axon/scorer";
 import { loadConfig } from "../config";
 import type { Config } from "../config";
 import { hybridSearch } from "../short-term/search";
+import { textMatchAxon, semanticSearchAxon, mergeAxonResults } from "../rag/axon-search";
+import { loadEmbeddingStore } from "../rag/embedding-store";
+import { embedText } from "../short-term/embedder";
 import { readShortTermFiles, rotateStm } from "../short-term/store";
 import { findGraduateCandidates, graduateToLongTerm } from "../short-term/graduate";
 import { readMoments } from "../moments/store";
@@ -255,6 +258,41 @@ export async function runSearch(query: string, config: Config): Promise<void> {
     }
   } catch {
     // moment search failure is non-fatal
+  }
+
+  // Phase 4.5: Axon long-term concept search (text + semantic)
+  try {
+    const axon = await AxonStore.load(config.axonPath ?? "data/axon.json");
+    const nodes = axon.graph
+      .nodes()
+      .map((k) => axon.graph.getNodeAttributes(k));
+
+    if (nodes.length > 0) {
+      const embStore = await loadEmbeddingStore(config.ragEmbeddingStorePath ?? "data/concept-embeddings.json").catch(() => ({}));
+
+      const textResults = textMatchAxon(query, nodes, 10);
+
+      // Semantic results — only if embeddings available and query can be embedded
+      let semanticResults: Awaited<ReturnType<typeof mergeAxonResults>> = [];
+      if (Object.keys(embStore).length > 0) {
+        const queryVec = await embedText(query, config.lmStudioUrl, config.lmStudioEmbedModel, config.lmStudioTimeoutMs);
+        if (queryVec !== null) {
+          semanticResults = semanticSearchAxon(queryVec, nodes, embStore, 10) as typeof semanticResults;
+        }
+      }
+
+      const axonResults = mergeAxonResults(textResults, semanticResults, 5);
+
+      if (axonResults.length > 0) {
+        console.log("\n--- Long-term Axon ---");
+        for (const r of axonResults) {
+          const tier = nodes.find((n) => n.concept_id === r.concept_id)?.relevance_tier ?? "?";
+          console.log(`[${tier}] ${r.surface_form} (${r.score.toFixed(3)} ${r.source})`);
+        }
+      }
+    }
+  } catch {
+    // axon search failure is non-fatal
   }
 }
 

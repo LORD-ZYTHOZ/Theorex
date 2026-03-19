@@ -5,6 +5,7 @@
 import { describe, test, expect } from "bun:test";
 import {
   formatTemporalContext,
+  computeMarketSessions,
   type TemporalContext,
   type TimeOfDay,
   type GapType,
@@ -31,6 +32,7 @@ function makeCtx(overrides: Partial<TemporalContext> = {}): TemporalContext {
     gap_type: "first_session" as GapType,
     session_count: 1,
     reorientation_needed: false,
+    market_sessions: [],
     ...overrides,
   };
 }
@@ -82,7 +84,6 @@ describe("formatTemporalContext()", () => {
 
   test("does not append location when location is empty", () => {
     const result = formatTemporalContext(makeCtx({ location: "" }));
-    // The Time line should not end with "| " followed by a location
     const timeLine = result.split("\n").find((l) => l.startsWith("Time:")) ?? "";
     expect(timeLine).not.toMatch(/\| \S/);
   });
@@ -146,5 +147,139 @@ describe("formatTemporalContext()", () => {
     const ctx = makeCtx({ hour: 7 });
     const result = formatTemporalContext(ctx);
     expect(result).toContain("07:");
+  });
+
+  // Market session lines in format output
+  test("shows open market session with closes_in_min", () => {
+    const ctx = makeCtx({
+      market_sessions: [{
+        name: "london",
+        label: "London",
+        status: "open",
+        opens_in_min: null,
+        closes_in_min: 120,
+      }],
+    });
+    const result = formatTemporalContext(ctx);
+    expect(result).toContain("London");
+    expect(result).toContain("Markets:");
+    expect(result).toContain("120m");
+  });
+
+  test("shows upcoming session with opens_in_min", () => {
+    const ctx = makeCtx({
+      market_sessions: [{
+        name: "new_york",
+        label: "New York",
+        status: "open",
+        opens_in_min: 45,
+        closes_in_min: null,
+      }],
+    });
+    const result = formatTemporalContext(ctx);
+    expect(result).toContain("New York opens in 45m");
+  });
+
+  test("shows OVERLAP tag for overlapping sessions", () => {
+    const ctx = makeCtx({
+      market_sessions: [
+        { name: "london", label: "London", status: "overlap", opens_in_min: null, closes_in_min: 90 },
+        { name: "new_york", label: "New York", status: "overlap", opens_in_min: null, closes_in_min: 300 },
+      ],
+    });
+    const result = formatTemporalContext(ctx);
+    expect(result).toContain("[OVERLAP]");
+  });
+
+  test("omits Markets line when no sessions active or upcoming", () => {
+    const ctx = makeCtx({ market_sessions: [] });
+    const result = formatTemporalContext(ctx);
+    expect(result).not.toContain("Markets:");
+  });
+});
+
+// ---------------------------------------------------------------------------
+// computeMarketSessions — pure function, fully testable by UTC hour
+// ---------------------------------------------------------------------------
+
+describe("computeMarketSessions()", () => {
+  test("London is open at 10:00 UTC", () => {
+    const sessions = computeMarketSessions(10, 0);
+    const london = sessions.find(s => s.name === "london");
+    expect(london).toBeDefined();
+    expect(london!.opens_in_min).toBeNull(); // already open
+    expect(london!.closes_in_min).not.toBeNull();
+  });
+
+  test("New York is open at 15:00 UTC", () => {
+    const sessions = computeMarketSessions(15, 0);
+    const ny = sessions.find(s => s.name === "new_york");
+    expect(ny).toBeDefined();
+    expect(ny!.opens_in_min).toBeNull();
+  });
+
+  test("London/NY overlap at 14:00 UTC — both open, status=overlap", () => {
+    const sessions = computeMarketSessions(14, 0);
+    const london = sessions.find(s => s.name === "london");
+    const ny = sessions.find(s => s.name === "new_york");
+    expect(london).toBeDefined();
+    expect(ny).toBeDefined();
+    expect(london!.status).toBe("overlap");
+    expect(ny!.status).toBe("overlap");
+  });
+
+  test("Sydney wraps midnight — open at 23:00 UTC", () => {
+    const sessions = computeMarketSessions(23, 0);
+    const sydney = sessions.find(s => s.name === "sydney");
+    expect(sydney).toBeDefined();
+    expect(sydney!.opens_in_min).toBeNull(); // open
+  });
+
+  test("Sydney open at 02:00 UTC (after midnight)", () => {
+    const sessions = computeMarketSessions(2, 0);
+    const sydney = sessions.find(s => s.name === "sydney");
+    expect(sydney).toBeDefined();
+    expect(sydney!.opens_in_min).toBeNull();
+  });
+
+  test("Tokyo open at 03:00 UTC", () => {
+    const sessions = computeMarketSessions(3, 0);
+    const tokyo = sessions.find(s => s.name === "tokyo");
+    expect(tokyo).toBeDefined();
+    expect(tokyo!.opens_in_min).toBeNull();
+  });
+
+  test("New York is open at 20:00 UTC (closes at 22:00)", () => {
+    // 20:00 UTC: London closed (17:00), NY open until 22:00
+    const sessions = computeMarketSessions(20, 0);
+    const ny = sessions.find(s => s.name === "new_york");
+    expect(ny).toBeDefined();
+    expect(ny!.opens_in_min).toBeNull(); // already open
+    // London and Tokyo are closed and not within 2h window
+    const london = sessions.find(s => s.name === "london");
+    expect(london).toBeUndefined();
+  });
+
+  test("upcoming session shown when opening within 2h", () => {
+    // Sydney opens at 22:00 UTC. At 20:30 UTC that's 1h30m away = within 2h
+    const sessions = computeMarketSessions(20, 30);
+    const sydney = sessions.find(s => s.name === "sydney");
+    expect(sydney).toBeDefined();
+    expect(sydney!.opens_in_min).not.toBeNull();
+    expect(sydney!.opens_in_min).toBeLessThanOrEqual(120);
+  });
+
+  test("session not shown when more than 2h away", () => {
+    // London opens at 08:00 UTC. At 03:00 UTC that's 5h away — not shown
+    const sessions = computeMarketSessions(3, 0);
+    const london = sessions.find(s => s.name === "london");
+    expect(london).toBeUndefined();
+  });
+
+  test("closes_in_min is positive when session is open", () => {
+    const sessions = computeMarketSessions(10, 0);
+    for (const s of sessions.filter(s => s.opens_in_min === null)) {
+      expect(s.closes_in_min).toBeGreaterThan(0);
+    }
   });
 });

@@ -1,6 +1,9 @@
 // temporal/context.ts — Build a human-contextual temporal awareness node.
 // Phase 14: AI-native time — not a clock for meetings, a gap detector and human-context reader.
 // Every interaction carries a timecode. Gap = silence = elapsed human time.
+//
+// Phase 14b (market sessions): adds active/upcoming trading session awareness.
+// Sessions computed in UTC and mapped to human-readable labels.
 
 import { loadTemporalRecord, saveTemporalRecord } from "./store";
 import type { TemporalRecord } from "./store";
@@ -27,6 +30,20 @@ export type WorkContext =
   | "after_hours"     // 18:00–21:59
   | "late_night";     // 22:00–04:59
 
+export type MarketSessionName =
+  | "sydney"    // 22:00–07:00 UTC
+  | "tokyo"     // 00:00–06:00 UTC
+  | "london"    // 08:00–17:00 UTC
+  | "new_york"; // 13:00–22:00 UTC
+
+export interface MarketSession {
+  readonly name: MarketSessionName;
+  readonly label: string;       // e.g. "London"
+  readonly status: "open" | "overlap"; // open = active, overlap = two sessions active
+  readonly opens_in_min: number | null; // null if already open
+  readonly closes_in_min: number | null; // null if not open
+}
+
 export interface TemporalContext {
   readonly current_time: string;       // ISO 8601
   readonly timezone: string;           // IANA e.g. "Australia/Sydney"
@@ -42,6 +59,99 @@ export interface TemporalContext {
   readonly gap_type: GapType;
   readonly session_count: number;      // total sessions including this one
   readonly reorientation_needed: boolean; // true if gap >= long_break
+  readonly market_sessions: readonly MarketSession[]; // active or upcoming within 2h
+}
+
+// ---------------------------------------------------------------------------
+// Market session windows (UTC hours)
+// ---------------------------------------------------------------------------
+
+interface SessionWindow {
+  readonly name: MarketSessionName;
+  readonly label: string;
+  readonly openUtcHour: number;  // 0–23
+  readonly closeUtcHour: number; // 0–23 (if < openUtcHour, wraps midnight)
+}
+
+const SESSION_WINDOWS: readonly SessionWindow[] = [
+  { name: "sydney",   label: "Sydney",   openUtcHour: 22, closeUtcHour: 7  },
+  { name: "tokyo",    label: "Tokyo",    openUtcHour: 0,  closeUtcHour: 6  },
+  { name: "london",   label: "London",   openUtcHour: 8,  closeUtcHour: 17 },
+  { name: "new_york", label: "New York", openUtcHour: 13, closeUtcHour: 22 },
+] as const;
+
+/** Is utcHour inside [openH, closeH) with midnight wrap support? */
+function isInWindow(utcHour: number, openH: number, closeH: number): boolean {
+  if (openH < closeH) {
+    return utcHour >= openH && utcHour < closeH;
+  }
+  // Wraps midnight: open in evening, closes in morning
+  return utcHour >= openH || utcHour < closeH;
+}
+
+/** Minutes until openH from current utcHour (0–1439). */
+function minutesUntilOpen(utcMinuteOfDay: number, openH: number): number {
+  const openMin = openH * 60;
+  const diff = openMin - utcMinuteOfDay;
+  return diff > 0 ? diff : diff + 1440; // wrap 24h
+}
+
+/** Minutes until closeH from current utcHour (0–1439). */
+function minutesUntilClose(utcMinuteOfDay: number, closeH: number): number {
+  const closeMin = closeH * 60;
+  const diff = closeMin - utcMinuteOfDay;
+  return diff > 0 ? diff : diff + 1440;
+}
+
+/**
+ * Compute active and upcoming market sessions from a UTC hour + minute.
+ * Returns sessions that are either currently open or open within the next 2 hours.
+ */
+export function computeMarketSessions(utcHour: number, utcMinute: number = 0): MarketSession[] {
+  const utcMinuteOfDay = utcHour * 60 + utcMinute;
+  const UPCOMING_WINDOW_MIN = 120; // show sessions opening within 2h
+
+  const active: MarketSession[] = [];
+  const openNames = new Set<MarketSessionName>();
+
+  // First pass: identify open sessions
+  for (const w of SESSION_WINDOWS) {
+    if (isInWindow(utcHour, w.openUtcHour, w.closeUtcHour)) {
+      openNames.add(w.name);
+    }
+  }
+
+  // Second pass: build MarketSession objects
+  for (const w of SESSION_WINDOWS) {
+    const isOpen = openNames.has(w.name);
+
+    if (isOpen) {
+      // Determine if this is an overlap (two sessions open simultaneously)
+      // London/NY overlap: 13:00–17:00 UTC is the key volatility window
+      const overlapPartner = isOpen && openNames.size > 1;
+      active.push({
+        name: w.name,
+        label: w.label,
+        status: overlapPartner ? "overlap" : "open",
+        opens_in_min: null,
+        closes_in_min: minutesUntilClose(utcMinuteOfDay, w.closeUtcHour),
+      });
+    } else {
+      // Not open — check if opening within 2 hours
+      const minsUntil = minutesUntilOpen(utcMinuteOfDay, w.openUtcHour);
+      if (minsUntil <= UPCOMING_WINDOW_MIN) {
+        active.push({
+          name: w.name,
+          label: w.label,
+          status: "open", // will be open — we call it open for display
+          opens_in_min: minsUntil,
+          closes_in_min: null,
+        });
+      }
+    }
+  }
+
+  return active;
 }
 
 // ---------------------------------------------------------------------------
@@ -92,8 +202,6 @@ function formatGapHuman(gapMs: number | null): string {
   const remHours = hours % 24;
   return remHours > 0 ? `${days}d ${remHours}h` : `${days}d`;
 }
-
-const DAY_NAMES = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
 
 // ---------------------------------------------------------------------------
 // Main export
@@ -155,6 +263,11 @@ export async function buildTemporalContext(config: Config): Promise<TemporalCont
   };
   saveTemporalRecord(config.temporalStorePath, newRecord).catch(() => {});
 
+  // Market sessions — from current UTC time
+  const utcHour = now.getUTCHours();
+  const utcMinute = now.getUTCMinutes();
+  const market_sessions = computeMarketSessions(utcHour, utcMinute);
+
   return {
     current_time: currentIso,
     timezone,
@@ -170,6 +283,7 @@ export async function buildTemporalContext(config: Config): Promise<TemporalCont
     gap_type: gapType,
     session_count: sessionCount,
     reorientation_needed: gapType === "long_break" || gapType === "sleep" || gapType === "days" || gapType === "weeks",
+    market_sessions,
   };
 }
 
@@ -212,6 +326,22 @@ export function formatTemporalContext(ctx: TemporalContext): string {
     lines.push("Late night session — keep responses tight, respect their time.");
   } else if (ctx.work_context === "after_hours") {
     lines.push("After hours — personal/project time, not work time.");
+  }
+
+  // Market sessions — only emit if any are active or upcoming
+  if (ctx.market_sessions.length > 0) {
+    const sessionParts: string[] = [];
+    for (const s of ctx.market_sessions) {
+      if (s.opens_in_min !== null) {
+        sessionParts.push(`${s.label} opens in ${s.opens_in_min}m`);
+      } else if (s.closes_in_min !== null) {
+        const tag = s.status === "overlap" ? " [OVERLAP]" : "";
+        sessionParts.push(`${s.label} open, closes in ${s.closes_in_min}m${tag}`);
+      }
+    }
+    if (sessionParts.length > 0) {
+      lines.push(`Markets: ${sessionParts.join(" | ")}`);
+    }
   }
 
   return lines.join("\n");

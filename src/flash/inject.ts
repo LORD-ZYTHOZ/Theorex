@@ -12,6 +12,7 @@ import type { MomentNode } from "../moments/store";
 import { buildTemporalContext, formatTemporalContext } from "../temporal/context";
 import { loadConfig, type Config } from "../config";
 import { loadProfessionPack, formatPackContext } from "../profession/loader";
+import { writeToAgent } from "../family/write";
 
 const MAX_ACTIVE_NODES = 10;
 const MAX_RECENT_ENTRIES = 5;
@@ -48,6 +49,13 @@ export async function injectContext(
       const temporal = await buildTemporalContext(config);
       const temporalText = formatTemporalContext(temporal);
       lines.push(temporalText);
+
+      // Write gap observation to agent axon on significant gaps — the brain remembers time.
+      // This lets temporal patterns accumulate: "user comes back after sleep", "long absence", etc.
+      if (temporal.reorientation_needed && config.temporalAgentId) {
+        const gapObservation = `Session #${temporal.session_count} started after ${temporal.gap_human} gap [${temporal.gap_type}]. ${temporal.date} ${temporal.time_of_day} (${temporal.work_context}).`;
+        writeToAgent(config.temporalAgentId, gapObservation, config, Date.now(), "change").catch(() => {});
+      }
     }
   } catch {
     // Temporal failure is non-fatal — session continues without time context

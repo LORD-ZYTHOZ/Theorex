@@ -64,6 +64,8 @@ export interface Config {
   healthDir: string;                   // default: "data/health"
   healthProbeTimeoutMs: number;        // default: 3000
   healthWindowDays: number;            // default: 7
+  // Phase 23: Multi-Vault Shared Memory
+  vaultRegistryPath: string;           // default: "data/vaults.json"
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -127,6 +129,8 @@ export const DEFAULT_CONFIG: Config = {
   healthDir: "data/health",
   healthProbeTimeoutMs: 3000,
   healthWindowDays: 7,
+  // Phase 23: Multi-Vault Shared Memory
+  vaultRegistryPath: "data/vaults.json",
 };
 
 /**

@@ -1650,6 +1650,175 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 23: vault-list — show all registered vaults
+    case "vault-list": {
+      const { loadVaultRegistry } = await import("../vaults/registry");
+      const vaults = await loadVaultRegistry(config.vaultRegistryPath ?? "data/vaults.json");
+
+      console.log(`Vaults (${vaults.length})\n`);
+      const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+      const COL_NAME = 12;
+      const COL_MEMBERS = 40;
+      const COL_DOMAINS = 40;
+      const header = pad("name", COL_NAME) + pad("members", COL_MEMBERS) + pad("domains", COL_DOMAINS);
+      console.log(header);
+      console.log("-".repeat(header.length));
+      for (const v of vaults) {
+        const members = v.members.join(", ");
+        const domains = v.domains.length > 0 ? v.domains.join(", ") : "(all)";
+        console.log(pad(v.name, COL_NAME) + pad(members, COL_MEMBERS) + pad(domains, COL_DOMAINS));
+      }
+      break;
+    }
+
+    // Phase 23: vault-create — create or update a vault in the registry
+    case "vault-create": {
+      const { values: vcValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          name: { type: "string" },
+          members: { type: "string" },
+          readonly: { type: "string" },
+          domains: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const { loadVaultRegistry, saveVaultRegistry, upsertVault, resolveVaultAxonPath } = await import("../vaults/registry");
+      const vaultName = typeof vcValues.name === "string" ? vcValues.name.trim() : "";
+      if (!vaultName) {
+        console.error("Usage: theorex vault-create --name <name> [--members id1,id2] [--readonly id3] [--domains d1,d2]");
+        process.exit(1);
+      }
+      const members = typeof vcValues.members === "string"
+        ? vcValues.members.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
+      const readOnly = typeof vcValues.readonly === "string"
+        ? vcValues.readonly.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
+      const domains = typeof vcValues.domains === "string"
+        ? vcValues.domains.split(",").map((s) => s.trim()).filter(Boolean)
+        : [];
+      const registryPath = config.vaultRegistryPath ?? "data/vaults.json";
+      const existing = await loadVaultRegistry(registryPath);
+      const newVault = {
+        name: vaultName,
+        path: resolveVaultAxonPath(vaultName),
+        members,
+        read_only_members: readOnly,
+        domains,
+        created_at: new Date().toISOString(),
+      };
+      const updated = upsertVault(existing, newVault);
+      await saveVaultRegistry(updated, registryPath);
+      console.log(`Vault '${vaultName}' saved.`);
+      console.log(`  Path:     ${newVault.path}`);
+      console.log(`  Members:  ${members.join(", ") || "(none)"}`);
+      console.log(`  Readonly: ${readOnly.join(", ") || "(none)"}`);
+      console.log(`  Domains:  ${domains.join(", ") || "(all)"}`);
+      break;
+    }
+
+    // Phase 23: vault-promote — promote agent private axon to a named vault
+    case "vault-promote": {
+      const { values: vpValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent: { type: "string" },
+          vault: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const vpAgentId = typeof vpValues.agent === "string" ? vpValues.agent.trim() : "";
+      const vpVaultName = typeof vpValues.vault === "string" ? vpValues.vault.trim() : "";
+      if (!vpAgentId || !vpVaultName) {
+        console.error("Usage: theorex vault-promote --agent <id> --vault <name>");
+        process.exit(1);
+      }
+      const { loadVaultRegistry, findVault } = await import("../vaults/registry");
+      const { promoteToVault } = await import("../vaults/promote");
+      const registryPath = config.vaultRegistryPath ?? "data/vaults.json";
+      const vaults = await loadVaultRegistry(registryPath);
+      const vault = findVault(vpVaultName, vaults);
+      if (!vault) {
+        console.error(`Vault not found: ${vpVaultName}. Run: theorex vault-list`);
+        process.exit(1);
+      }
+      console.log(`Promoting ${vpAgentId} → vault '${vpVaultName}'...`);
+      const result = await promoteToVault(vpAgentId, vault, config);
+      if (result.denied) {
+        console.error(`Agent '${vpAgentId}' is not a member of vault '${vpVaultName}'.`);
+        process.exit(1);
+      }
+      console.log(`  Promoted:  ${result.promoted} concepts, ${result.edgesPromoted} edges`);
+      console.log(`  Skipped:   ${result.skipped} (below threshold)`);
+      console.log(`  Filtered:  ${result.filtered} (domain filter)`);
+      break;
+    }
+
+    // Phase 23: vault-query — show top concepts from a vault
+    case "vault-query": {
+      const { values: vqValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          vault: { type: "string" },
+          top: { type: "string" },
+          merge: { type: "boolean" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const { loadVaultRegistry, findVault } = await import("../vaults/registry");
+      const { queryVault, mergeVaults } = await import("../vaults/query");
+      const registryPath = config.vaultRegistryPath ?? "data/vaults.json";
+      const vaults = await loadVaultRegistry(registryPath);
+      const topN = typeof vqValues.top === "string" ? parseInt(vqValues.top, 10) || 20 : 20;
+      const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+      const COL_TIER = 8;
+      const COL_FORM = 24;
+      const COL_SCORE = 8;
+      const COL_AGENT = 20;
+
+      if (vqValues.merge) {
+        // Merged view across all vaults
+        console.log("Merged vault view\n");
+        const merged = await mergeVaults(vaults, config, topN);
+        if (merged.length === 0) { console.log("No concepts in any vault yet."); break; }
+        const header = pad("tier", COL_TIER) + pad("concept", COL_FORM) + pad("score", COL_SCORE) + pad("vaults/agents", COL_AGENT);
+        console.log(header);
+        console.log("-".repeat(header.length));
+        for (const c of merged) {
+          console.log(pad(c.relevance_tier.slice(0, 7), COL_TIER) + pad(c.surface_form, COL_FORM) + pad(c.score.toFixed(3), COL_SCORE) + pad(`${c.vault_name} / ${c.agent_id}`, COL_AGENT));
+        }
+        break;
+      }
+
+      const vqVaultName = typeof vqValues.vault === "string" ? vqValues.vault.trim() : "";
+      if (!vqVaultName) {
+        console.error("Usage: theorex vault-query --vault <name> [--top N] | --merge");
+        process.exit(1);
+      }
+      const vault = findVault(vqVaultName, vaults);
+      if (!vault) {
+        console.error(`Vault not found: ${vqVaultName}. Run: theorex vault-list`);
+        process.exit(1);
+      }
+      const concepts = await queryVault(vault, config, topN);
+      if (concepts.length === 0) {
+        console.log(`Vault '${vqVaultName}' is empty. Run: theorex vault-promote --agent <id> --vault ${vqVaultName}`);
+        break;
+      }
+      console.log(`Vault: ${vqVaultName} — top ${concepts.length} concepts\n`);
+      const header = pad("tier", COL_TIER) + pad("concept", COL_FORM) + pad("score", COL_SCORE) + pad("agent", COL_AGENT);
+      console.log(header);
+      console.log("-".repeat(header.length));
+      for (const c of concepts) {
+        console.log(pad(c.relevance_tier.slice(0, 7), COL_TIER) + pad(c.surface_form, COL_FORM) + pad(c.score.toFixed(3), COL_SCORE) + pad(c.agent_id, COL_AGENT));
+      }
+      break;
+    }
+
     // Phase 21: health — show latest health snapshots for all agents
     case "health": {
       const { readAllHealthSnapshots: readAllSnaps } = await import("../health/store");
@@ -1751,7 +1920,7 @@ if (import.meta.main) {
 
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>|health|health-check [--agent <id>]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>|health|health-check [--agent <id>]|vault-list|vault-create --name <name> [--members id1,id2] [--readonly id3] [--domains d1,d2]|vault-promote --agent <id> --vault <name>|vault-query --vault <name> [--top N] | --merge>");
       process.exit(1);
   }
 }

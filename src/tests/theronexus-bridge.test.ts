@@ -1,10 +1,10 @@
-// gitnexus-bridge.test.ts — Phase 7.5
+// theronexus-bridge.test.ts — Phase 7.5
 
 import { test, expect, describe, beforeEach, afterEach } from "bun:test";
 import { mkdtemp, rm, mkdir } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { analyzeWithTheronexus } from "../code/gitnexus-bridge";
+import { analyzeWithTheronexus } from "../code/theronexus-bridge";
 import { DEFAULT_CONFIG } from "../config";
 
 describe("analyzeWithTheronexus", () => {
@@ -34,7 +34,7 @@ describe("analyzeWithTheronexus", () => {
     expect(typeof result.message).toBe("string");
   }, 10_000);
 
-  test("writes marker node to agent axon regardless of gitnexus outcome", async () => {
+  test("writes marker node to agent axon regardless of theronexus outcome", async () => {
     const agentsDir = join(tmpDir, "agents");
     await mkdir(agentsDir, { recursive: true });
 

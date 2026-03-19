@@ -872,12 +872,12 @@ if (import.meta.main) {
     }
 
     case "ingest-code": {
-      // Usage: theorex ingest-code --agent <id> <dir> [--gitnexus]
+      // Usage: theorex ingest-code --agent <id> <dir> [--theronexus]
       const { values: icValues, positionals: icPos } = parseArgs({
         args: Bun.argv.slice(3),
         options: {
           agent: { type: "string" },
-          gitnexus: { type: "boolean" },
+          theronexus: { type: "boolean" },
         },
         allowPositionals: true,
         strict: false,
@@ -885,14 +885,14 @@ if (import.meta.main) {
       const icAgent = typeof icValues.agent === "string" ? icValues.agent : icPos[0];
       const icDir = typeof icValues.agent === "string" ? icPos[0] : icPos[1];
       if (!icAgent || !icDir) {
-        console.error("Usage: theorex ingest-code --agent <id> <dir> [--gitnexus]");
+        console.error("Usage: theorex ingest-code --agent <id> <dir> [--theronexus]");
         process.exit(1);
       }
       await runIngestCode(icAgent, icDir, config);
 
       // Phase 7.5: optionally run Theronexus structural analysis after AST ingest
-      if (icValues.gitnexus) {
-        const { analyzeWithTheronexus } = await import("../code/gitnexus-bridge");
+      if (icValues.theronexus) {
+        const { analyzeWithTheronexus } = await import("../code/theronexus-bridge");
         console.log(`\n[theronexus] Indexing ${icDir}...`);
         const gnResult = await analyzeWithTheronexus(icAgent, icDir, config);
         if (gnResult.status === "unavailable") {

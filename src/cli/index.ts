@@ -1501,9 +1501,98 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 12 extension: set-user-pref — write personal layer for an agent
+    case "set-user-pref": {
+      // Usage: theorex set-user-pref --agent <id> [--name "Name"] [--tone formal|casual|balanced]
+      //          [--length brief|detailed|adaptive] [--note "text"] [--contact "text"]
+      const { values: supValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:   { type: "string" },
+          name:    { type: "string" },
+          tone:    { type: "string" },
+          length:  { type: "string" },
+          note:    { type: "string" },
+          contact: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const supAgentId = typeof supValues.agent === "string" ? supValues.agent.trim() : "";
+      if (!supAgentId) {
+        console.error("Usage: theorex set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]");
+        process.exit(1);
+      }
+      const { loadPersonalLayer: supLoad, savePersonalLayer: supSave } = await import("../profession/personal");
+      const cfg = await loadConfig();
+      const existing = await supLoad(supAgentId, cfg.agentAxonDir || undefined) ?? {
+        name: supAgentId,
+        tone: "balanced" as const,
+        response_length: "adaptive" as const,
+        notes: [] as string[],
+        key_contacts: [] as string[],
+        last_seen: new Date().toISOString(),
+      };
+      const validTones = ["formal", "casual", "balanced"] as const;
+      const validLengths = ["brief", "detailed", "adaptive"] as const;
+      const newTone = typeof supValues.tone === "string" && validTones.includes(supValues.tone as any)
+        ? supValues.tone as typeof existing.tone
+        : existing.tone;
+      const newLength = typeof supValues.length === "string" && validLengths.includes(supValues.length as any)
+        ? supValues.length as typeof existing.response_length
+        : existing.response_length;
+      const updated = {
+        ...existing,
+        name: typeof supValues.name === "string" ? supValues.name.trim() : existing.name,
+        tone: newTone,
+        response_length: newLength,
+        notes: typeof supValues.note === "string"
+          ? [...existing.notes, supValues.note.trim()].filter(Boolean)
+          : existing.notes,
+        key_contacts: typeof supValues.contact === "string"
+          ? [...existing.key_contacts, supValues.contact.trim()].filter(Boolean)
+          : existing.key_contacts,
+        last_seen: new Date().toISOString(),
+      };
+      await supSave(supAgentId, updated, cfg.agentAxonDir || undefined);
+      console.log(`Personal layer updated for agent: ${supAgentId}`);
+      console.log(`  Name: ${updated.name}`);
+      console.log(`  Tone: ${updated.tone}, Length: ${updated.response_length}`);
+      console.log(`  Notes: ${updated.notes.length}`);
+      console.log(`  Contacts: ${updated.key_contacts.length}`);
+      break;
+    }
+
+    // Phase 12 extension: show-user-pref — display personal layer for an agent
+    case "show-user-pref": {
+      // Usage: theorex show-user-pref --agent <id>
+      const { values: shpValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const shpAgentId = typeof shpValues.agent === "string" ? shpValues.agent.trim() : "";
+      if (!shpAgentId) {
+        console.error("Usage: theorex show-user-pref --agent <id>");
+        process.exit(1);
+      }
+      const { loadPersonalLayer: shpLoad, formatPersonalContext: shpFormat } = await import("../profession/personal");
+      const shpCfg = await loadConfig();
+      const layer = await shpLoad(shpAgentId, shpCfg.agentAxonDir || undefined);
+      if (!layer) {
+        console.log(`No personal layer found for agent: ${shpAgentId}`);
+        console.log(`Create one with: theorex set-user-pref --agent ${shpAgentId} --name "Your Name"`);
+      } else {
+        console.log(shpFormat(layer));
+        console.log(`\nLast seen: ${layer.last_seen}`);
+      }
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>>");
       process.exit(1);
   }
 }

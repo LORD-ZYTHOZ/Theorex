@@ -12,6 +12,7 @@ import type { MomentNode } from "../moments/store";
 import { buildTemporalContext, formatTemporalContext } from "../temporal/context";
 import { loadConfig, type Config } from "../config";
 import { loadProfessionPack, formatPackContext } from "../profession/loader";
+import { loadPersonalLayer, formatPersonalContext } from "../profession/personal";
 import { writeToAgent } from "../family/write";
 
 const MAX_ACTIVE_NODES = 10;
@@ -74,6 +75,21 @@ export async function injectContext(
     }
   } catch {
     // Pack load failure is non-fatal
+  }
+
+  // 0c. Personal layer — Phase 12 extension (business mode only)
+  try {
+    if (config?.deploymentMode === "business" && config.temporalAgentId) {
+      const layer = await loadPersonalLayer(
+        config.temporalAgentId,
+        config.agentAxonDir || undefined,
+      );
+      if (layer) {
+        lines.push(formatPersonalContext(layer));
+      }
+    }
+  } catch {
+    // Personal layer load failure is non-fatal
   }
 
   // Hoist activeIds so the moments block can access it (set in block 1)

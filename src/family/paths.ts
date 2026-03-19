@@ -15,6 +15,12 @@ export function agentAxonPath(agentId: string, agentAxonDir = ""): string {
   return join(base, agentId, "theorex", "axon.json");
 }
 
+/** Absolute path to a specific agent's personal layer (business mode). */
+export function agentPersonalLayerPath(agentId: string, agentAxonDir = ""): string {
+  const base = agentAxonDir || join(OPENCLAW_BASE, "agents");
+  return join(base, agentId, "theorex", "personal.json");
+}
+
 /** Absolute path to the shared concept web. */
 export function resolvedSharedAxonPath(configPath = ""): string {
   return configPath || join(OPENCLAW_BASE, "workspace", "theorex", "shared-axon.json");

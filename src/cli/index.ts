@@ -890,20 +890,20 @@ if (import.meta.main) {
       }
       await runIngestCode(icAgent, icDir, config);
 
-      // Phase 7.5: optionally run GitNexus structural analysis after AST ingest
+      // Phase 7.5: optionally run Theronexus structural analysis after AST ingest
       if (icValues.gitnexus) {
-        const { analyzeWithGitNexus } = await import("../code/gitnexus-bridge");
-        console.log(`\n[gitnexus] Indexing ${icDir}...`);
-        const gnResult = await analyzeWithGitNexus(icAgent, icDir, config);
+        const { analyzeWithTheronexus } = await import("../code/gitnexus-bridge");
+        console.log(`\n[theronexus] Indexing ${icDir}...`);
+        const gnResult = await analyzeWithTheronexus(icAgent, icDir, config);
         if (gnResult.status === "unavailable") {
-          console.warn(`[gitnexus] ${gnResult.message}`);
-          console.warn(`[gitnexus] Structural index skipped — Theorex AST index still complete.`);
+          console.warn(`[theronexus] ${gnResult.message}`);
+          console.warn(`[theronexus] Structural index skipped — Theorex AST index still complete.`);
         } else if (gnResult.status === "failed") {
-          console.warn(`[gitnexus] ${gnResult.message}`);
+          console.warn(`[theronexus] ${gnResult.message}`);
         } else {
-          console.log(`[gitnexus] ${gnResult.message}`);
-          console.log(`[gitnexus] Marker node 'gitnexus:${icDir.split("/").pop()}' written to axon.`);
-          console.log(`[gitnexus] Run: theorex mcp-start to serve both Theorex + GitNexus via MCP.`);
+          console.log(`[theronexus] ${gnResult.message}`);
+          console.log(`[theronexus] Marker node 'theronexus:${icDir.split("/").pop()}' written to axon.`);
+          console.log(`[theronexus] Run: theorex mcp-start to serve both Theorex + Theronexus via MCP.`);
         }
       }
       break;

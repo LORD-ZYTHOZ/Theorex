@@ -1,15 +1,16 @@
-// code/gitnexus-bridge.ts — Phase 7.5: GitNexus Integration
-// Coordinates with the external GitNexus CLI (npx gitnexus) to build a structural
+// code/gitnexus-bridge.ts — Phase 7.5: Theronexus Integration
+// Coordinates with the external Theronexus CLI (npx gitnexus) to build a structural
 // code index alongside Theorex's semantic AST index.
 //
-// GitNexus license: PolyForm Noncommercial 1.0.0 — NOT embedded here.
+// Theronexus license: PolyForm Noncommercial 1.0.0 — NOT embedded here.
 // This module only shells out to it as an external tool.
+// npm package name: gitnexus (published as gitnexus@latest)
 //
 // What this does:
-//   1. Check if gitnexus is available on $PATH / via npx
-//   2. Run `gitnexus analyze <dir>` to build / refresh the .gitnexus/ index
+//   1. Check if Theronexus is available on $PATH / via npx
+//   2. Run `theronexus analyze <dir>` to build / refresh the .gitnexus/ index
 //   3. Check .gitnexus/ was created and return metadata
-//   4. Write a "gitnexus_indexed" observation node into the agent's axon
+//   4. Write a "theronexus_indexed" observation node into the agent's axon
 //      so Theorex remembers that this directory has structural intelligence attached.
 
 import { join } from "node:path";
@@ -24,14 +25,14 @@ import type { Config } from "../config";
 // Types
 // ---------------------------------------------------------------------------
 
-export type GitNexusStatus =
-  | "indexed"     // gitnexus ran and .gitnexus/ was created
-  | "refreshed"   // .gitnexus/ already existed, gitnexus refreshed it
+export type TheronexusStatus =
+  | "indexed"     // Theronexus ran and .gitnexus/ was created
+  | "refreshed"   // .gitnexus/ already existed, Theronexus refreshed it
   | "unavailable" // npx gitnexus not found
-  | "failed";     // gitnexus ran but exited non-zero
+  | "failed";     // Theronexus ran but exited non-zero
 
-export interface GitNexusResult {
-  readonly status: GitNexusStatus;
+export interface TheronexusResult {
+  readonly status: TheronexusStatus;
   readonly dir: string;
   readonly indexDir: string;        // path to .gitnexus/ dir
   readonly durationMs: number;
@@ -61,15 +62,15 @@ async function isIndexNonEmpty(indexDir: string): Promise<boolean> {
 }
 
 // ---------------------------------------------------------------------------
-// Run gitnexus analyze
+// Run Theronexus analyze
 // ---------------------------------------------------------------------------
 
 /**
  * Run `npx gitnexus@latest analyze <dir>` as a subprocess.
+ * (npm package is published as gitnexus — the tool is branded Theronexus)
  * Returns the exit code, or -1 if the process could not be spawned.
- * Captures stdout/stderr — does NOT stream to the caller's console.
  */
-async function runGitNexusAnalyze(
+async function runTheronexusAnalyze(
   dir: string,
   timeoutMs: number = 120_000,
 ): Promise<{ exitCode: number; stderr: string }> {
@@ -110,42 +111,40 @@ async function runGitNexusAnalyze(
 // ---------------------------------------------------------------------------
 
 /**
- * Analyze a directory with GitNexus and write a marker node into the agent's axon.
+ * Analyze a directory with Theronexus and write a marker node into the agent's axon.
  *
- * The marker node records that this directory has a GitNexus structural index,
- * so Theorex knows to route code-structure queries through the GitNexus MCP tools.
+ * The marker node records that this directory has a Theronexus structural index,
+ * so Theorex knows to route code-structure queries through the Theronexus MCP tools.
  */
-export async function analyzeWithGitNexus(
+export async function analyzeWithTheronexus(
   agentId: string,
   dir: string,
   config: Config,
   nowMs: number = Date.now(),
   analyzeTimeoutMs: number = 120_000,
-): Promise<GitNexusResult> {
+): Promise<TheronexusResult> {
   const indexDir = join(dir, ".gitnexus");
   const alreadyIndexed = await dirExists(indexDir) && await isIndexNonEmpty(indexDir);
   const start = Date.now();
 
-  const { exitCode, stderr } = await runGitNexusAnalyze(dir, analyzeTimeoutMs);
+  const { exitCode, stderr } = await runTheronexusAnalyze(dir, analyzeTimeoutMs);
   const durationMs = Date.now() - start;
 
-  let status: GitNexusStatus;
+  let status: TheronexusStatus;
   let message: string;
 
   if (exitCode === -1) {
     status = "unavailable";
-    message = "npx gitnexus not available — install Node 18+ or run: npm i -g gitnexus";
+    message = "Theronexus not available — install Node 18+ or run: npm i -g gitnexus";
   } else if (exitCode !== 0) {
     status = "failed";
-    message = `gitnexus analyze exited ${exitCode}: ${stderr.slice(0, 200)}`;
+    message = `Theronexus analyze exited ${exitCode}: ${stderr.slice(0, 200)}`;
   } else {
     status = alreadyIndexed ? "refreshed" : "indexed";
     message = `${status}: .gitnexus/ created in ${durationMs}ms`;
   }
 
-  // Write marker node into agent axon regardless of outcome
-  // This records that gitnexus was attempted for this directory.
-  await writeGitNexusMarker(agentId, dir, status, config, nowMs);
+  await writeTheronexusMarker(agentId, dir, status, config, nowMs);
 
   return { status, dir, indexDir, durationMs, message };
 }
@@ -155,19 +154,19 @@ export async function analyzeWithGitNexus(
 // ---------------------------------------------------------------------------
 
 /**
- * Write (or update) a "gitnexus_indexed" marker node into the agent's axon.
+ * Write (or update) a "theronexus_indexed" marker node into the agent's axon.
  *
- * Node surface_form: "gitnexus:<basename(dir)>"
- * observation_type: "gitnexus_indexed" | "gitnexus_failed"
+ * Node surface_form: "theronexus:<basename(dir)>"
+ * observation_type: "theronexus_indexed" | "theronexus_failed"
  * node_type: "code_function"
  *
- * This allows `theorex search gitnexus` or `theorex status` to show which
+ * This allows `theorex search theronexus` or `theorex status` to show which
  * repos have structural intelligence available.
  */
-async function writeGitNexusMarker(
+async function writeTheronexusMarker(
   agentId: string,
   dir: string,
-  status: GitNexusStatus,
+  status: TheronexusStatus,
   config: Config,
   nowMs: number,
 ): Promise<void> {
@@ -178,13 +177,13 @@ async function writeGitNexusMarker(
   const sourceWeight = sourceWeightForAgent(agentId);
   const timestamp = new Date(nowMs).toISOString();
   const baseName = dir.split("/").filter(Boolean).pop() ?? dir;
-  const surfaceForm = `gitnexus:${baseName}`;
+  const surfaceForm = `theronexus:${baseName}`;
   const MAX_SAFE_BIGINT = BigInt(Number.MAX_SAFE_INTEGER);
   const conceptId = Number(Bun.hash.wyhash(surfaceForm.toLowerCase(), 0n) & MAX_SAFE_BIGINT);
 
   const observationType = status === "unavailable" || status === "failed"
-    ? "gitnexus_failed"
-    : "gitnexus_indexed";
+    ? "theronexus_failed"
+    : "theronexus_indexed";
 
   store.mergeNode(
     {

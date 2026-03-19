@@ -1650,9 +1650,108 @@ if (import.meta.main) {
       break;
     }
 
+    // Phase 21: health — show latest health snapshots for all agents
+    case "health": {
+      const { readAllHealthSnapshots: readAllSnaps } = await import("../health/store");
+      const snaps = await readAllSnaps(config.healthDir ?? "data/health");
+
+      if (snaps.length === 0) {
+        console.log("No health data yet. Run: theorex health-check");
+        break;
+      }
+
+      snaps.sort((a, b) => a.agent_id.localeCompare(b.agent_id));
+
+      const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+      const COL_AGENT = 20;
+      const COL_STATUS = 12;
+      const COL_PING = 10;
+      const COL_RATE = 10;
+      const COL_LATENCY = 12;
+      const COL_TRACES = 8;
+      const COL_LAST = 20;
+
+      console.log("Agent Health\n");
+      const header =
+        pad("agent", COL_AGENT) +
+        pad("status", COL_STATUS) +
+        pad("ping_ms", COL_PING) +
+        pad("success%", COL_RATE) +
+        pad("avg_lat_ms", COL_LATENCY) +
+        pad("traces", COL_TRACES) +
+        pad("last_trace", COL_LAST);
+      console.log(header);
+      console.log("-".repeat(header.length));
+
+      for (const s of snaps) {
+        const statusLabel =
+          s.status === "healthy" ? "healthy" :
+          s.status === "degraded" ? "degraded [!]" :
+          `UNREACHABLE (${s.consecutive_failures}x)`;
+        const row =
+          pad(s.agent_id, COL_AGENT) +
+          pad(statusLabel, COL_STATUS) +
+          pad(s.ping_ms !== null ? String(s.ping_ms) : "-", COL_PING) +
+          pad(s.success_rate_7d > 0 || s.trace_count_7d > 0 ? `${(s.success_rate_7d * 100).toFixed(0)}%` : "-", COL_RATE) +
+          pad(s.avg_latency_ms !== null ? s.avg_latency_ms.toFixed(0) : "-", COL_LATENCY) +
+          pad(String(s.trace_count_7d), COL_TRACES) +
+          pad(s.last_trace_at ? s.last_trace_at.slice(0, 19).replace("T", " ") : "-", COL_LAST);
+        console.log(row);
+      }
+
+      const checked = snaps[0]?.timestamp?.slice(0, 19).replace("T", " ") ?? "-";
+      console.log(`\nChecked: ${checked}`);
+      break;
+    }
+
+    // Phase 21: health-check — probe all (or one) agents and write snapshots
+    case "health-check": {
+      const { values: hcValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { agent: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const { checkAgent: hcCheckAgent, checkAllAgents: hcCheckAll, AGENT_ENDPOINTS } = await import("../health/monitor");
+      const { DEFAULT_AGENT_PROFILES } = await import("../roles/registry");
+
+      const hcConfig = {
+        healthDir: config.healthDir ?? "data/health",
+        healthProbeTimeoutMs: config.healthProbeTimeoutMs ?? 3000,
+        healthWindowDays: config.healthWindowDays ?? 7,
+      };
+
+      const targetId = typeof hcValues.agent === "string" ? hcValues.agent.trim() : null;
+      const allIds = DEFAULT_AGENT_PROFILES.map((p) => p.agent_id);
+
+      if (targetId) {
+        console.log(`Checking agent: ${targetId}...`);
+        const snap = await hcCheckAgent(targetId, hcConfig);
+        const endpointNote = snap.endpoint ? ` (${snap.endpoint})` : " (trace-only)";
+        console.log(`  Status:  ${snap.status}${endpointNote}`);
+        console.log(`  Ping:    ${snap.ping_ms !== null ? `${snap.ping_ms}ms` : "n/a"}`);
+        console.log(`  Success: ${snap.trace_count_7d > 0 ? `${(snap.success_rate_7d * 100).toFixed(0)}%` : "no data"} (${snap.trace_count_7d} traces/7d)`);
+        console.log(`  Latency: ${snap.avg_latency_ms !== null ? `${snap.avg_latency_ms.toFixed(0)}ms` : "n/a"}`);
+        if (snap.consecutive_failures > 0) {
+          console.log(`  Consecutive failures: ${snap.consecutive_failures}`);
+        }
+      } else {
+        console.log(`Checking ${allIds.length} agents...`);
+        const snaps = await hcCheckAll(allIds, hcConfig);
+        for (const s of snaps) {
+          const indicator = s.status === "healthy" ? "✓" : s.status === "degraded" ? "~" : "✗";
+          const endpointNote = AGENT_ENDPOINTS[s.agent_id] ? ` [${AGENT_ENDPOINTS[s.agent_id]}]` : "";
+          console.log(`  ${indicator} ${s.agent_id.padEnd(20)} ${s.status}${endpointNote}`);
+        }
+        console.log(`\nSnapshots saved to: ${hcConfig.healthDir}`);
+        console.log("View with: theorex health");
+      }
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>|health|health-check [--agent <id>]>");
       process.exit(1);
   }
 }

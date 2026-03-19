@@ -60,6 +60,10 @@ export interface Config {
   evolveWindowDays: number;            // default: 7 — rolling window for outcome review
   // Short-term memory directory (Phase 2) — explicit field enables test isolation
   stmDir: string;                      // default: "data/short-term"
+  // Phase 21: Agent Health Monitoring
+  healthDir: string;                   // default: "data/health"
+  healthProbeTimeoutMs: number;        // default: 3000
+  healthWindowDays: number;            // default: 7
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -119,6 +123,10 @@ export const DEFAULT_CONFIG: Config = {
   evolutionLogPath: "data/evolution.jsonl",
   evolveWindowDays: 7,
   stmDir: "data/short-term",
+  // Phase 21: Agent Health Monitoring
+  healthDir: "data/health",
+  healthProbeTimeoutMs: 3000,
+  healthWindowDays: 7,
 };
 
 /**

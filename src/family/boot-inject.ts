@@ -15,6 +15,8 @@ import { AxonStore } from "../axon/store";
 import { compositeScore, classifyTier } from "../axon/scorer";
 import { resolvedSharedAxonPath } from "./paths";
 import type { Config } from "../config";
+import { loadDeprecated, formatDeprecatedBlock } from "../system/deprecated";
+import { readRecentUpdates, formatUpdatesBlock } from "../system/updates";
 
 const DEFAULT_OUTPUT_PATH = join(homedir(), ".openclaw", "workspace", "theorex", "SHARED_CONTEXT.md");
 
@@ -117,6 +119,16 @@ export async function generateBootContext(
   if (activeConcepts === 0) {
     lines.push("_No active shared concepts yet. Run: theorex promote --agent <id>_");
   }
+
+  // System updates — injected so agents always boot with current fleet state
+  const recentUpdates = await readRecentUpdates(10);
+  const updatesBlock = formatUpdatesBlock(recentUpdates);
+  if (updatesBlock) lines.push(updatesBlock);
+
+  // Deprecated registry — hard block so agents never try to heal retired processes
+  const deprecatedRegistry = await loadDeprecated();
+  const deprecatedBlock = formatDeprecatedBlock(deprecatedRegistry);
+  if (deprecatedBlock) lines.push(deprecatedBlock);
 
   await mkdir(dirname(outputPath), { recursive: true });
   await writeFile(outputPath, lines.join("\n"), "utf-8");

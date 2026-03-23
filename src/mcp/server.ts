@@ -1,11 +1,14 @@
 // mcp/server.ts — MCP (Model Context Protocol) HTTP server for Theorex.
 // Exposes axon memory as JSON-RPC 2.0 resources and tools.
 // Phase 19: external tools can access memory without direct axon coupling.
+// Phase 7.5: Theronexus structural code intelligence tools added inline —
+//   all queries run against the local .gitnexus/ index, nothing leaves the machine.
 
 import { AxonStore } from "../axon/store";
 import { agentAxonPath } from "../family/paths";
 import { loadConfig } from "../config";
 import { writeToAgent } from "../family/write";
+import { getState } from "../web/state";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -160,6 +163,31 @@ async function readBootResource(
 }
 
 // ---------------------------------------------------------------------------
+// Theronexus — local CLI runner
+// Shells out to npx gitnexus@latest (reads local .gitnexus/ index only)
+// ---------------------------------------------------------------------------
+
+async function runTheronexusCli(args: string[]): Promise<unknown> {
+  const proc = Bun.spawn(
+    ["npx", "-y", "gitnexus@latest", ...args],
+    { stdout: "pipe", stderr: "pipe", env: { ...process.env } },
+  );
+  const [exitCode, rawOut] = await Promise.all([
+    proc.exited,
+    new Response(proc.stdout as ReadableStream).text(),
+  ]);
+  if (exitCode !== 0) {
+    const err = await new Response(proc.stderr as ReadableStream).text();
+    throw new Error(err.slice(0, 300) || `exited ${exitCode}`);
+  }
+  try {
+    return JSON.parse(rawOut);
+  } catch {
+    return { text: rawOut.trim() };
+  }
+}
+
+// ---------------------------------------------------------------------------
 // Tool handlers
 // ---------------------------------------------------------------------------
 
@@ -196,6 +224,51 @@ function handleToolsList(id: string | number | null): Response {
       description: "Health check — returns server version",
       inputSchema: { type: "object", properties: {} },
     },
+    {
+      name: "theronexus_query",
+      description: "Search Theronexus knowledge graph for execution flows related to a concept",
+      inputSchema: {
+        type: "object",
+        properties: {
+          query: { type: "string", description: "Concept or keyword to search for" },
+        },
+        required: ["query"],
+      },
+    },
+    {
+      name: "theronexus_context",
+      description: "360-degree view of a code symbol — callers, callees, and execution flow participation",
+      inputSchema: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Symbol name (function, class, method)" },
+        },
+        required: ["name"],
+      },
+    },
+    {
+      name: "theronexus_impact",
+      description: "Blast radius analysis — what breaks if you change a symbol",
+      inputSchema: {
+        type: "object",
+        properties: {
+          target: { type: "string", description: "Symbol name to analyse" },
+          direction: { type: "string", description: "upstream (callers) or downstream (callees), default: upstream" },
+        },
+        required: ["target"],
+      },
+    },
+    {
+      name: "theronexus_detect_changes",
+      description: "Detect which symbols and execution flows are affected by current changes",
+      inputSchema: {
+        type: "object",
+        properties: {
+          scope: { type: "string", description: "all | staged | compare (default: staged)" },
+          base_ref: { type: "string", description: "Base git ref when scope=compare" },
+        },
+      },
+    },
   ];
   return makeResult(id, { tools });
 }
@@ -214,6 +287,14 @@ async function handleToolCall(
       return await callRetrieve(id, args);
     case "status":
       return callStatus(id);
+    case "theronexus_query":
+      return await callTheronexusQuery(id, args);
+    case "theronexus_context":
+      return await callTheronexusContext(id, args);
+    case "theronexus_impact":
+      return await callTheronexusImpact(id, args);
+    case "theronexus_detect_changes":
+      return await callTheronexusDetectChanges(id, args);
     default:
       return makeError(id, -32602, `Unknown tool: ${name}`);
   }
@@ -282,6 +363,99 @@ async function callRetrieve(
     text: JSON.stringify(matches, null, 2),
   }];
   return makeResult(id, { content });
+}
+
+async function callTheronexusQuery(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const query = typeof args.query === "string" ? args.query : "";
+  if (!query) return makeError(id, -32602, "Missing required argument: query");
+  try {
+    const result = await runTheronexusCli(["query", query]);
+    try {
+      const state = getState();
+      const r = result as any;
+      const defs: any[] = r.definitions ?? [];
+      const procs: any[] = r.processes ?? [];
+      for (const d of defs.slice(0, 20)) {
+        if (d.id && d.name) state.touchNode(d.id, d.name, 0.05);
+      }
+      for (const p of procs) {
+        const steps: any[] = p.steps ?? [];
+        for (let i = 0; i < steps.length - 1; i++) {
+          if (steps[i].id && steps[i + 1].id) state.strengthenEdge(steps[i].id, steps[i + 1].id);
+        }
+      }
+    } catch {}
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Theronexus query failed: ${String(err)}`);
+  }
+}
+
+async function callTheronexusContext(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const name = typeof args.name === "string" ? args.name : "";
+  if (!name) return makeError(id, -32602, "Missing required argument: name");
+  try {
+    const result = await runTheronexusCli(["context", name]);
+    try {
+      const state = getState();
+      const r = result as any;
+      if (r.status === "found" && r.symbol) {
+        state.touchNode(r.symbol.uid ?? name, r.symbol.name, 0.10);
+        for (const c of (r.incoming?.calls ?? [])) {
+          if (c.uid) state.strengthenEdge(c.uid, r.symbol.uid ?? name);
+        }
+        for (const c of (r.outgoing?.calls ?? [])) {
+          if (c.uid) state.strengthenEdge(r.symbol.uid ?? name, c.uid);
+        }
+      }
+    } catch {}
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Theronexus context failed: ${String(err)}`);
+  }
+}
+
+async function callTheronexusImpact(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const target = typeof args.target === "string" ? args.target : "";
+  if (!target) return makeError(id, -32602, "Missing required argument: target");
+  const direction = typeof args.direction === "string" ? args.direction : "upstream";
+  try {
+    const result = await runTheronexusCli(["impact", target, "--direction", direction]);
+    try {
+      const state = getState();
+      const r = result as any;
+      if (r.target) state.touchNode(r.target.id ?? target, r.target.name ?? target, 0.15);
+    } catch {}
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Theronexus impact failed: ${String(err)}`);
+  }
+}
+
+async function callTheronexusDetectChanges(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const scope = typeof args.scope === "string" ? args.scope : "staged";
+  const cliArgs = ["detect-changes", "--scope", scope];
+  if (scope === "compare" && typeof args.base_ref === "string") {
+    cliArgs.push("--base-ref", args.base_ref);
+  }
+  try {
+    const result = await runTheronexusCli(cliArgs);
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result, null, 2) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Theronexus detect-changes failed: ${String(err)}`);
+  }
 }
 
 function callStatus(id: string | number | null): Response {
@@ -353,4 +527,62 @@ export function startMcpServer(
       return new Response("Not Found", { status: 404 });
     },
   });
+}
+
+// ---------------------------------------------------------------------------
+// Stdio transport — used by Claude Code MCP plugin (reads stdin, writes stdout)
+// ---------------------------------------------------------------------------
+
+async function handleMcpRequestRaw(body: unknown): Promise<object | null> {
+  const req = body as Record<string, unknown>;
+  const id = req.id ?? null;
+
+  // MCP handshake
+  if (req.method === "initialize") {
+    return {
+      jsonrpc: "2.0", id,
+      result: {
+        protocolVersion: "2024-11-05",
+        capabilities: { tools: {}, resources: {} },
+        serverInfo: { name: "theorex", version: "1.0" },
+      },
+    };
+  }
+  // Notification — no response
+  if (typeof req.method === "string" && req.method.startsWith("notifications/")) {
+    return null;
+  }
+
+  const resp = await handleMcpRequest(body);
+  return await resp.json() as object;
+}
+
+export async function startMcpStdio(): Promise<void> {
+  const reader = Bun.stdin.stream().getReader();
+  const decoder = new TextDecoder();
+  let buffer = "";
+
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    buffer += decoder.decode(value);
+    const lines = buffer.split("\n");
+    buffer = lines.pop() ?? "";
+    for (const line of lines) {
+      const trimmed = line.trim();
+      if (!trimmed) continue;
+      try {
+        const body = JSON.parse(trimmed);
+        const result = await handleMcpRequestRaw(body);
+        if (result !== null) {
+          process.stdout.write(JSON.stringify(result) + "\n");
+        }
+      } catch {
+        process.stdout.write(JSON.stringify({
+          jsonrpc: "2.0", id: null,
+          error: { code: -32700, message: "Parse error" },
+        }) + "\n");
+      }
+    }
+  }
 }

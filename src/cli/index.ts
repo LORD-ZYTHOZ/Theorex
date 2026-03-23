@@ -37,6 +37,9 @@ import {
 const ARCHIVE_DIR = "data/archive";
 const MEMORY_PATH = "data/MEMORY.md";
 
+import { appendUpdate, readRecentUpdates } from "../system/updates";
+import { addDeprecated, removeDeprecated, loadDeprecated } from "../system/deprecated";
+
 // ---------------------------------------------------------------------------
 // Exported handler functions (testable without spawning subprocess)
 // ---------------------------------------------------------------------------
@@ -670,7 +673,7 @@ if (import.meta.main) {
         console.error("Usage: theorex ref <keyword>");
         process.exit(1);
       }
-      await runRef(config.axonPath ?? "data/axon.json", keyword, config);
+      await runRef(resolvedSharedAxonPath(config.sharedAxonPath), keyword, config);
       break;
     }
 
@@ -894,14 +897,14 @@ if (import.meta.main) {
       if (icValues.theronexus) {
         const { analyzeWithTheronexus } = await import("../code/theronexus-bridge");
         console.log(`\n[theronexus] Indexing ${icDir}...`);
-        const gnResult = await analyzeWithTheronexus(icAgent, icDir, config);
-        if (gnResult.status === "unavailable") {
-          console.warn(`[theronexus] ${gnResult.message}`);
+        const tnResult = await analyzeWithTheronexus(icAgent, icDir, config);
+        if (tnResult.status === "unavailable") {
+          console.warn(`[theronexus] ${tnResult.message}`);
           console.warn(`[theronexus] Structural index skipped — Theorex AST index still complete.`);
-        } else if (gnResult.status === "failed") {
-          console.warn(`[theronexus] ${gnResult.message}`);
+        } else if (tnResult.status === "failed") {
+          console.warn(`[theronexus] ${tnResult.message}`);
         } else {
-          console.log(`[theronexus] ${gnResult.message}`);
+          console.log(`[theronexus] ${tnResult.message}`);
           console.log(`[theronexus] Marker node 'theronexus:${icDir.split("/").pop()}' written to axon.`);
           console.log(`[theronexus] Run: theorex mcp-start to serve both Theorex + Theronexus via MCP.`);
         }
@@ -1440,23 +1443,44 @@ if (import.meta.main) {
 
     // Phase 19: MCP server — start HTTP JSON-RPC server
     case "mcp-start": {
-      // Usage: theorex mcp-start [--port <n>] [--agent <id>]
+      // Usage: theorex mcp-start [--port <n>] [--agent <id>] [--stdio]
       const { values: mcpValues } = parseArgs({
         args: Bun.argv.slice(3),
         options: {
           port:  { type: "string" },
           agent: { type: "string" },
+          stdio: { type: "boolean" },
         },
         allowPositionals: false,
         strict: false,
       });
-      const mcpPort = typeof mcpValues.port === "string" ? parseInt(mcpValues.port, 10) : 18800;
       const mcpAgent = typeof mcpValues.agent === "string" ? mcpValues.agent : "main";
-      const { startMcpServer } = await import("../mcp/server");
-      const server = startMcpServer({ port: mcpPort, agentId: mcpAgent });
-      console.log(`Theorex MCP server listening at http://${server.hostname}:${server.port}/mcp`);
-      console.log(`Agent: ${mcpAgent} | POST /mcp for JSON-RPC 2.0`);
-      // keep process alive
+      if (mcpValues.stdio) {
+        const { startMcpStdio } = await import("../mcp/server");
+        await startMcpStdio();
+      } else {
+        const mcpPort = typeof mcpValues.port === "string" ? parseInt(mcpValues.port, 10) : 18800;
+        const { startMcpServer } = await import("../mcp/server");
+        const server = startMcpServer({ port: mcpPort, agentId: mcpAgent });
+        console.log(`Theorex MCP server listening at http://${server.hostname}:${server.port}/mcp`);
+        console.log(`Agent: ${mcpAgent} | POST /mcp for JSON-RPC 2.0`);
+        await new Promise(() => {});
+      }
+      break;
+    }
+
+    case "web": {
+      // Usage: theorex web [--port <n>]
+      const { values: webValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { port: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const webPort = typeof webValues.port === "string" ? parseInt(webValues.port, 10) : 7777;
+      const { startWebServer } = await import("../web/server");
+      const webServer = startWebServer(webPort);
+      console.log(`Theronexus UI → http://${webServer.hostname}:${webServer.port}`);
       await new Promise(() => {});
       break;
     }
@@ -1934,6 +1958,96 @@ if (import.meta.main) {
         }
         console.log(`\nSnapshots saved to: ${hcConfig.healthDir}`);
         console.log("View with: theorex health");
+      }
+      break;
+    }
+
+    // System: push-update — append a system change to the update queue
+    case "push-update": {
+      // Usage: theorex push-update "<message>"
+      const message = rest.join(" ").trim();
+      if (!message) {
+        console.error('Usage: theorex push-update "<message>"');
+        process.exit(1);
+      }
+      const update = await appendUpdate(message);
+      console.log(`Update recorded [${update.id}]: ${update.message}`);
+      console.log("Run: theorex boot-inject to push to SHARED_CONTEXT.md");
+      break;
+    }
+
+    // System: push-update-list — show recent system updates
+    case "push-update-list": {
+      // Usage: theorex push-update-list [--n <count>]
+      const { values: pulValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { n: { type: "string" } },
+        allowPositionals: false,
+        strict: false,
+      });
+      const pulN = typeof pulValues.n === "string" ? parseInt(pulValues.n, 10) : 10;
+      const updates = await readRecentUpdates(pulN);
+      if (updates.length === 0) {
+        console.log("No system updates yet. Run: theorex push-update \"<message>\"");
+        break;
+      }
+      console.log(`System Updates (last ${updates.length})\n`);
+      for (const u of [...updates].reverse()) {
+        const ts = u.timestamp.slice(0, 16).replace("T", " ");
+        console.log(`  [${ts}] ${u.message}`);
+      }
+      break;
+    }
+
+    // System: deprecate — add a process/agent to the deprecated list
+    case "deprecate": {
+      // Usage: theorex deprecate "<name>" [--reason "<text>"]
+      const { values: depValues, positionals: depPos } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: { reason: { type: "string" } },
+        allowPositionals: true,
+        strict: false,
+      });
+      const depName = depPos[0]?.trim();
+      const depReason = typeof depValues.reason === "string" ? depValues.reason.trim() : "retired";
+      if (!depName) {
+        console.error('Usage: theorex deprecate "<name>" [--reason "<text>"]');
+        process.exit(1);
+      }
+      const reg = await addDeprecated(depName, depReason);
+      console.log(`Deprecated: ${depName} — ${depReason}`);
+      console.log(`Total deprecated: ${reg.items.length}`);
+      console.log("Run: theorex boot-inject to push to SHARED_CONTEXT.md");
+      break;
+    }
+
+    // System: undeprecate — remove a process/agent from the deprecated list
+    case "undeprecate": {
+      // Usage: theorex undeprecate "<name>"
+      const depName = rest[0]?.trim();
+      if (!depName) {
+        console.error('Usage: theorex undeprecate "<name>"');
+        process.exit(1);
+      }
+      const reg = await removeDeprecated(depName);
+      console.log(`Removed from deprecated list: ${depName}`);
+      console.log(`Remaining deprecated: ${reg.items.length}`);
+      console.log("Run: theorex boot-inject to push to SHARED_CONTEXT.md");
+      break;
+    }
+
+    // System: deprecated-list — show all deprecated items
+    case "deprecated-list": {
+      // Usage: theorex deprecated-list
+      const reg = await loadDeprecated();
+      if (reg.items.length === 0) {
+        console.log("No deprecated items. Add with: theorex deprecate \"<name>\"");
+        break;
+      }
+      console.log(`Deprecated (${reg.items.length})\n`);
+      for (const item of reg.items) {
+        const date = item.deprecated_at.slice(0, 10);
+        console.log(`  [${date}] ${item.name.padEnd(30)} ${item.reason}`);
       }
       break;
     }

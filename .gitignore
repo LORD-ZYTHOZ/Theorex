@@ -45,3 +45,4 @@ data/MEMORY.md
 
 # Runtime data — never commit
 data/
+.gitnexus

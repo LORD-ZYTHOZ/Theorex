@@ -17,24 +17,35 @@ module.exports = {
       error_file: `${LOG_DIR}/theorex-scan-err.log`,
     },
     {
-      // Hourly idle promote — all known agents (ECO-003)
+      // Hourly idle promote — promotes agents that went quiet in the last hour
       name: "theorex-idle-flush",
-      script: "bash",
-      args: `-c 'for agent in main qwen-sage secretarius claude-code-agent m4-engineer; do ${BUN} run ${CLI} promote --agent $agent; done'`,
+      script: "/Users/eoh/theorex/theorex-idle-flush.sh",
+      cwd: "/Users/eoh/theorex",
       cron_restart: "15 * * * *",
       autorestart: false,
       out_file: `${LOG_DIR}/theorex-idle-flush-out.log`,
       error_file: `${LOG_DIR}/theorex-idle-flush-err.log`,
     },
     {
-      // Nightly: scan-agent all → evolve-review all → promote all → boot-inject
+      // Nightly: scan → prune → promote → boot-inject for all agents
       name: "theorex-nightly",
-      script: "bash",
-      args: `-c 'for agent in main qwen-sage secretarius claude-code-agent m4-engineer; do ${BUN} run ${CLI} scan-agent --agent $agent && ${BUN} run ${CLI} prune-agent --agent $agent; done && ${BUN} run ${CLI} evolve-review --agent all && for agent in main qwen-sage secretarius claude-code-agent m4-engineer; do ${BUN} run ${CLI} promote --agent $agent; done && ${BUN} run ${CLI} boot-inject'`,
+      script: "/Users/eoh/theorex/theorex-nightly.sh",
+      cwd: "/Users/eoh/theorex",
       cron_restart: "0 3 * * *",
       autorestart: false,
       out_file: `${LOG_DIR}/theorex-nightly-out.log`,
       error_file: `${LOG_DIR}/theorex-nightly-err.log`,
+    },
+    {
+      // Every 5 min: check agent endpoint health + trace metrics
+      name: "theorex-health",
+      script: BUN,
+      args: `run ${CLI} health-check`,
+      cwd: "/Users/eoh/theorex",
+      cron_restart: "*/5 * * * *",
+      autorestart: false,
+      out_file: `${LOG_DIR}/theorex-health-out.log`,
+      error_file: `${LOG_DIR}/theorex-health-err.log`,
     },
   ],
 };

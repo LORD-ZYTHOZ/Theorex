@@ -3,14 +3,8 @@
     "theorex": {
       "type": "stdio",
       "command": "bun",
-      "args": ["run", "/Users/eoh/theorex/src/cli/index.ts", "mcp-start"],
-      "description": "Theorex semantic memory — concepts, drift, moments, vaults"
-    },
-    "theronexus": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "gitnexus@latest", "mcp"],
-      "description": "Theronexus structural code intelligence — blast radius, call chains, impact analysis"
+      "args": ["run", "/Users/eoh/theorex/src/cli/index.ts", "mcp-start", "--stdio"],
+      "description": "Theorex — semantic memory + Theronexus structural code intelligence"
     }
   }
 }

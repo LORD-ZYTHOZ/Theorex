@@ -1,4 +1,4 @@
-// code/gitnexus-bridge.ts — Phase 7.5: Theronexus Integration
+// code/theronexus-bridge.ts — Phase 7.5: Theronexus Integration
 // Coordinates with the external Theronexus CLI (npx gitnexus) to build a structural
 // code index alongside Theorex's semantic AST index.
 //

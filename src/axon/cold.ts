@@ -21,9 +21,9 @@ export class ColdStore {
 
   constructor(path: string) {
     this.db = new Database(path, { create: true });
-    // WAL mode + 5s busy timeout: prevents SQLITE_BUSY when scan and nightly run overlap
-    this.db.exec("PRAGMA journal_mode = WAL");
+    // busy_timeout MUST come before journal_mode = WAL so it applies during WAL recovery
     this.db.exec("PRAGMA busy_timeout = 5000");
+    this.db.exec("PRAGMA journal_mode = WAL");
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS cold_nodes (
         archive_id TEXT PRIMARY KEY,

@@ -3,7 +3,8 @@
     "theorex": {
       "type": "stdio",
       "command": "bun",
-      "args": ["run", "/Users/eoh/theorex/src/cli/index.ts", "mcp-start", "--stdio"],
+      "args": ["run", "src/cli/index.ts", "mcp-start", "--stdio"],
+      "cwd": "${workspaceFolder}",
       "description": "Theorex — semantic memory + Theronexus structural code intelligence"
     }
   }

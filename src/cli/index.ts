@@ -1057,6 +1057,7 @@ if (import.meta.main) {
       const outcomesDir = config.outcomesDir ?? "data/outcomes";
       const { reviewOutcomes } = await import("../evolve/review");
       const { refineFromReport } = await import("../evolve/refine");
+      const { readOutcomesSince } = await import("../evolve/outcome");
 
       // Discover agent IDs: glob ~/.openclaw/agents/*/theorex/axon.json
       let erAgents: string[];
@@ -1074,11 +1075,13 @@ if (import.meta.main) {
 
       for (const erAgent of erAgents) {
         const erAxonPath = agentAxonPath(erAgent, config.agentAxonDir);
+        const erSince = new Date(Date.now() - erDays * 24 * 60 * 60 * 1000).toISOString();
+        const erOutcomes = await readOutcomesSince(erSince, outcomesDir);
         const erReport = await reviewOutcomes(erAgent, erDays, outcomesDir);
-        const erEntry = await refineFromReport(erReport, config, erAxonPath);
+        const erEntry = await refineFromReport(erReport, config, erAxonPath, erOutcomes);
         console.log(`Evolution review complete for agent "${erAgent}" (last ${erDays} days)`);
         console.log(`  Outcomes: ${erReport.total_outcomes} | Win rate: ${Math.round(erReport.overall_win_rate * 100)}%`);
-        console.log(`  Concepts reinforced: ${erEntry.concepts_reinforced} | Decayed: ${erEntry.concepts_decayed}`);
+        console.log(`  Concepts reinforced: ${erEntry.concepts_reinforced} | Decayed: ${erEntry.concepts_decayed} | Lessons: ${erEntry.lessons_written}`);
         if (erReport.insights.length > 0) {
           console.log("\nInsights:");
           for (const insight of erReport.insights) {
@@ -1173,6 +1176,56 @@ if (import.meta.main) {
             console.log(`  • ${insight}`);
           }
         }
+      }
+      break;
+    }
+
+    // Phase 13: Ingest trades — convert shadow_outcomes.jsonl to OutcomeRecords
+    case "ingest-trades": {
+      // Usage: theorex ingest-trades --file <path> --agent <id>
+      const { values: itValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          file:  { type: "string" },
+          agent: { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const itFile = typeof itValues.file === "string" ? itValues.file : "";
+      const itAgent = typeof itValues.agent === "string" ? itValues.agent : "secretarius";
+      if (!itFile) { console.error("Usage: theorex ingest-trades --file <path> --agent <id>"); break; }
+      const { ingestTradeFile } = await import("../evolve/ingest-trades");
+      const outcomesDir = config.outcomesDir ?? "data/outcomes";
+      const watermarksDir = "data/ingest-watermarks";
+      const itResult = await ingestTradeFile({ filePath: itFile, agentId: itAgent, outcomesDir, watermarksDir });
+      console.log(`Ingest complete: ${itResult.ingested} new | ${itResult.skipped} skipped | ${itResult.malformed} malformed`);
+      break;
+    }
+
+    // Phase 13: Session brief — output top lessons for a given agent/domain
+    case "session-brief": {
+      // Usage: theorex session-brief [--agent <id>] [--domain <name>] [--max <n>]
+      const { values: sbValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:  { type: "string" },
+          domain: { type: "string" },
+          max:    { type: "string" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const sbAgent = typeof sbValues.agent === "string" ? sbValues.agent : "claude-code-agent";
+      const sbDomain = typeof sbValues.domain === "string" ? sbValues.domain : "coding";
+      const sbMax = typeof sbValues.max === "string" ? parseInt(sbValues.max, 10) : 5;
+      const { readActiveLessons } = await import("../evolve/lesson");
+      const { buildSessionBrief, formatSessionBrief } = await import("../evolve/session-brief");
+      const lessonsDir = config.lessonsDir ?? "data/lessons";
+      const active = await readActiveLessons(lessonsDir, { domain: sbDomain, agentId: sbAgent });
+      if (active.length > 0) {
+        const brief = buildSessionBrief(active, { domain: sbDomain, agentId: sbAgent, maxLessons: sbMax });
+        process.stdout.write(formatSessionBrief(brief) + "\n");
       }
       break;
     }
@@ -2056,9 +2109,99 @@ if (import.meta.main) {
       // Usage: theorex deliberate --session LDN --date 2026-03-24 [--force]
       //        theorex deliberate --latest [--force]
       const { parseDeliberateArgs } = await import("../deliberate/cli");
+      const { runDeliberation } = await import("../deliberate/orchestrate");
+      const { writeDeliberation } = await import("../deliberate/writer");
+      const { extractTakeaways } = await import("../deliberate/takeaways");
+      const { batchWriteToAgent } = await import("../family/write");
+      const { loadConfig: loadCfg } = await import("../config");
+      const { join: pathJoin } = await import("node:path");
+
       const deliberateArgs = parseDeliberateArgs(Bun.argv.slice(3));
-      console.log("Deliberation args:", JSON.stringify(deliberateArgs, null, 2));
-      // TODO: wire to runDeliberation() once dispatch/paths are configured
+      const cfg = await loadCfg();
+
+      // Resolve session + date
+      let targetDate: string;
+      let targetSession: import("../deliberate/types").TradingSession;
+
+      if (deliberateArgs.latest) {
+        const now = new Date();
+        targetDate = now.toISOString().slice(0, 10);
+        const utcHour = now.getUTCHours();
+        if (utcHour >= 0 && utcHour < 8) targetSession = "asian";
+        else if (utcHour >= 8 && utcHour < 16) targetSession = "london";
+        else if (utcHour >= 13 && utcHour < 21) targetSession = "new_york";
+        else targetSession = "off_hours";
+      } else {
+        targetDate = deliberateArgs.date!;
+        targetSession = deliberateArgs.session!;
+      }
+
+      // Build data paths
+      const singularityPath = cfg.singularityTradesPath;
+      const divergentPath = pathJoin(cfg.divergentDir, `${targetDate}-${targetSession}.json`);
+      const horizonPath = pathJoin(cfg.horizonDir, `${targetDate}-${targetSession}.json`);
+
+      // Dispatch: POST to Qwen3 32B large model
+      const largeModelUrl = "http://localhost:8082/v1/chat/completions";
+      const dispatchFn = async (prompt: string): Promise<string> => {
+        const body = JSON.stringify({
+          messages: [{ role: "user", content: `/no_think ${prompt}` }],
+          max_tokens: 2048,
+          temperature: 0.3,
+        });
+        const res = await Bun.fetch(largeModelUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          signal: AbortSignal.timeout(120_000),
+        });
+        if (!res.ok) {
+          throw new Error(`LM Studio returned HTTP ${res.status}: ${await res.text()}`);
+        }
+        const json = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
+        const raw = json.choices?.[0]?.message?.content ?? "";
+        return raw.replace(/<think>[\s\S]*?<\/think>\s*/g, "").replace(/<\|im_end\|>/g, "").trim();
+      };
+
+      console.log(`Running deliberation: ${targetDate} ${targetSession}...`);
+
+      const record = await runDeliberation({
+        session: targetSession,
+        date: targetDate,
+        paths: { singularity: singularityPath, divergent: divergentPath, horizon: horizonPath },
+        outputDir: cfg.deliberationsDir,
+        dispatch: dispatchFn,
+        force: deliberateArgs.force,
+      });
+
+      if (record.status === "error") {
+        console.error(`Deliberation failed: ${record.error}`);
+        process.exit(1);
+      }
+
+      // Write JSON + markdown output
+      const { jsonPath, mdPath } = await writeDeliberation(
+        record,
+        cfg.deliberationsDir,
+        { force: deliberateArgs.force },
+      );
+      console.log(`JSON: ${jsonPath}`);
+      console.log(`Markdown: ${mdPath}`);
+
+      // Extract takeaways and write to agent axon
+      if (record.response) {
+        const takeaways = extractTakeaways(record.response);
+        if (takeaways.length > 0) {
+          const entries = takeaways.map((t) =>
+            `[deliberation:${targetSession}] ${t.insight}` +
+            (t.test_condition ? ` (test: ${t.test_condition})` : ""),
+          );
+          await batchWriteToAgent("claude-code-agent", entries, cfg, Date.now(), "deliberation");
+          console.log(`Takeaways written: ${takeaways.length}`);
+        }
+      }
+
+      console.log(`Deliberation complete (${record.latency_ms}ms)`);
       break;
     }
 

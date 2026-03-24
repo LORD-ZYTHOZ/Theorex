@@ -56,6 +56,7 @@ export interface Config {
   ffmpegPath: string;                  // default: "ffmpeg" — path to ffmpeg binary
   // Phase 13: Living Code / Self-Refinement
   outcomesDir: string;                 // default: "data/outcomes" — outcome records
+  lessonsDir: string;                  // default: "data/lessons" — synthesized lesson records
   evolutionLogPath: string;            // default: "data/evolution.jsonl" — nightly refinement log
   evolveWindowDays: number;            // default: 7 — rolling window for outcome review
   // Short-term memory directory (Phase 2) — explicit field enables test isolation
@@ -66,6 +67,11 @@ export interface Config {
   healthWindowDays: number;            // default: 7
   // Phase 23: Multi-Vault Shared Memory
   vaultRegistryPath: string;           // default: "data/vaults.json"
+  // Deliberation Channel — post-session multi-engine review
+  deliberationsDir: string;            // default: "data/deliberations"
+  singularityTradesPath: string;       // default: "data/singularity/latent_trades.jsonl"
+  divergentDir: string;                // default: "data/divergent"
+  horizonDir: string;                  // default: "data/horizon"
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -122,6 +128,7 @@ export const DEFAULT_CONFIG: Config = {
   ffmpegPath: "ffmpeg",
   // Phase 13: Living Code / Self-Refinement
   outcomesDir: "data/outcomes",
+  lessonsDir: "data/lessons",
   evolutionLogPath: "data/evolution.jsonl",
   evolveWindowDays: 7,
   stmDir: "data/short-term",
@@ -131,6 +138,11 @@ export const DEFAULT_CONFIG: Config = {
   healthWindowDays: 7,
   // Phase 23: Multi-Vault Shared Memory
   vaultRegistryPath: "data/vaults.json",
+  // Deliberation Channel
+  deliberationsDir: "data/deliberations",
+  singularityTradesPath: "data/singularity/latent_trades.jsonl",
+  divergentDir: "data/divergent",
+  horizonDir: "data/horizon",
 };
 
 /**

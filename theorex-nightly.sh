@@ -7,6 +7,7 @@
 #   2. prune: remove LESS-tier nodes older than pruneThresholdDays (default 30 days)
 #   3. promote: push qualifying concepts to shared axon
 #   4. boot-inject: regenerate SHARED_CONTEXT.md with fresh scores + relative ages
+#   5. evolve-review: run Phase 13 learning loop — review failed outcomes + write fixes
 #
 # Effect over time:
 #   - Concept unseen for 14 days: score halved (halfLifeDays=14)
@@ -20,7 +21,7 @@ SCRIPT_REAL="$(readlink -f "$0" 2>/dev/null || realpath "$0" 2>/dev/null || echo
 THEOREX_DIR="$(cd "$(dirname "$SCRIPT_REAL")" && pwd)"
 BUN="$HOME/.bun/bin/bun"
 CLI="$THEOREX_DIR/src/cli/index.ts"
-AGENTS="${AGENTS:-main qwen-sage secretarius}"
+AGENTS="${AGENTS:-main qwen-sage secretarius claude-code-agent}"
 
 cd "$THEOREX_DIR"
 
@@ -37,5 +38,13 @@ done
 
 echo "--- Regenerating boot context..."
 "$BUN" run "$CLI" boot-inject 2>&1
+
+echo "--- Ingesting Singularity trade outcomes..."
+SHADOW_OUTCOMES="$HOME/.openclaw/workspace/Project_Singularity/logs/shadow_outcomes.jsonl"
+[ -f "$SHADOW_OUTCOMES" ] && "$BUN" run "$CLI" ingest-trades \
+  --file "$SHADOW_OUTCOMES" --agent secretarius 2>&1 | tail -1
+
+echo "--- Running evolve-review (Phase 13 learning loop)..."
+"$BUN" run "$CLI" evolve-review --agent all 2>&1 | tail -5
 
 echo "=== Done ==="

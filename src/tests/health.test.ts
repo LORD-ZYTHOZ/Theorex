@@ -74,8 +74,9 @@ describe("classifyStatus", () => {
   });
 
   // No endpoint (trace-only agents like main / claude-code-agent)
-  test("unreachable (no endpoint) when no traces", () => {
-    expect(classifyStatus(null, emptyTraces)).toBe("unreachable");
+  // "unreachable" means a connection failed; no-data trace-only agents are "degraded" (no signal)
+  test("degraded (no endpoint) when no traces", () => {
+    expect(classifyStatus(null, emptyTraces)).toBe("degraded");
   });
 
   test("healthy (no endpoint) when traces look good", () => {

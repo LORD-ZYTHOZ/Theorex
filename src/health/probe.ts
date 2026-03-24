@@ -109,7 +109,8 @@ const DEGRADED_LATENCY_THRESHOLD_MS = 30_000; // above this → degraded
  * Derive AgentStatus from probe + trace data.
  *
  * Rules (in order):
- *   unreachable — endpoint exists but ping failed (or no endpoint and zero traces)
+ *   unreachable — endpoint exists but ping failed
+ *   degraded    — no endpoint and zero traces (or poor metrics)
  *   degraded    — ping ok but success_rate < 0.7 OR avg_latency > 30s
  *   healthy     — ping ok AND metrics within thresholds (or no endpoint, traces present)
  */
@@ -130,8 +131,9 @@ export function classifyStatus(
     return "healthy";
   }
 
-  // No endpoint — classify from traces alone
-  if (traces.count === 0) return "unreachable";
+  // No endpoint — classify from traces alone.
+  // "unreachable" means a connection failed; trace-only agents with no data are "degraded" (no signal).
+  if (traces.count === 0) return "degraded";
   if (traces.success_rate < DEGRADED_SUCCESS_THRESHOLD) return "degraded";
   return "healthy";
 }

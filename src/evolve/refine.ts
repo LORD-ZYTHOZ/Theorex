@@ -7,6 +7,9 @@ import { processText } from "../compose";
 import type { EvolutionReport } from "./review";
 import type { Config } from "../config";
 import { mkdir, appendFile } from "node:fs/promises";
+import { synthesizeLessons } from "./synthesize";
+import { writeLesson, readLesson, reinforceLesson, readAllLessons, DEFAULT_LESSONS_DIR } from "./lesson";
+import type { OutcomeRecord } from "./outcome";
 
 export const DEFAULT_EVOLUTION_LOG = "data/evolution.jsonl";
 
@@ -23,6 +26,7 @@ export interface EvolutionEntry {
   readonly insights: readonly string[];
   readonly concepts_reinforced: number;
   readonly concepts_decayed: number;
+  readonly lessons_written: number;    // new in Phase 13 schema upgrade
 }
 
 // ---------------------------------------------------------------------------
@@ -41,10 +45,12 @@ export interface EvolutionEntry {
 export async function refineFromReport(
   report: EvolutionReport,
   config: Config,
-  axonPath: string
+  axonPath: string,
+  outcomes?: readonly OutcomeRecord[],
 ): Promise<EvolutionEntry> {
   let conceptsReinforced = 0;
   let conceptsDecayed = 0;
+  let lessonsWritten = 0;
 
   // Load the agent's axon
   const store = await AxonStore.load(axonPath);
@@ -89,7 +95,29 @@ export async function refineFromReport(
     console.warn(`[refine] Failed to save axon for ${report.agent_id}: ${err instanceof Error ? err.message : String(err)}`);
   }
 
-  // 4. Append to evolution log
+  // 4. Synthesize LessonRecords from outcomes (if provided)
+  if (outcomes && outcomes.length > 0) {
+    const lessonsDir = config.lessonsDir ?? DEFAULT_LESSONS_DIR;
+    const domain = _inferDomain(report.agent_id);
+    const newLessons = synthesizeLessons({ agentId: report.agent_id, domain, outcomes });
+    const existingLessons = await readAllLessons(lessonsDir);
+
+    for (const lesson of newLessons) {
+      // Check for existing lesson with same title to reinforce rather than duplicate
+      const existing = existingLessons.find(
+        (l) => l.agent_id === lesson.agent_id && l.title === lesson.title,
+      );
+      if (existing) {
+        const avgQuality = lesson.evidence_quality_score;
+        await reinforceLesson(existing.id, lessonsDir, { newQualityScore: avgQuality });
+      } else {
+        await writeLesson(lesson, lessonsDir);
+        lessonsWritten++;
+      }
+    }
+  }
+
+  // 5. Append to evolution log
   const entry: EvolutionEntry = {
     timestamp: report.timestamp,
     agent_id: report.agent_id,
@@ -99,6 +127,7 @@ export async function refineFromReport(
     insights: report.insights,
     concepts_reinforced: conceptsReinforced,
     concepts_decayed: conceptsDecayed,
+    lessons_written: lessonsWritten,
   };
 
   const logPath = config.evolutionLogPath ?? DEFAULT_EVOLUTION_LOG;
@@ -110,6 +139,14 @@ export async function refineFromReport(
 // ---------------------------------------------------------------------------
 // appendEvolutionEntry
 // ---------------------------------------------------------------------------
+
+function _inferDomain(agentId: string): string {
+  if (agentId === "claude-code-agent") return "coding";
+  if (["secretarius", "singularity"].includes(agentId)) return "trading";
+  if (["meridian", "divergence"].includes(agentId)) return "trading";
+  if (["augur", "horizon"].includes(agentId)) return "trading";
+  return "general";
+}
 
 async function appendEvolutionEntry(entry: EvolutionEntry, logPath: string): Promise<void> {
   try {

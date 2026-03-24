@@ -20,7 +20,7 @@ CLI="$THEOREX_DIR/src/cli/index.ts"
 
 IDLE_SECS="${IDLE_SECS:-600}"      # 10 min idle = flush
 WINDOW_SECS="${WINDOW_SECS:-3600}" # only check activity in last 1hr
-AGENTS="${AGENTS:-main qwen-sage secretarius}"
+AGENTS="${AGENTS:-main qwen-sage secretarius claude-code-agent}"
 OPENCLAW="$HOME/.openclaw"
 
 cd "$THEOREX_DIR"

@@ -9,6 +9,12 @@ import { agentAxonPath } from "../family/paths";
 import { loadConfig } from "../config";
 import { writeToAgent } from "../family/write";
 import { getState } from "../web/state";
+import {
+  deliberateToolDef,
+  deliberationHistoryToolDef,
+  handleDeliberateTool,
+  handleDeliberationHistoryTool,
+} from "../deliberate/mcp";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -269,6 +275,8 @@ function handleToolsList(id: string | number | null): Response {
         },
       },
     },
+    deliberateToolDef(),
+    deliberationHistoryToolDef(),
   ];
   return makeResult(id, { tools });
 }
@@ -295,6 +303,10 @@ async function handleToolCall(
       return await callTheronexusImpact(id, args);
     case "theronexus_detect_changes":
       return await callTheronexusDetectChanges(id, args);
+    case "deliberate":
+      return makeResult(id, await handleDeliberateTool(args));
+    case "deliberation_history":
+      return makeResult(id, await handleDeliberationHistoryTool(args));
     default:
       return makeError(id, -32602, `Unknown tool: ${name}`);
   }

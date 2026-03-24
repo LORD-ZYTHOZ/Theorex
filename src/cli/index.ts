@@ -2052,9 +2052,19 @@ if (import.meta.main) {
       break;
     }
 
+    case "deliberate": {
+      // Usage: theorex deliberate --session LDN --date 2026-03-24 [--force]
+      //        theorex deliberate --latest [--force]
+      const { parseDeliberateArgs } = await import("../deliberate/cli");
+      const deliberateArgs = parseDeliberateArgs(Bun.argv.slice(3));
+      console.log("Deliberation args:", JSON.stringify(deliberateArgs, null, 2));
+      // TODO: wire to runDeliberation() once dispatch/paths are configured
+      break;
+    }
+
     default:
       console.error(`Unknown command: ${subcommand ?? "(none)"}`);
-      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>|health|health-check [--agent <id>]|vault-list|vault-create --name <name> [--members id1,id2] [--readonly id3] [--domains d1,d2]|vault-promote --agent <id> --vault <name>|vault-query --vault <name> [--top N] | --merge>");
+      console.error("Usage: theorex <scan|scan-agent --agent <id>|status|ref <keyword>|prune|prune-agent --agent <id>|search <query>|build-index|graduate|flash-write|flush|flash-inject|moment <story>|drift|audit|write --agent <id> <text>|promote --agent <id>|query-shared|ingest --agent <id> <files>|ingest-code --agent <id> <dir>|ingest-image <path>|ingest-video <path>|synthesize --agent <id> <text>|session-summary --agent <id>|boot-inject|context-monitor --session <id>|outcome --agent <id> --decision \"text\" --result \"text\"|evolve-review [--agent <id>]|evolve-status [--agent <id>]|trace-stats|route <query>|matrix-build|matrix-show|energy-check|policy-snapshot|boot-aware [--model <name>] [--agent <id>]|dispatch \"<task>\" [--agent <id>] [--context <pct>]|roles|role-route <query>|mcp-start [--port <n>] [--agent <id>]|a2a-tasks [--agent <id>]|trace-review [--agent <id>]|notify-agents --reason \"text\" [--agents id1,id2]|set-user-pref --agent <id> [--name \"Name\"] [--tone formal|casual|balanced] [--length brief|detailed|adaptive] [--note \"text\"] [--contact \"text\"]|show-user-pref --agent <id>|health|health-check [--agent <id>]|vault-list|vault-create --name <name> [--members id1,id2] [--readonly id3] [--domains d1,d2]|vault-promote --agent <id> --vault <name>|vault-query --vault <name> [--top N] | --merge|deliberate --session <LDN|NY|ASIA|OFF> --date <YYYY-MM-DD> [--force] | --latest [--force]>");
       process.exit(1);
   }
 }

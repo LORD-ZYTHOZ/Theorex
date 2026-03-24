@@ -7,6 +7,7 @@
 
 import { mkdir, rename } from "node:fs/promises";
 import { readdir } from "node:fs/promises";
+import type { TradingSession, DeliberationStatus } from "../deliberate/types";
 
 // ---------------------------------------------------------------------------
 // Event type literals
@@ -18,7 +19,10 @@ export type BusEventType =
   | "TOOL_CALL_START"
   | "TOOL_CALL_END"
   | "ROUTING_DECISION"
-  | "OUTCOME_RECORDED";
+  | "OUTCOME_RECORDED"
+  | "DELIBERATION_START"
+  | "DELIBERATION_ROUND"
+  | "DELIBERATION_COMPLETE";
 
 // ---------------------------------------------------------------------------
 // Event payload types
@@ -68,6 +72,27 @@ export interface OutcomeRecordedPayload {
   readonly success: boolean;
 }
 
+export interface DeliberationStartPayload {
+  readonly date: string;
+  readonly session: TradingSession;
+}
+
+export interface DeliberationRoundPayload {
+  readonly date: string;
+  readonly session: TradingSession;
+  readonly round: number;
+  readonly perspective: string;
+}
+
+export interface DeliberationCompletePayload {
+  readonly date: string;
+  readonly session: TradingSession;
+  readonly status: DeliberationStatus;
+  readonly latency_ms: number;
+  readonly perspectives_collected: number;
+  readonly error?: string;
+}
+
 // Discriminated union mapping event type → payload
 export type BusEventPayloadMap = {
   LM_INFERENCE_START: LmInferenceStartPayload;
@@ -76,6 +101,9 @@ export type BusEventPayloadMap = {
   TOOL_CALL_END: ToolCallEndPayload;
   ROUTING_DECISION: RoutingDecisionPayload;
   OUTCOME_RECORDED: OutcomeRecordedPayload;
+  DELIBERATION_START: DeliberationStartPayload;
+  DELIBERATION_ROUND: DeliberationRoundPayload;
+  DELIBERATION_COMPLETE: DeliberationCompletePayload;
 };
 
 export interface BusEvent<T extends BusEventType = BusEventType> {

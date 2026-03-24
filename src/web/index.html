@@ -1,0 +1,3315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Theronexus</title>
+  <!-- Three.js + 3D force graph + postprocessing bloom -->
+  <script src="https://unpkg.com/three@0.158.0/build/three.min.js"></script>
+  <script src="https://unpkg.com/3d-force-graph@1.73.3/dist/3d-force-graph.min.js"></script>
+  <script src="https://unpkg.com/postprocessing@6.35.5/build/postprocessing.min.js"></script>
+  <style>
+    :root {
+      --bg: #010b14;
+      --surface: #030f1e;
+      --border: #0a2e44;
+      --accent: #00e5ff;
+      --accent2: #ff2d78;
+      --gold: #39ff14;
+      --text: #8ffcff;
+      --muted: #1c5468;
+      --risk-low: #00e5ff;
+      --risk-medium: #ffe600;
+      --risk-high: #ff6a00;
+      --risk-critical: #ff0040;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--bg); color: var(--text); font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+
+    header {
+      display: flex; align-items: center; gap: 12px; padding: 14px 20px;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(180deg, #040f1e 0%, #030c18 100%);
+      box-shadow: 0 1px 0 rgba(0,229,255,0.15), 0 4px 20px rgba(0,0,0,0.6);
+      flex-shrink: 0;
+    }
+    .logo { font-size: 18px; font-weight: 700; letter-spacing: 1px; color: var(--accent); text-shadow: 0 0 12px rgba(0,229,255,0.7), 0 0 30px rgba(0,229,255,0.3); text-transform: uppercase; }
+    .logo span { color: var(--accent2); text-shadow: 0 0 12px rgba(255,45,120,0.7), 0 0 30px rgba(255,45,120,0.3); }
+    .tagline { color: var(--muted); font-size: 10px; letter-spacing: 2px; text-transform: uppercase; }
+    .stats-bar { margin-left: auto; display: flex; gap: 20px; }
+    .stat { text-align: right; }
+    .stat-val { font-size: 16px; font-weight: 700; color: var(--accent); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
+    .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Live activity indicator */
+    .activity-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--muted); transition: background 0.3s, box-shadow 0.3s; margin-left: 4px; flex-shrink: 0; }
+    .activity-dot.alive { background: var(--accent2); box-shadow: 0 0 10px var(--accent2), 0 0 20px rgba(255,45,120,0.5); }
+
+    .split { flex: 1; display: flex; overflow: hidden; }
+    .left-panel {
+      width: 320px; flex-shrink: 0;
+      background: linear-gradient(180deg, #030f1e 0%, #020b16 100%);
+      border-right: 1px solid var(--border);
+      box-shadow: 1px 0 0 rgba(0,229,255,0.08), 4px 0 20px rgba(0,0,0,0.4);
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .left-tabs { display: flex; border-bottom: 1px solid var(--border); flex-shrink: 0; background: rgba(0,0,0,0.3); }
+    .left-tab { flex: 1; padding: 9px 4px; cursor: pointer; color: var(--muted); font-size: 10px; text-align: center; border-bottom: 2px solid transparent; transition: color 0.15s, border-color 0.15s; letter-spacing: 1px; text-transform: uppercase; }
+    .left-tab:hover { color: var(--text); }
+    .left-tab.active { color: var(--accent); border-bottom-color: var(--accent); text-shadow: 0 0 8px rgba(0,229,255,0.5); }
+    .left-content { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+    .left-pane { flex: 1; display: flex; flex-direction: column; overflow: hidden; padding: 12px 14px; gap: 10px; transition: opacity 0.15s; }
+    .left-pane.hidden { display: none; }
+
+    .right-panel { flex: 1; display: flex; flex-direction: column; overflow: hidden; background: #010b14; }
+    .graph-toolbar { display: flex; gap: 6px; align-items: center; padding: 6px 10px; border-bottom: 1px solid var(--border); background: rgba(3,15,30,0.95); flex-shrink: 0; flex-wrap: wrap; }
+    .graph-canvas-wrap { flex: 1; position: relative; overflow: hidden; }
+
+    /* Scanlines overlay */
+    .graph-canvas-wrap::after {
+      content: '';
+      position: absolute; inset: 0; pointer-events: none; z-index: 15;
+      background:
+        repeating-linear-gradient(0deg, rgba(0,229,255,0.012) 0px, rgba(0,229,255,0.012) 1px, transparent 1px, transparent 4px),
+        radial-gradient(ellipse at 50% 50%, transparent 55%, rgba(0,5,15,0.75) 100%);
+    }
+
+    .graph-legend { position: absolute; bottom: 10px; left: 14px; display: flex; gap: 8px; flex-wrap: wrap; pointer-events: none; z-index: 1000; }
+    .legend-item { display: flex; align-items: center; gap: 5px; font-size: 10px; color: var(--muted); background: rgba(1,11,20,0.85); padding: 3px 7px; border-radius: 2px; border: 1px solid rgba(0,229,255,0.1); letter-spacing: 0.5px; }
+    .legend-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+    .graph-stats { position: absolute; bottom: 10px; right: 14px; font-size: 10px; color: var(--muted); pointer-events: none; background: rgba(1,11,20,0.85); padding: 3px 8px; border-radius: 2px; border: 1px solid rgba(0,229,255,0.1); z-index: 1000; letter-spacing: 1px; }
+
+    .search-row { display: flex; gap: 8px; flex-shrink: 0; }
+    input[type=text] { flex: 1; background: rgba(0,0,0,0.5); border: 1px solid var(--border); border-radius: 3px; padding: 8px 10px; color: var(--text); font-family: inherit; font-size: 12px; outline: none; transition: border-color 0.2s, box-shadow 0.2s; min-width: 0; }
+    input[type=text]:focus { border-color: var(--accent); box-shadow: 0 0 0 1px rgba(0,229,255,0.3), 0 0 12px rgba(0,229,255,0.15); }
+    input[type=text]::placeholder { color: var(--muted); }
+    button { background: rgba(0,229,255,0.12); border: 1px solid rgba(0,229,255,0.5); border-radius: 3px; padding: 8px 12px; color: var(--accent); font-family: inherit; font-size: 11px; font-weight: 600; cursor: pointer; transition: all 0.15s; white-space: nowrap; flex-shrink: 0; letter-spacing: 1px; text-transform: uppercase; text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+    button:hover { background: rgba(0,229,255,0.22); box-shadow: 0 0 12px rgba(0,229,255,0.25); }
+    button.secondary { background: rgba(0,0,0,0.4); border: 1px solid var(--border); color: var(--muted); text-shadow: none; }
+    button.secondary:hover { border-color: var(--accent); color: var(--accent); text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+    .results { flex: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 6px; }
+    .results::-webkit-scrollbar { width: 3px; }
+    .results::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 2px; }
+    .flow-card { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s; }
+    .flow-card:hover { border-color: var(--accent); box-shadow: 0 0 10px rgba(0,229,255,0.1), inset 0 0 10px rgba(0,229,255,0.03); }
+    .flow-title { font-weight: 600; color: var(--text); margin-bottom: 4px; font-size: 12px; }
+    .flow-meta { display: flex; gap: 8px; color: var(--muted); font-size: 10px; flex-wrap: wrap; }
+    .badge { display: inline-block; padding: 2px 6px; border-radius: 2px; font-size: 10px; font-weight: 600; background: rgba(255,45,120,0.15); color: var(--accent2); border: 1px solid rgba(255,45,120,0.3); }
+    .symbol-card { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 3px; padding: 10px 12px; flex-shrink: 0; }
+    .symbol-name { font-size: 14px; font-weight: 700; color: var(--accent); text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+    .symbol-path { color: var(--muted); font-size: 10px; margin-top: 2px; margin-bottom: 8px; word-break: break-all; }
+    .caller-item { display: flex; align-items: center; gap: 6px; padding: 4px 6px; border-radius: 2px; background: transparent; cursor: pointer; transition: background 0.1s; min-width: 0; }
+    .caller-item:hover { background: rgba(0,229,255,0.06); }
+    .caller-name { color: var(--text); font-weight: 500; font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .caller-path { color: var(--muted); font-size: 10px; margin-left: auto; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px; flex-shrink: 0; }
+    .risk-badge { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 2px; font-weight: 700; font-size: 11px; letter-spacing: 1px; }
+    .risk-LOW    { background: rgba(0,229,255,0.08);  color: var(--risk-low);      border: 1px solid rgba(0,229,255,0.4); }
+    .risk-MEDIUM { background: rgba(255,230,0,0.08);  color: var(--risk-medium);   border: 1px solid rgba(255,230,0,0.4); }
+    .risk-HIGH   { background: rgba(255,106,0,0.08);  color: var(--risk-high);     border: 1px solid rgba(255,106,0,0.4); }
+    .risk-CRITICAL { background: rgba(255,0,64,0.1);  color: var(--risk-critical); border: 1px solid rgba(255,0,64,0.5); }
+    .impact-summary { display: flex; gap: 12px; margin: 8px 0; }
+    .impact-stat { text-align: center; flex: 1; }
+    .impact-stat-val { font-size: 18px; font-weight: 700; color: var(--accent); text-shadow: 0 0 8px rgba(0,229,255,0.4); }
+    .impact-stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+    .cluster-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 6px; overflow-y: auto; flex: 1; }
+    .cluster-grid::-webkit-scrollbar { width: 3px; }
+    .cluster-grid::-webkit-scrollbar-thumb { background: rgba(0,229,255,0.2); border-radius: 2px; }
+    .cluster-card { background: rgba(0,0,0,0.4); border: 1px solid var(--border); border-radius: 3px; padding: 10px; cursor: pointer; transition: border-color 0.15s, box-shadow 0.15s, transform 0.1s; }
+    .cluster-card:hover { border-color: rgba(0,229,255,0.5); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(0,229,255,0.1); }
+    .cluster-card.active { border-color: var(--accent); background: rgba(0,229,255,0.06); box-shadow: 0 0 0 1px rgba(0,229,255,0.3), 0 0 16px rgba(0,229,255,0.12); }
+    .agent-row { display:flex; align-items:center; gap:8px; padding:5px 8px; border-radius:3px; background:rgba(0,0,0,0.35); border:1px solid var(--border); }
+    .agent-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; transition:background 0.4s, box-shadow 0.4s; }
+    .agent-dot.healthy { background:var(--accent); box-shadow:0 0 6px var(--accent); }
+    .agent-dot.unhealthy { background:var(--accent2); box-shadow:0 0 6px var(--accent2); }
+    .agent-dot.unknown { background:var(--muted); }
+    .agent-name { color:var(--text); font-size:11px; font-weight:600; flex:1; }
+    .agent-ping { color:var(--muted); font-size:10px; }
+    .feed-item { display:flex; flex-direction:column; gap:2px; padding:6px 8px; border-radius:3px; background:rgba(0,0,0,0.3); border-left:2px solid var(--border); flex-shrink:0; }
+    .feed-item.tier-up { border-left-color:var(--accent); }
+    .feed-item.tier-down { border-left-color:var(--muted); }
+    .feed-item.health-up { border-left-color:var(--gold); }
+    .feed-item.health-down { border-left-color:var(--accent2); }
+    .feed-item.outcome-ok { border-left-color:var(--accent); }
+    .feed-item.outcome-fail { border-left-color:var(--risk-critical); }
+    .feed-time { color:var(--muted); font-size:9px; }
+    .feed-msg { color:var(--text); font-size:10px; line-height:1.4; }
+    /* Deliberation panel */
+    .delib-card { background:rgba(0,0,0,0.4); border:1px solid var(--border); border-radius:3px; padding:10px 12px; cursor:pointer; transition:border-color 0.15s, box-shadow 0.15s; flex-shrink:0; }
+    .delib-card:hover { border-color:var(--accent); box-shadow:0 0 10px rgba(0,229,255,0.1); }
+    .delib-card.status-complete { border-left:2px solid var(--accent); }
+    .delib-card.status-error { border-left:2px solid var(--risk-critical); }
+    .delib-card.status-pending { border-left:2px solid var(--muted); }
+    .delib-card.status-in_progress { border-left:2px solid var(--risk-medium); }
+    .delib-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:4px; }
+    .delib-date { font-weight:600; color:var(--text); font-size:12px; }
+    .delib-session { font-size:10px; color:var(--accent2); text-transform:uppercase; letter-spacing:1px; }
+    .delib-meta { display:flex; gap:8px; color:var(--muted); font-size:10px; flex-wrap:wrap; }
+    .delib-back { font-size:10px; color:var(--accent); cursor:pointer; text-decoration:underline; flex-shrink:0; }
+    .delib-section { background:rgba(0,0,0,0.3); border:1px solid var(--border); border-radius:3px; padding:10px; }
+    .delib-section-title { font-size:10px; color:var(--muted); text-transform:uppercase; letter-spacing:1px; margin-bottom:6px; }
+    .delib-response { color:var(--text); font-size:11px; line-height:1.6; white-space:pre-wrap; word-break:break-word; }
+    .delib-stat { display:inline-block; padding:2px 6px; border-radius:2px; font-size:10px; background:rgba(0,229,255,0.1); color:var(--accent); border:1px solid rgba(0,229,255,0.2); }
+
+    .cluster-name { font-weight: 700; font-size: 11px; color: var(--text); margin-bottom: 6px; letter-spacing: 0.5px; }
+    .cluster-bar-bg { background: rgba(0,0,0,0.5); border-radius: 1px; height: 2px; margin-bottom: 6px; }
+    .cluster-bar { height: 2px; border-radius: 1px; background: linear-gradient(90deg, var(--accent), var(--accent2)); box-shadow: 0 0 4px rgba(0,229,255,0.5); }
+    .cluster-stats { display: flex; justify-content: space-between; color: var(--muted); font-size: 10px; }
+    .two-col { display: flex; gap: 10px; flex-shrink: 0; }
+    .col { flex: 1; display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+    .col-header { font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1.5px; color: var(--muted); padding-bottom: 4px; border-bottom: 1px solid var(--border); }
+    .empty { color: var(--muted); text-align: center; padding: 30px 12px; font-size: 11px; line-height: 1.8; }
+    .loading { color: var(--accent); text-align: center; padding: 24px; animation: pulse 1.2s ease-in-out infinite; text-shadow: 0 0 8px rgba(0,229,255,0.5); }
+    @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+    .error-msg { color: var(--risk-high); background: rgba(255,106,0,0.08); border: 1px solid rgba(255,106,0,0.4); border-radius: 3px; padding: 8px 12px; font-size: 11px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div>
+        <div class="logo">Thero<span>nexus</span></div>
+        <div class="tagline">local code intelligence</div>
+      </div>
+      <div class="activity-dot" id="activity-dot" title="Live activity stream"></div>
+    </div>
+    <div class="stats-bar" id="stats-bar">
+      <div class="stat"><div class="stat-val" id="stat-symbols">—</div><div class="stat-label">Symbols</div></div>
+      <div class="stat"><div class="stat-val" id="stat-clusters">—</div><div class="stat-label">Clusters</div></div>
+      <div class="stat"><div class="stat-val" id="stat-flows">—</div><div class="stat-label">Flows</div></div>
+    </div>
+  </header>
+
+  <div class="split">
+    <div class="left-panel">
+      <div class="left-tabs">
+        <div class="left-tab active" data-ltab="explore">Explore</div>
+        <div class="left-tab" data-ltab="context">Context</div>
+        <div class="left-tab" data-ltab="impact">Impact</div>
+        <div class="left-tab" data-ltab="clusters">Clusters</div>
+        <div class="left-tab" data-ltab="live">Live</div>
+        <div class="left-tab" data-ltab="delib">Delib</div>
+      </div>
+      <div class="left-content">
+        <div class="left-pane" id="ltab-explore">
+          <div class="search-row">
+            <input type="text" id="explore-input" placeholder="Search execution flows…" />
+            <button id="explore-btn">Search</button>
+          </div>
+          <div class="results" id="explore-results">
+            <div class="empty">Search for a concept to see execution flows ranked by relevance</div>
+          </div>
+        </div>
+        <div class="left-pane hidden" id="ltab-context">
+          <div class="search-row">
+            <input type="text" id="context-input" placeholder="Symbol name…" />
+            <button id="context-btn">Inspect</button>
+          </div>
+          <div id="context-results" class="results">
+            <div class="empty">Enter a symbol name to see callers &amp; callees</div>
+          </div>
+        </div>
+        <div class="left-pane hidden" id="ltab-impact">
+          <div class="search-row">
+            <input type="text" id="impact-input" placeholder="Symbol to analyse…" />
+          </div>
+          <div class="search-row">
+            <select id="impact-dir" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:7px 8px;color:var(--text);font-family:inherit;font-size:12px;outline:none;">
+              <option value="upstream">Upstream (callers)</option>
+              <option value="downstream">Downstream (callees)</option>
+            </select>
+            <button id="impact-btn">Blast Radius</button>
+          </div>
+          <div id="impact-results" class="results">
+            <div class="empty">Run blast radius analysis to see what breaks if you change a symbol</div>
+          </div>
+        </div>
+        <div class="left-pane hidden" id="ltab-clusters">
+          <div class="cluster-grid" id="cluster-grid">
+            <div class="loading">Loading clusters…</div>
+          </div>
+        </div>
+        <div class="left-pane hidden" id="ltab-live" style="gap:8px">
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;flex-shrink:0">Agents</div>
+          <div id="agents-status" style="display:flex;flex-direction:column;gap:5px;flex-shrink:0"></div>
+          <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:1px;flex-shrink:0;margin-top:4px">Event Feed</div>
+          <div id="live-feed" class="results" style="font-size:10px"></div>
+        </div>
+        <div class="left-pane hidden" id="ltab-delib" style="gap:8px">
+          <div style="display:flex;gap:8px;flex-shrink:0;align-items:center">
+            <select id="delib-session-filter" style="flex:1;background:var(--bg);border:1px solid var(--border);border-radius:3px;padding:6px 8px;color:var(--text);font-family:inherit;font-size:11px;outline:none;">
+              <option value="">All sessions</option>
+              <option value="asian">Asian</option>
+              <option value="london">London</option>
+              <option value="new_york">New York</option>
+              <option value="off_hours">Off Hours</option>
+            </select>
+            <button id="delib-refresh-btn" class="secondary" style="font-size:10px;padding:5px 10px;">Refresh</button>
+          </div>
+          <div id="delib-list" class="results" style="font-size:11px"></div>
+          <div id="delib-detail" style="display:none;flex-direction:column;gap:8px;overflow-y:auto;flex:1"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PANEL — 3D living brain -->
+    <div class="right-panel" id="right-panel">
+      <div class="graph-toolbar">
+        <input type="text" id="graph-search" placeholder="Search nodes…" style="width:140px;font-size:11px;padding:4px 8px;background:rgba(18,18,26,0.9);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:inherit;outline:none;" />
+        <button id="heat-toggle" class="secondary" style="font-size:10px;padding:4px 10px;">HEAT OFF</button>
+        <button id="churn-btn" class="secondary" style="font-size:10px;padding:4px 10px;">REFRESH</button>
+        <button id="explode-btn" class="secondary" style="font-size:10px;padding:4px 10px;" title="[E] Explode modules apart">EXPLODE</button>
+        <button id="path-btn" class="secondary" style="font-size:10px;padding:4px 10px;" title="[F] Highlight selected node's connections">PATH</button>
+        <button id="unpin-btn" class="secondary" style="font-size:10px;padding:4px 10px;" title="[U] Unpin all pinned nodes">UNPIN ALL</button>
+        <div style="width:1px;height:16px;background:var(--border);margin:0 2px;flex-shrink:0;"></div>
+        <button id="mode-btn" style="font-size:10px;padding:4px 12px;background:rgba(255,45,120,0.1);border:1px solid rgba(255,45,120,0.5);color:var(--accent2);font-family:inherit;border-radius:3px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-weight:600;">BRAIN</button>
+        <button id="nexus-btn" style="font-size:10px;padding:4px 12px;background:rgba(153,51,255,0.1);border:1px solid rgba(153,51,255,0.5);color:#aa55ff;font-family:inherit;border-radius:3px;cursor:pointer;letter-spacing:1px;text-transform:uppercase;font-weight:600;">NEXUS</button>
+        <div id="slice-row" style="display:none;align-items:center;gap:6px;">
+          <span style="font-size:9px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;">SLICE</span>
+          <input type="range" id="slice-slider" min="-240" max="260" value="260" style="width:80px;accent-color:var(--accent);cursor:pointer;" />
+        </div>
+      </div>
+      <div class="graph-canvas-wrap" id="graph-canvas-wrap">
+        <div id="galaxy-view" style="position:absolute;inset:0;"></div>
+        <div id="brain-view" style="position:absolute;inset:0;display:none;"></div>
+        <div id="nexus-view" style="position:absolute;inset:0;display:none;"></div>
+        <div class="graph-legend" id="graph-legend"></div>
+        <div class="graph-stats" id="graph-stats"></div>
+      </div>
+    </div>
+  </div>
+
+  <script type="module" src="./main.js"></script>
+  <script>
+    // ─────────────────────────────────────────────────────────────────────────────
+    // LEGACY INLINE SCRIPT — kept only as archive reference.
+    // All logic has been moved to ES modules. This block is NOT executed.
+    // ─────────────────────────────────────────────────────────────────────────────
+    if (false) { let reqId = 1;
+    async function mcp(tool, args) {
+      const res = await fetch('/api/mcp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ jsonrpc: '2.0', id: reqId++, method: 'tools/call', params: { name: tool, arguments: args } })
+      });
+      const data = await res.json();
+      if (data.error) throw new Error(data.error.message);
+      return JSON.parse(data.result.content[0].text);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // Left panel
+    // ─────────────────────────────────────────────────────────────────────────────
+    function switchLeftTab(name) {
+      document.querySelectorAll('.left-tab').forEach(t => t.classList.toggle('active', t.dataset.ltab === name));
+      document.querySelectorAll('.left-pane').forEach(p => p.classList.toggle('hidden', p.id !== 'ltab-' + name));
+      if (name === 'clusters') loadClusters();
+      if (name === 'live') loadAgents();
+      if (name === 'delib') loadDeliberations();
+    }
+    document.querySelectorAll('.left-tab').forEach(t => t.addEventListener('click', () => switchLeftTab(t.dataset.ltab)));
+
+    async function loadStats() {
+      try {
+        const r = await fetch('/api/stats').then(r => r.json());
+        document.getElementById('stat-symbols').textContent = r.symbols?.toLocaleString() ?? '956';
+        document.getElementById('stat-clusters').textContent = r.clusters ?? '180';
+        document.getElementById('stat-flows').textContent = r.processes ?? '69';
+      } catch {}
+    }
+    loadStats();
+
+    function renderLoading(el) { el.innerHTML = '<div class="loading">Searching…</div>'; }
+    function renderError(el, msg) { el.innerHTML = `<div class="error-msg">${msg}</div>`; }
+
+    // Explore
+    document.getElementById('explore-btn').addEventListener('click', runExplore);
+    document.getElementById('explore-input').addEventListener('keydown', e => e.key === 'Enter' && runExplore());
+    async function runExplore() {
+      const q = document.getElementById('explore-input').value.trim();
+      if (!q) return;
+      const el = document.getElementById('explore-results');
+      renderLoading(el);
+      try {
+        const data = await mcp('theronexus_query', { query: q });
+        const flows = data.processes ?? [], defs = data.definitions ?? [];
+        if (!flows.length && !defs.length) { el.innerHTML = '<div class="empty">No results found</div>'; return; }
+        el.innerHTML = '';
+        if (flows.length) {
+          const hdr = document.createElement('div'); hdr.className = 'col-header'; hdr.textContent = `Execution Flows (${flows.length})`; el.appendChild(hdr);
+          flows.forEach(f => {
+            const c = document.createElement('div'); c.className = 'flow-card';
+            c.innerHTML = `<div class="flow-title">${f.summary}</div><div class="flow-meta"><span class="badge">${f.process_type}</span><span>${f.step_count} steps</span><span>${f.symbol_count} symbols</span><span>priority ${(f.priority*100).toFixed(0)}%</span></div>`;
+            el.appendChild(c);
+          });
+        }
+        if (defs.length) {
+          const hdr = document.createElement('div'); hdr.className = 'col-header'; hdr.style.marginTop = '8px'; hdr.textContent = `Definitions (${defs.length})`; el.appendChild(hdr);
+          defs.slice(0,10).forEach(d => {
+            const c = document.createElement('div'); c.className = 'caller-item'; c.style.marginBottom = '2px';
+            c.innerHTML = `<span class="caller-name">${d.name}</span><span class="caller-path">${d.filePath}</span>`;
+            c.addEventListener('click', () => showNodeDetail({ name: d.name })); el.appendChild(c);
+          });
+        }
+      } catch(e) { renderError(el, e.message); }
+    }
+
+    // Context
+    document.getElementById('context-btn').addEventListener('click', runContext);
+    document.getElementById('context-input').addEventListener('keydown', e => e.key === 'Enter' && runContext());
+    async function runContext() {
+      const name = document.getElementById('context-input').value.trim();
+      if (!name) return;
+      await runContextForName(name);
+    }
+    async function runContextForName(name) {
+      document.getElementById('context-input').value = name;
+      const el = document.getElementById('context-results');
+      renderLoading(el);
+      try {
+        const data = await mcp('theronexus_context', { name });
+        if (data.status !== 'found') { el.innerHTML = `<div class="empty">Symbol "${name}" not found</div>`; return; }
+        const s = data.symbol, incoming = data.incoming?.calls ?? [], outgoing = data.outgoing?.calls ?? [];
+        el.innerHTML = '';
+        const header = document.createElement('div'); header.className = 'symbol-card';
+        header.innerHTML = `<div class="symbol-name">${s.name}</div><div class="symbol-path">${s.filePath}:${s.startLine}–${s.endLine}</div>`;
+        el.appendChild(header);
+        const cols = document.createElement('div'); cols.className = 'two-col';
+        const makeCol = (title, items) => {
+          const col = document.createElement('div'); col.className = 'col';
+          col.innerHTML = `<div class="col-header">${title} (${items.length})</div>`;
+          if (!items.length) { col.innerHTML += `<div style="color:var(--muted);font-size:11px;padding:4px 0">none</div>`; return col; }
+          items.forEach(c => {
+            const row = document.createElement('div'); row.className = 'caller-item';
+            row.innerHTML = `<span class="caller-name">${c.name}</span><span class="caller-path">${c.filePath??''}</span>`;
+            row.addEventListener('click', () => runContextForName(c.name)); col.appendChild(row);
+          }); return col;
+        };
+        cols.appendChild(makeCol('Callers', incoming)); cols.appendChild(makeCol('Callees', outgoing)); el.appendChild(cols);
+        const btn = document.createElement('button'); btn.className = 'secondary'; btn.style.alignSelf = 'flex-start'; btn.style.marginTop = '4px'; btn.textContent = 'Run Impact Analysis →';
+        btn.addEventListener('click', () => { document.getElementById('impact-input').value = s.name; switchLeftTab('impact'); runImpact(); }); el.appendChild(btn);
+      } catch(e) { renderError(el, e.message); }
+    }
+
+    function showNodeDetail(node) { switchLeftTab('context'); runContextForName(node.name); }
+
+    // Impact
+    document.getElementById('impact-btn').addEventListener('click', runImpact);
+    document.getElementById('impact-input').addEventListener('keydown', e => e.key === 'Enter' && runImpact());
+    async function runImpact() {
+      const target = document.getElementById('impact-input').value.trim();
+      const direction = document.getElementById('impact-dir').value;
+      if (!target) return;
+      const el = document.getElementById('impact-results');
+      renderLoading(el);
+      try {
+        const data = await mcp('theronexus_impact', { target, direction });
+        el.innerHTML = '';
+        const risk = data.risk ?? 'LOW';
+        const header = document.createElement('div'); header.className = 'symbol-card';
+        header.innerHTML = `<div style="display:flex;align-items:center;gap:10px;margin-bottom:8px"><div class="symbol-name">${data.target?.name??target}</div><div class="risk-badge risk-${risk}">${risk}</div></div><div class="symbol-path">${data.target?.filePath??''}</div><div class="impact-summary"><div class="impact-stat"><div class="impact-stat-val">${data.summary?.direct??0}</div><div class="impact-stat-label">Direct</div></div><div class="impact-stat"><div class="impact-stat-val">${data.summary?.processes_affected??0}</div><div class="impact-stat-label">Processes</div></div><div class="impact-stat"><div class="impact-stat-val">${data.summary?.modules_affected??0}</div><div class="impact-stat-label">Modules</div></div></div>`;
+        el.appendChild(header);
+        (data.affected_modules ?? []).forEach((m, i) => {
+          if (i === 0) { const h = document.createElement('div'); h.className = 'col-header'; h.textContent = 'Affected Modules'; el.appendChild(h); }
+          const row = document.createElement('div'); row.className = 'caller-item';
+          row.innerHTML = `<span class="caller-name">${m.name}</span><span class="badge">${m.impact}</span><span class="caller-path">${m.hits} hit${m.hits!==1?'s':''}</span>`; el.appendChild(row);
+        });
+        (data.affected_processes ?? []).forEach((p, i) => {
+          if (i === 0) { const h = document.createElement('div'); h.className = 'col-header'; h.style.marginTop = '10px'; h.textContent = 'Affected Flows'; el.appendChild(h); }
+          const row = document.createElement('div'); row.className = 'flow-card';
+          row.innerHTML = `<div class="flow-title">${p.summary??p.id}</div>`; el.appendChild(row);
+        });
+      } catch(e) { renderError(el, e.message); }
+    }
+
+    // Clusters
+    let clustersLoaded = false, clusterHighlightLabel = null;
+    async function loadClusters() {
+      if (clustersLoaded) return;
+      const grid = document.getElementById('cluster-grid');
+      try {
+        const res = await fetch('/api/clusters').then(r => r.json());
+        const clusters = res.clusters ?? [];
+        if (!clusters.length) { grid.innerHTML = '<div class="empty">No clusters found</div>'; return; }
+        const maxSym = Math.max(...clusters.map(c => c.symbolCount));
+        grid.innerHTML = '';
+        clusters.forEach(c => {
+          const card = document.createElement('div'); card.className = 'cluster-card';
+          const pct = Math.round((c.symbolCount/maxSym)*100), coh = Math.round(c.cohesion*100);
+          card.innerHTML = `<div class="cluster-name">${c.label}</div><div class="cluster-bar-bg"><div class="cluster-bar" style="width:${pct}%"></div></div><div class="cluster-stats"><span>${c.symbolCount} sym</span><span>${coh}% coh</span></div>`;
+          card.addEventListener('click', () => {
+            if (clusterHighlightLabel === c.label) { clusterHighlightLabel = null; card.classList.remove('active'); }
+            else { document.querySelectorAll('.cluster-card.active').forEach(el => el.classList.remove('active')); clusterHighlightLabel = c.label; card.classList.add('active'); }
+            applyHighlight();
+          });
+          grid.appendChild(card);
+        });
+        clustersLoaded = true;
+      } catch(e) { grid.innerHTML = `<div class="error-msg">${e.message}</div>`; }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 3D FORCE GRAPH — Living Brain
+    // ─────────────────────────────────────────────────────────────────────────────
+    const MODULE_COLORS = ['#4da6ff','#ff4dd2','#9d6bff','#ffc94d','#00ff88','#ff6600','#00ddff','#ff3366','#00ffcc','#cc00ff','#ffaa00','#ff2d78','#00ff55','#7700ff','#ff9900'];
+    const moduleColorMap = {};
+    let colorIdx = 0;
+    function moduleColor(mod) {
+      if (!moduleColorMap[mod]) moduleColorMap[mod] = MODULE_COLORS[colorIdx++ % MODULE_COLORS.length];
+      return moduleColorMap[mod];
+    }
+    function nodeSize(node) {
+      const base = node.type==='Class'?8.8:node.type==='Method'?5.5:3.3;
+      const degScale = 1 + Math.sqrt(node.__degree||0) * 0.42; // hubs grow, singletons stay small
+      return base * Math.min(degScale, 5.0); // cap at 5x
+    }
+
+    let heatMode = false, heatData = { nodes: {}, edges: {} };
+    let graphSearchTerm = '';
+    let graph3d = null, allNodes = [], nodeById = new Map();
+
+    // Per-node material refs — updated in-place for zero-rebuild state changes
+    const coreMats = new Map(), glowMats = new Map(), spriteMats = new Map();
+
+    // Per-node activity level for real-time demand visualization
+    const nodeActivity = new Map(); // id → { level, timer }
+
+    // Live signal tracking — nodes that have received real (non-ambient) activity
+    const liveActivityNodes = new Set(); // node ids with at least one real pulse
+    const edgeFireCount = new Map();     // edgeKey → count, for camera auto-route
+
+    // Explode mode — per-module force centers
+    let explodeMode = false;
+
+    // Path highlight — progressive BFS from selected node (depth 0=off, 1, 2, 3)
+    let pathHighlightNodes = new Set(); // node ids
+    let pathSelectedNode = null;
+    let pathDepth = 0;
+
+    // Flick inertia — track drag velocity
+    const dragHistory  = new Map();  // nodeId → [{x,y,z,t}, ...]
+    const draggedNodes = new Map();  // nodeId → {x,y,z} live drag position (nexus pull physics)
+    const dragPinTimers = new Map(); // nodeId → timeout
+
+    function tensionColor(t) { return t<0.30?'#4fd1c5':t<0.55?'#fbbf24':t<0.75?'#f97316':'#ef4444'; }
+    function lerpHex(h1, h2, t) {
+      const p = h => [parseInt(h.slice(1,3),16),parseInt(h.slice(3,5),16),parseInt(h.slice(5,7),16)];
+      const [r1,g1,b1]=p(h1),[r2,g2,b2]=p(h2);
+      return '#'+[r1+(r2-r1)*t,g1+(g2-g1)*t,b1+(b2-b1)*t].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('');
+    }
+
+    function isNodeHighlighted(n) {
+      if (pathHighlightNodes.size && !pathHighlightNodes.has(n.id)) return false;
+      if (clusterHighlightLabel && n.module !== clusterHighlightLabel) return false;
+      if (graphSearchTerm && !n.name.toLowerCase().includes(graphSearchTerm)) return false;
+      return true;
+    }
+
+    function getBaseColor(node) {
+      let col = moduleColor(node.module);
+      if (heatMode && heatData.nodes[node.id]) {
+        const ns = heatData.nodes[node.id];
+        col = lerpHex(col, tensionColor(ns.tension??0), Math.min(1,(ns.tension??0)*1.5));
+      }
+      return col;
+    }
+
+    function applyHighlight() {
+      const has = clusterHighlightLabel || graphSearchTerm;
+      allNodes.forEach(node => {
+        const core = coreMats.get(node.id), glow = glowMats.get(node.id);
+        if (!core) return;
+        const col = (!has || isNodeHighlighted(node)) && node.__pinned ? '#39ff14' : getBaseColor(node);
+        const dimmed = has && !isNodeHighlighted(node);
+        const actLevel = nodeActivity.get(node.id)?.level ?? 0;
+        core.color.set(col); core.emissive.set(col);
+        core.opacity = dimmed ? 0.06 : 1.0;
+        if (node.__pinned && !dimmed) { core.color.set('#39ff14'); core.emissive.set('#39ff14'); }
+        core.emissiveIntensity = dimmed ? 0.0 : (node.__pinned ? 1.8 : 0.75 + actLevel);
+        if (glow) glow.opacity = dimmed ? 0.004 : 0.18 + actLevel * 0.15;
+      });
+    }
+
+    async function loadHeatmap() {
+      try { heatData = await fetch('/api/heatmap').then(r=>r.json()); if (graph3d) applyHighlight(); } catch {}
+    }
+    loadHeatmap(); setInterval(loadHeatmap, 15000);
+
+    // ── Activity: real-time node demand ─────────────────────────────────────────
+    function triggerActivation(nodeId, intensity) {
+      if (brainMode) { brainTriggerActivation(nodeId, intensity); return; }
+      const core = coreMats.get(nodeId), glow = glowMats.get(nodeId);
+      if (!core) return;
+      const cur = nodeActivity.get(nodeId) ?? { level: 0 };
+      clearTimeout(cur.timer);
+      const newLevel = Math.min(2.5, cur.level + intensity);
+      const timer = setTimeout(() => decayNode(nodeId), 1500 + intensity * 2000);
+      nodeActivity.set(nodeId, { level: newLevel, timer });
+      liveActivityNodes.add(nodeId); // mark as real-signal node
+      if (!core.opacity || core.opacity > 0.5) { // not dimmed
+        core.emissiveIntensity = node__pinned => node__pinned ? 1.2 : 0.5 + newLevel;
+        core.emissiveIntensity = 0.5 + newLevel;
+        if (glow) glow.opacity = Math.min(0.4, 0.10 + newLevel * 0.12);
+      }
+      // Spawn activity pulses along connected edges
+      if (graph3d && activityPulses.length < 80) {
+        const links = graph3d.graphData().links;
+        const connected = links.filter(l => {
+          const s = typeof l.source==='object'?l.source.id:l.source;
+          const t = typeof l.target==='object'?l.target.id:l.target;
+          return s === nodeId || t === nodeId;
+        }).slice(0, Math.ceil(intensity * 6));
+        const srcNode = nodeById.get(nodeId);
+        connected.forEach((link, i) => {
+          const sId = typeof link.source==='object'?link.source.id:link.source;
+          const tId = typeof link.target==='object'?link.target.id:link.target;
+          const s = nodeById.get(sId), t = nodeById.get(tId);
+          if (s && t) {
+            const eKey = [sId, tId].sort().join('|');
+            edgeFireCount.set(eKey, (edgeFireCount.get(eKey) ?? 0) + 1);
+            setTimeout(() => spawnPulse(s, t, moduleColor(srcNode?.module ?? s.module), intensity), i * 120);
+          }
+        });
+      }
+    }
+
+    function decayNode(nodeId) {
+      const act = nodeActivity.get(nodeId); if (!act) return;
+      const newLevel = act.level * 0.35;
+      if (newLevel < 0.05) {
+        nodeActivity.delete(nodeId);
+        const core = coreMats.get(nodeId), glow = glowMats.get(nodeId);
+        const n = nodeById.get(nodeId);
+        if (core) { if (n?.__pinned) { core.color.set('#39ff14'); core.emissive.set('#39ff14'); core.emissiveIntensity=1.8; } else { const c=getBaseColor(n??{}); core.color.set(c); core.emissive.set(c); core.emissiveIntensity=0.75; } }
+        if (glow) glow.opacity = 0.18;
+      } else {
+        const timer = setTimeout(() => decayNode(nodeId), 700);
+        nodeActivity.set(nodeId, { level: newLevel, timer });
+        const core = coreMats.get(nodeId), glow = glowMats.get(nodeId);
+        if (core) core.emissiveIntensity = 0.5 + newLevel;
+        if (glow) glow.opacity = Math.min(0.4, 0.10 + newLevel * 0.12);
+      }
+    }
+
+    function activateByName(name, intensity) {
+      const q = name.toLowerCase();
+      allNodes.forEach(n => { if (n.name.toLowerCase().includes(q)) triggerActivation(n.id, intensity); });
+    }
+    function activateByFile(filePath, intensity) {
+      const file = filePath.split('/').pop() ?? '';
+      if (!file) return;
+      allNodes.forEach(n => { if (n.filePath && n.filePath.includes(file)) triggerActivation(n.id, intensity); });
+    }
+
+    function handleActivityEvent(evt) {
+      const tool = evt.tool_name;
+      let input = {};
+      try { input = JSON.parse(evt.tool_input_preview ?? '{}'); } catch {}
+      const sig = Math.max(0.3, Math.min(1.0, evt.significance_score ?? 0.5));
+
+      if      (tool === 'theronexus_context')       activateByName(input.name ?? '', sig);
+      else if (tool === 'theronexus_impact')         activateByName(input.target ?? '', sig);
+      else if (tool === 'theronexus_detect_changes') allNodes.slice(0,20).forEach(n => triggerActivation(n.id, sig * 0.3));
+      else if (tool === 'theronexus_query') {
+        (input.query ?? '').split(/\s+/).filter(w => w.length > 4).forEach(w => activateByName(w, sig * 0.45));
+      }
+      else if (tool === 'Read')         activateByFile(input.file_path ?? '', sig * 0.4);
+      else if (tool === 'Edit' || tool === 'Write') activateByFile(input.file_path ?? '', sig * 0.9);
+      else if (tool === 'Grep') {
+        if (input.path) activateByFile(input.path, sig * 0.25);
+        const p = input.pattern ?? '';
+        if (p.length > 3 && p.length < 30) activateByName(p.replace(/[\\^$.*+?()[\]{}|]/g,''), sig * 0.3);
+      }
+
+      // Pulse the activity dot
+      const dot = document.getElementById('activity-dot');
+      dot.classList.add('alive');
+      clearTimeout(dot._timer);
+      dot._timer = setTimeout(() => dot.classList.remove('alive'), 1200);
+    }
+
+    // ── System event visuals ──────────────────────────────────────────────────────
+    function systemWave(color, intensity, count = 15, staggerMs = 30) {
+      if (!allNodes.length) return;
+      const shuffled = [...allNodes].sort(() => Math.random() - 0.5).slice(0, count);
+      shuffled.forEach((n, i) => setTimeout(() => triggerActivationWithColor(n.id, intensity, color), i * staggerMs));
+    }
+
+    function triggerActivationWithColor(nodeId, intensity, color) {
+      triggerActivation(nodeId, intensity);
+      // Also spawn pulses on edges of this node
+      const links = graph3d?.graphData().links ?? [];
+      links.filter(l => {
+        const s = typeof l.source==='object'?l.source.id:l.source;
+        const t = typeof l.target==='object'?l.target.id:l.target;
+        return s === nodeId || t === nodeId;
+      }).slice(0,3).forEach((l, i) => {
+        const s = typeof l.source==='object'?l.source:nodeById.get(l.source);
+        const t = typeof l.target==='object'?l.target:nodeById.get(l.target);
+        if (s && t) setTimeout(() => spawnPulse(s, t, color, intensity * 0.8), i * 80);
+      });
+    }
+
+    function hubBurst(color, intensity) {
+      if (!allNodes.length) return;
+      const hubs = [...allNodes].sort((a,b) => (b.__degree||0)-(a.__degree||0)).slice(0, 8);
+      hubs.forEach((n, i) => setTimeout(() => triggerActivationWithColor(n.id, intensity, color), i * 60));
+    }
+
+    function addFeedItem(cls, msg, time) {
+      const feed = document.getElementById('live-feed');
+      if (!feed) return;
+      const d = document.createElement('div');
+      d.className = `feed-item ${cls}`;
+      const t = time ? new Date(time).toLocaleTimeString('en-AU', { hour12: false }) : new Date().toLocaleTimeString('en-AU', { hour12: false });
+      d.innerHTML = `<span class="feed-time">${t}</span><span class="feed-msg">${msg}</span>`;
+      feed.insertBefore(d, feed.firstChild);
+      // Keep last 50 items
+      while (feed.children.length > 50) feed.removeChild(feed.lastChild);
+    }
+
+    function handleSystemEvent(evt) {
+      const dot = document.getElementById('activity-dot');
+      dot.classList.add('alive');
+      clearTimeout(dot._timer);
+      dot._timer = setTimeout(() => dot.classList.remove('alive'), 1200);
+
+      const evtType = evt.event_type ?? evt.type;
+      if (evtType === 'tier_change') {
+        const up = ['ACTIVE','MILD'].includes(evt.to ?? '');
+        const color = up ? '#00e5ff' : '#1c5468';
+        const msg = `Concept <b>${(evt.surface_form ?? 'unknown').replace(/`/g,'')}</b> tier: ${evt.from} → ${evt.to}`;
+        if (up) { hubBurst(color, 0.5); addFeedItem('tier-up', msg, evt.timestamp); }
+        else { systemWave(color, 0.12, 8); addFeedItem('tier-down', msg, evt.timestamp); }
+      }
+
+      else if (evtType === 'agent_health_change') {
+        const toHealthy = evt.to === 'healthy';
+        const color = toHealthy ? '#39ff14' : '#ff2d78';
+        const intensity = toHealthy ? 0.45 : 0.35;
+        systemWave(color, intensity, toHealthy ? 30 : 15, toHealthy ? 20 : 50);
+        const msg = `Agent <b>${evt.agent_id}</b>: ${evt.from} → <b>${evt.to}</b>`;
+        addFeedItem(toHealthy ? 'health-up' : 'health-down', msg, evt.timestamp);
+        // Refresh agent panel
+        loadAgents();
+      }
+
+      else if (evtType === 'outcome_record') {
+        const ok = evt.success !== false;
+        const color = ok ? '#39ff14' : '#ff0040';
+        if (ok) { hubBurst(color, 0.7); }
+        else { systemWave(color, 0.3, 10); }
+        const src = evt.source ?? 'unknown';
+        const msg = ok
+          ? `Outcome <b>${src}</b> ✓ success`
+          : `Outcome <b>${src}</b> ✗ failed`;
+        addFeedItem(ok ? 'outcome-ok' : 'outcome-fail', msg, evt.timestamp);
+      }
+    }
+
+    // ── Agent health panel ────────────────────────────────────────────────────────
+    async function loadAgents() {
+      try {
+        const data = await fetch('/api/agents').then(r => r.json());
+        const agents = data.agents ?? [];
+        const el = document.getElementById('agents-status');
+        if (!el) return;
+        el.innerHTML = '';
+        agents.forEach(a => {
+          const row = document.createElement('div');
+          row.className = 'agent-row';
+          const status = a.status === 'healthy' ? 'healthy' : a.status === 'unreachable' ? 'unhealthy' : 'unknown';
+          const ping = a.ping_ms != null ? `${Math.round(a.ping_ms)}ms` : a.status;
+          const sr = a.success_rate != null ? ` · ${(a.success_rate*100).toFixed(0)}% ok` : '';
+          row.innerHTML = `<div class="agent-dot ${status}"></div><span class="agent-name">${a.id}</span><span class="agent-ping">${ping}${sr}</span>`;
+          el.appendChild(row);
+        });
+      } catch {}
+    }
+
+    // ── Deliberation panel ──────────────────────────────────────────────────────
+    async function loadDeliberations() {
+      const listEl = document.getElementById('delib-list');
+      const detailEl = document.getElementById('delib-detail');
+      if (!listEl) return;
+      detailEl.style.display = 'none';
+      listEl.style.display = '';
+
+      const sessionFilter = document.getElementById('delib-session-filter').value;
+      const params = new URLSearchParams();
+      if (sessionFilter) params.set('session', sessionFilter);
+
+      listEl.innerHTML = '<div class="loading">Loading deliberations...</div>';
+      try {
+        const url = '/api/deliberations' + (params.toString() ? '?' + params.toString() : '');
+        const data = await fetch(url).then(r => r.json());
+        const items = data.deliberations ?? [];
+        if (!items.length) {
+          listEl.innerHTML = '<div class="empty">No deliberations found</div>';
+          return;
+        }
+        listEl.innerHTML = '';
+        items.forEach(d => {
+          const card = document.createElement('div');
+          card.className = 'delib-card status-' + (d.status || 'pending');
+          const dateStr = d.date || 'unknown';
+          const session = d.session || 'unknown';
+          const model = d.model || '';
+          const timing = d.latency_ms != null ? (d.latency_ms / 1000).toFixed(1) + 's' : '';
+          const tokens = d.tokens_used != null ? d.tokens_used.toLocaleString() + ' tok' : '';
+          card.innerHTML = [
+            '<div class="delib-header">',
+            '  <span class="delib-date">' + dateStr + '</span>',
+            '  <span class="delib-session">' + session.replace('_', ' ') + '</span>',
+            '</div>',
+            '<div class="delib-meta">',
+            '  <span class="badge">' + (d.status || 'pending') + '</span>',
+            (model ? '  <span>' + model + '</span>' : ''),
+            (timing ? '  <span>' + timing + '</span>' : ''),
+            (tokens ? '  <span>' + tokens + '</span>' : ''),
+            '</div>',
+          ].join('\n');
+          card.addEventListener('click', () => showDelibDetail(d.id));
+          listEl.appendChild(card);
+        });
+      } catch (err) {
+        listEl.innerHTML = '<div class="error-msg">Failed to load: ' + err.message + '</div>';
+      }
+    }
+
+    async function showDelibDetail(id) {
+      const listEl = document.getElementById('delib-list');
+      const detailEl = document.getElementById('delib-detail');
+      if (!detailEl) return;
+
+      listEl.style.display = 'none';
+      detailEl.style.display = 'flex';
+      detailEl.innerHTML = '<div class="loading">Loading...</div>';
+
+      try {
+        const d = await fetch('/api/deliberations/' + encodeURIComponent(id)).then(r => r.json());
+        if (d.error) throw new Error(d.error);
+
+        const sections = [];
+
+        // Back button
+        sections.push('<div class="delib-back" id="delib-back-btn">Back to list</div>');
+
+        // Header
+        sections.push('<div class="delib-section">');
+        sections.push('<div class="delib-header"><span class="delib-date">' + (d.date || '') + '</span><span class="delib-session">' + (d.session || '').replace('_', ' ') + '</span></div>');
+        sections.push('<div class="delib-meta" style="margin-top:6px">');
+        sections.push('<span class="badge">' + (d.status || '') + '</span>');
+        if (d.model) sections.push('<span class="delib-stat">' + d.model + '</span>');
+        if (d.latency_ms != null) sections.push('<span class="delib-stat">' + (d.latency_ms / 1000).toFixed(1) + 's</span>');
+        if (d.tokens_used != null) sections.push('<span class="delib-stat">' + d.tokens_used.toLocaleString() + ' tokens</span>');
+        sections.push('</div></div>');
+
+        // Packet summary — perspectives
+        if (d.packet && d.packet.perspectives) {
+          sections.push('<div class="delib-section">');
+          sections.push('<div class="delib-section-title">Perspectives</div>');
+          d.packet.perspectives.forEach(function(p) {
+            if (p.source === 'singularity') {
+              sections.push('<div style="margin-bottom:6px"><b style="color:var(--accent)">Singularity</b>');
+              sections.push(' &mdash; ' + p.total_trades + ' trades, WR ' + ((p.win_rate || 0) * 100).toFixed(0) + '%, PnL ' + (p.total_pnl || 0).toFixed(2) + '</div>');
+            } else if (p.source === 'divergent') {
+              sections.push('<div style="margin-bottom:6px"><b style="color:var(--gold)">Divergent</b>');
+              sections.push(' &mdash; ' + p.signal_count + ' signals, agreement ' + ((p.agreement_rate || 0) * 100).toFixed(0) + '%</div>');
+            } else if (p.source === 'horizon') {
+              sections.push('<div style="margin-bottom:6px"><b style="color:var(--accent2)">Horizon</b>');
+              sections.push(' &mdash; ' + p.active_positions + ' positions, exposure ' + (p.total_exposure || 0).toFixed(2) + ', uPnL ' + (p.unrealized_pnl || 0).toFixed(2) + '</div>');
+            }
+          });
+          sections.push('</div>');
+        }
+
+        // LLM response
+        if (d.response) {
+          sections.push('<div class="delib-section">');
+          sections.push('<div class="delib-section-title">Analysis</div>');
+          sections.push('<div class="delib-response">' + escapeHtml(d.response) + '</div>');
+          sections.push('</div>');
+        }
+
+        // Error
+        if (d.error) {
+          sections.push('<div class="delib-section" style="border-color:var(--risk-critical)">');
+          sections.push('<div class="delib-section-title" style="color:var(--risk-critical)">Error</div>');
+          sections.push('<div class="delib-response" style="color:var(--risk-high)">' + escapeHtml(d.error) + '</div>');
+          sections.push('</div>');
+        }
+
+        detailEl.innerHTML = sections.join('\n');
+        document.getElementById('delib-back-btn').addEventListener('click', function() {
+          detailEl.style.display = 'none';
+          listEl.style.display = '';
+        });
+      } catch (err) {
+        detailEl.innerHTML = '<div class="error-msg">Failed to load: ' + err.message + '</div>';
+      }
+    }
+
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+
+    document.getElementById('delib-session-filter').addEventListener('change', loadDeliberations);
+    document.getElementById('delib-refresh-btn').addEventListener('click', loadDeliberations);
+
+    function connectActivityStream() {
+      const es = new EventSource('/api/events');
+      es.onmessage = e => {
+        try {
+          const evt = JSON.parse(e.data);
+          if (evt.type === 'tool') handleActivityEvent(evt);
+          else if (evt.type === 'system_event') handleSystemEvent(evt);
+        } catch {}
+      };
+      es.onerror = () => { es.close(); setTimeout(connectActivityStream, 3000); };
+    }
+
+    // ── Custom activity pulse meshes (travel along edges) ────────────────────────
+    const activityPulses = [];
+
+    function spawnPulse(srcNode, tgtNode, color, intensity) {
+      if (!graph3d) return;
+      const geo = new THREE.SphereGeometry(1.8, 6, 6);
+      const mat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const mesh = new THREE.Mesh(geo, mat);
+      graph3d.scene().add(mesh);
+      activityPulses.push({ mesh, srcNode, tgtNode, progress: 0, speed: 0.007 + Math.random() * 0.009, intensity });
+    }
+
+    function animatePulses() {
+      const now = performance.now();
+      // Tick nexus shader uTime
+      nexusUniforms.uTime.value = now / 1000;
+      // Nucleus heartbeat — corona breathing + bloom + light sync
+      if (nexusMode && nucleusCoronas.length) {
+        const t    = now / 1000;
+        const beat = Math.sin(t * 0.8);
+        nucleusCoronas.forEach((c, i) => {
+          const freq = 0.8 - i * 0.12;
+          const s    = Math.sin(t * freq + c.phase);
+          c.mesh.scale.setScalar(1.0 + (0.04 + i * 0.025) * s);
+          c.mesh.material.opacity = c.baseOpacity * (1.0 + 0.3 * s);
+        });
+        if (nexusBloomRef)     nexusBloomRef.intensity = 5.5 + 0.5 * beat;
+        if (nucleusPointLight) nucleusPointLight.intensity = 5.0 + 1.0 * beat;
+        updateNucleusLaser();
+        animateNexusFibers();
+        // Update nucleus edge braid weight from cumulative edgeFireCount
+        if (graph3d) {
+          const _links = graph3d.graphData().links;
+          for (const _lnk of _links) {
+            if (!_lnk.__nexusFiberMats) continue;
+            const _sId  = typeof _lnk.source==='object' ? _lnk.source.id : _lnk.source;
+            const _tId  = typeof _lnk.target==='object' ? _lnk.target.id : _lnk.target;
+            const _eKey = [_sId, _tId].sort().join('|');
+            const _fires = edgeFireCount.get(_eKey) ?? 0;
+            const _w    = Math.min(1.0, 0.35 + _fires * 0.05);
+            const _ss   = 0.40 + _w * 1.40;
+            for (const _m of _lnk.__nexusFiberMats) {
+              _m.uniforms.uWeight.value      = _w;
+              _m.uniforms.uScrollSpeed.value = _ss;
+            }
+          }
+        }
+        if (nexusGlowRingRefs) nexusGlowRingRefs.tick(t);
+        if (nexusStarfieldRefs) { nexusStarfieldRefs.close.rotation.y = t * 0.02; nexusStarfieldRefs.close.rotation.x = Math.sin(t * 0.1) * 0.05; }
+      }
+      const dead = [];
+      for (const p of activityPulses) {
+        p.progress += p.speed;
+        if (p.progress >= 1) { dead.push(p); continue; }
+        const { x: sx=0, y: sy=0, z: sz=0 } = p.srcNode;
+        const { x: tx=0, y: ty=0, z: tz=0 } = p.tgtNode;
+        const t = p.progress;
+        p.mesh.position.set(sx+(tx-sx)*t, sy+(ty-sy)*t, sz+(tz-sz)*t);
+        p.mesh.material.opacity = Math.sin(t * Math.PI) * p.intensity * 0.9;
+        // Pulse brightens nearby node glow
+        if (t < 0.15) {
+          const g = glowMats.get(p.srcNode.id);
+          if (g) g.opacity = Math.min(0.5, g.opacity + 0.08 * (1 - t / 0.15));
+        }
+        if (t > 0.85) {
+          const g = glowMats.get(p.tgtNode.id);
+          if (g) g.opacity = Math.min(0.5, g.opacity + 0.08 * ((t - 0.85) / 0.15));
+        }
+      }
+      for (const p of dead) {
+        graph3d?.scene().remove(p.mesh);
+        activityPulses.splice(activityPulses.indexOf(p), 1);
+        // Ignition flare — only for real-intensity pulses (not ambient hum)
+        if (p.intensity > 0.15) flareNode(p.tgtNode.id);
+      }
+      // Node breathing — idle nodes pulse emissiveIntensity gently
+      let nodeIdx = 0;
+      for (const [id, mat] of coreMats) {
+        const act = nodeActivity.get(id);
+        if (!act || !act.level) {
+          const breathAmp = nexusMode ? 0.08 : 0.08;
+          const breathBase = nexusMode ? 0.125 : 0.75;
+          const breathe = Math.sin(now / 1000 * 1.2 + nodeIdx * 0.37) * breathAmp;
+          mat.emissiveIntensity = breathBase + breathe;
+        }
+        nodeIdx++;
+      }
+      // Decay glow back toward baseline
+      for (const [, g] of glowMats) {
+        if (g.opacity > 0.18) g.opacity = Math.max(0.18, g.opacity - 0.003);
+      }
+      requestAnimationFrame(animatePulses);
+    }
+
+    // ── Ambient neural noise — low-level always-alive background hum ─────────────
+    function runAmbientNoise() {
+      if (!graph3d || allNodes.length === 0) return setTimeout(runAmbientNoise, 1500);
+      const links = graph3d.graphData().links;
+      if (!links.length) return setTimeout(runAmbientNoise, 2000);
+      const count = 1 + Math.floor(Math.random() * 2);
+      for (let i = 0; i < count; i++) {
+        const link = links[Math.floor(Math.random() * links.length)];
+        const sId = typeof link.source==='object'?link.source.id:link.source;
+        const tId = typeof link.target==='object'?link.target.id:link.target;
+        const s = nodeById.get(sId), t = nodeById.get(tId);
+        if (s && t && activityPulses.length < 60) spawnPulse(s, t, moduleColor(s.module), 0.10);
+      }
+      setTimeout(runAmbientNoise, 1800 + Math.random() * 2800);
+    }
+
+    // ── Nebula drip — nucleus constantly feeds nodes with dim background pulses ──
+    function runNebulaDrip() {
+      if (!nexusMode || !graph3d) return setTimeout(runNebulaDrip, 2000);
+      if (allNodes.length === 0) return setTimeout(runNebulaDrip, 1500);
+      const nucleusNode = allNodes.find(n => n.__isNucleus && n.__nucleusRank === 0);
+      if (!nucleusNode) return setTimeout(runNebulaDrip, 2000);
+      const links = graph3d.graphData().links;
+      if (!links.length) return setTimeout(runNebulaDrip, 2000);
+
+      const nucleusEdges = links.filter(l => {
+        const sId = typeof l.source==='object' ? l.source.id : l.source;
+        const tId = typeof l.target==='object' ? l.target.id : l.target;
+        return sId === nucleusNode.id || tId === nucleusNode.id;
+      });
+
+      if (nucleusEdges.length && activityPulses.length < 80) {
+        const link   = nucleusEdges[Math.floor(Math.random() * nucleusEdges.length)];
+        const sId    = typeof link.source==='object' ? link.source.id : link.source;
+        const peerId = sId === nucleusNode.id
+          ? (typeof link.target==='object' ? link.target.id : link.target)
+          : sId;
+        const peerNode = nodeById.get(peerId);
+        if (peerNode) {
+          const intensity  = 0.04 + Math.random() * 0.04;
+          const baseColor  = new THREE.Color(moduleColor(peerNode.module)).multiplyScalar(0.4);
+          const geo  = new THREE.SphereGeometry(1.8 * 0.4, 6, 6);
+          const mat  = new THREE.MeshBasicMaterial({
+            color: baseColor, transparent: true, opacity: 0,
+            blending: THREE.AdditiveBlending, depthWrite: false,
+          });
+          const mesh = new THREE.Mesh(geo, mat);
+          graph3d.scene().add(mesh);
+          activityPulses.push({ mesh, srcNode: nucleusNode, tgtNode: peerNode,
+            progress: 0, speed: 0.004 + Math.random() * 0.003, intensity });
+        }
+      }
+
+      const isHot = liveActivityNodes.size > 0;
+      setTimeout(runNebulaDrip, isHot ? 200 + Math.random()*200 : 800 + Math.random()*600);
+    }
+
+    // ── Ignition flare — violet burst when a pulse arrives at target node ────────
+    function flareNode(nodeId) {
+      const core = coreMats.get(nodeId), glow = glowMats.get(nodeId);
+      if (!core || !glow) return;
+      // Snap to violet
+      core.color.set('#9933ff'); core.emissive.set('#cc66ff');
+      core.emissiveIntensity = 4.0;
+      glow.color.set('#9933ff');
+      glow.opacity = 0.7;
+      // Ignite connected nebula filaments
+      if (nexusMode && nexusFibers.length) {
+        for (const f of nexusFibers) {
+          if (f.srcId === nodeId || f.tgtId === nodeId) f.ignited = 1.0;
+        }
+      }
+      // Decay back to module color after 400ms
+      const node = nodeById.get(nodeId);
+      setTimeout(() => {
+        const col = getBaseColor(node ?? {});
+        core.color.set(col); core.emissive.set(col);
+        core.emissiveIntensity = 0.75;
+        glow.color.set(col);
+        glow.opacity = 0.18;
+      }, 420);
+    }
+
+    // ── Code sprite ambient flicker — random idle nodes regenerate binary texture ─
+    function runSpriteFlicker() {
+      if (spriteMats.size > 0) {
+        const ids = [...spriteMats.keys()];
+        const id = ids[Math.floor(Math.random() * ids.length)];
+        const act = nodeActivity.get(id);
+        if (!act || !act.level) {
+          const entry = spriteMats.get(id);
+          if (entry) {
+            const newTex = makeCodeTexture(entry.col, entry.name);
+            entry.mat.map = newTex;
+            entry.mat.needsUpdate = true;
+          }
+        }
+      }
+      setTimeout(runSpriteFlicker, 800 + Math.random() * 1500);
+    }
+
+    // ── Bloom post-processing ────────────────────────────────────────────────────
+    function setupBloom(container) {
+      try {
+        const { EffectComposer, RenderPass, BloomEffect, ChromaticAberrationEffect, EffectPass } = POSTPROCESSING;
+        const renderer = graph3d.renderer(), scene = graph3d.scene(), camera = graph3d.camera();
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.15;
+        const composer = new EffectComposer(renderer);
+        composer.addPass(new RenderPass(scene, camera));
+        // Tight bloom — crisp corona on bright nodes only, not diffuse fog
+        const bloom = new BloomEffect({ intensity: 2.8, radius: 0.38, luminanceThreshold: 0.20, luminanceSmoothing: 0.06 });
+        nexusBloomRef = bloom; galaxyBloomRef = bloom; // shared ref for nexus intensity swap
+        // Subtle chromatic aberration — digital lens feel
+        const ca = ChromaticAberrationEffect
+          ? new ChromaticAberrationEffect({ offset: new THREE.Vector2(0.0008, 0.0005) })
+          : null;
+        composer.addPass(new EffectPass(camera, bloom, ...(ca ? [ca] : [])));
+        // Override renderer.render with re-entrancy guard
+        let composing = false;
+        const orig = renderer.render.bind(renderer);
+        renderer.render = (s, c) => {
+          if (!composing && s === scene) { composing = true; composer.render(); composing = false; }
+          else orig(s, c);
+        };
+        const ro = new ResizeObserver(() => composer.setSize(container.clientWidth, container.clientHeight));
+        ro.observe(container);
+      } catch(e) {
+        // Graceful degradation — bloom unavailable, graph still works
+        console.warn('Bloom unavailable:', e.message);
+        const r = graph3d.renderer();
+        r.toneMapping = THREE.ACESFilmicToneMapping;
+        r.toneMappingExposure = 1.15;
+      }
+    }
+
+    // ── Scanner plane — sweeping holographic slice ───────────────────────────────
+    function addScannerPlane(scene) {
+      // Scan ring — sweeps vertically like a sensor ping, no square artifacts
+      const geo = new THREE.TorusGeometry(700, 1.2, 6, 80);
+      const mat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+      const ring = new THREE.Mesh(geo, mat);
+      ring.rotation.x = Math.PI / 2;
+      scene.add(ring);
+      let y = -500, dir = 1, lastT = 0;
+      (function tick(t) {
+        const dt = Math.min(lastT ? t - lastT : 16, 50); lastT = t;
+        y += 0.07 * dt * dir;
+        if (y > 500) { dir = -1; mat.opacity = 0; }
+        else if (y < -500) { dir = 1; mat.opacity = 0; }
+        ring.position.y = y;
+        if (mat.opacity < 0.55) mat.opacity = Math.min(0.55, mat.opacity + 0.00008 * dt);
+        requestAnimationFrame(tick);
+      })(0);
+    }
+
+    // ── Screen-space HUD overlay — Tony Stark data readout ───────────────────────
+    let hudNode = null, hudEl = null;
+
+    function setupHUD(container) {
+      hudEl = document.createElement('div');
+      hudEl.style.cssText = 'position:absolute;pointer-events:none;z-index:20;background:rgba(0,8,20,0.96);border:1px solid rgba(0,229,255,0.55);border-radius:2px;padding:12px 16px;font-family:"SF Mono","Fira Code",monospace;font-size:11px;color:#8ffcff;backdrop-filter:blur(8px);display:none;box-shadow:0 0 30px rgba(0,229,255,0.2),inset 0 0 20px rgba(0,229,255,0.04),0 0 0 1px rgba(0,229,255,0.1);max-width:240px;';
+      container.appendChild(hudEl);
+      (function track() {
+        if (hudNode && graph3d) {
+          const v = new THREE.Vector3(hudNode.x||0, hudNode.y||0, hudNode.z||0).project(graph3d.camera());
+          const cv = graph3d.renderer().domElement;
+          const x = (v.x*0.5+0.5)*cv.clientWidth, y = (-v.y*0.5+0.5)*cv.clientHeight;
+          hudEl.style.left = Math.min(cv.clientWidth-260, x+20)+'px';
+          hudEl.style.top  = Math.max(10, y-50)+'px';
+        }
+        requestAnimationFrame(track);
+      })();
+    }
+
+    function showHUD(node) {
+      hudNode = node;
+      const actLevel = nodeActivity.get(node.id)?.level ?? 0;
+      const actBar = actLevel > 0 ? `<div style="margin-top:8px;height:2px;background:rgba(0,229,255,0.08)"><div style="height:2px;width:${Math.min(100,actLevel*40)}%;background:linear-gradient(90deg,#00e5ff,#ff2d78);box-shadow:0 0 6px rgba(0,229,255,0.6);transition:width 0.3s"></div></div>` : '';
+      hudEl.innerHTML = `
+        <div style="color:#00e5ff;font-weight:700;font-size:13px;margin-bottom:6px;letter-spacing:1px;text-shadow:0 0 10px rgba(0,229,255,0.6)">${node.name}</div>
+        <div style="color:#1c5468;margin-bottom:4px;word-break:break-all;line-height:1.5;font-size:10px">${node.filePath||''}</div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap">
+          <span style="background:rgba(0,229,255,0.1);color:#00e5ff;padding:2px 7px;border:1px solid rgba(0,229,255,0.3);font-size:10px;letter-spacing:1px">${node.type}</span>
+          <span style="background:rgba(255,45,120,0.1);color:#ff2d78;padding:2px 7px;border:1px solid rgba(255,45,120,0.3);font-size:10px;letter-spacing:1px">${node.module}</span>
+          ${node.__pinned?'<span style="background:rgba(57,255,20,0.1);color:#39ff14;padding:2px 7px;border:1px solid rgba(57,255,20,0.3);font-size:10px;letter-spacing:1px;text-shadow:0 0 6px rgba(57,255,20,0.5)">LOCKED</span>':''}
+        </div>
+        ${actBar}
+        <div style="color:#0a2030;font-size:10px;margin-top:10px;border-top:1px solid rgba(0,229,255,0.1);padding-top:6px;letter-spacing:0.5px">drag→flick/pin · dbl-click to${node.__pinned?' unpin':' warp'} · [F] path · [E] explode</div>`;
+      hudEl.style.display = 'block';
+    }
+    function hideHUD() { hudNode = null; hudEl.style.display = 'none'; }
+
+    // ── Scene extras ─────────────────────────────────────────────────────────────
+    function addStarField(scene) {
+      // Dim blue-tinted background stars — small, numerous, low opacity
+      const dimCount = 4000;
+      const dimPos = new Float32Array(dimCount * 3);
+      for (let i = 0; i < dimCount; i++) {
+        dimPos[i*3]   = (Math.random() - 0.5) * 8000;
+        dimPos[i*3+1] = (Math.random() - 0.5) * 8000;
+        dimPos[i*3+2] = (Math.random() - 0.5) * 8000;
+      }
+      const dimGeo = new THREE.BufferGeometry();
+      dimGeo.setAttribute('position', new THREE.BufferAttribute(dimPos, 3));
+      scene.add(new THREE.Points(dimGeo, new THREE.PointsMaterial({
+        color: 0x3399cc, size: 0.9, transparent: true, opacity: 0.30, sizeAttenuation: true
+      })));
+
+      // Mid-brightness stars — moderate count, cool white-blue
+      const midCount = 1200;
+      const midPos = new Float32Array(midCount * 3);
+      for (let i = 0; i < midCount; i++) {
+        midPos[i*3]   = (Math.random() - 0.5) * 7000;
+        midPos[i*3+1] = (Math.random() - 0.5) * 7000;
+        midPos[i*3+2] = (Math.random() - 0.5) * 7000;
+      }
+      const midGeo = new THREE.BufferGeometry();
+      midGeo.setAttribute('position', new THREE.BufferAttribute(midPos, 3));
+      scene.add(new THREE.Points(midGeo, new THREE.PointsMaterial({
+        color: 0x88ddff, size: 1.6, transparent: true, opacity: 0.50, sizeAttenuation: true
+      })));
+
+      // Bright accent stars — sparse, larger, near-white with a blue edge
+      const brightCount = 180;
+      const brightPos = new Float32Array(brightCount * 3);
+      for (let i = 0; i < brightCount; i++) {
+        brightPos[i*3]   = (Math.random() - 0.5) * 6000;
+        brightPos[i*3+1] = (Math.random() - 0.5) * 6000;
+        brightPos[i*3+2] = (Math.random() - 0.5) * 6000;
+      }
+      const brightGeo = new THREE.BufferGeometry();
+      brightGeo.setAttribute('position', new THREE.BufferAttribute(brightPos, 3));
+      scene.add(new THREE.Points(brightGeo, new THREE.PointsMaterial({
+        color: 0xccefff, size: 3.2, transparent: true, opacity: 0.80, sizeAttenuation: true
+      })));
+    }
+    function addNebulaVolumes(scene) {
+      // Minimal deep-field atmosphere — not NMS, just depth
+      const atmo = new THREE.Mesh(
+        new THREE.SphereGeometry(3000, 6, 6),
+        new THREE.MeshBasicMaterial({ color: 0x001a2e, transparent: true, opacity: 0.18, side: THREE.BackSide, depthWrite: false })
+      );
+      scene.add(atmo);
+    }
+
+    // ── Code-orb texture — binary/hex chars forming a data sphere ────────────────
+    function makeCodeTexture(hexCol, name) {
+      const res = 128;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = res;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, res, res);
+
+      const r = parseInt(hexCol.slice(1,3),16);
+      const g = parseInt(hexCol.slice(3,5),16);
+      const b = parseInt(hexCol.slice(5,7),16);
+
+      // Fill circle with binary/hex glyphs
+      ctx.font = '7px "SF Mono","Fira Code",monospace';
+      const glyphPool = '01010110010100110011' + (name || '').toUpperCase().replace(/[^A-Z0-9]/g,'');
+      for (let row = 0; row < 18; row++) {
+        for (let col = 0; col < 18; col++) {
+          const x = col * 7 + 1, y = row * 7 + 8;
+          const dx = x + 3 - res/2, dy = y - 3 - res/2;
+          const dist = Math.sqrt(dx*dx + dy*dy) / (res/2 - 2);
+          if (dist > 1) continue;
+          // Characters closer to edge are dimmer; center is bright
+          const alpha = (1 - dist*dist) * (0.25 + Math.random() * 0.65);
+          const ch = glyphPool[Math.floor(Math.random() * glyphPool.length)] || '0';
+          ctx.fillStyle = `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+          ctx.fillText(ch, x, y);
+        }
+      }
+
+      // Soft radial centre glow baked into texture
+      const grad = ctx.createRadialGradient(res/2,res/2,0, res/2,res/2,res/2);
+      grad.addColorStop(0,   `rgba(${r},${g},${b},0.35)`);
+      grad.addColorStop(0.45,`rgba(${r},${g},${b},0.10)`);
+      grad.addColorStop(1,   `rgba(${r},${g},${b},0.00)`);
+      ctx.fillStyle = grad;
+      ctx.beginPath(); ctx.arc(res/2, res/2, res/2, 0, Math.PI*2); ctx.fill();
+
+      return new THREE.CanvasTexture(canvas);
+    }
+
+    // ── Main graph init ──────────────────────────────────────────────────────────
+    let brainEdgesData = [];
+
+    async function loadGraph() {
+      const container = document.getElementById('galaxy-view');
+      const data = await fetch('/api/graph').then(r=>r.json());
+      if (data.error) { container.innerHTML=`<div style="color:#f97316;padding:20px;font-family:monospace">${data.error}</div>`; return; }
+
+      allNodes = data.nodes;
+      nodeById = new Map(allNodes.map(n => [n.id, n]));
+      brainEdgesData = data.edges; // stored for brain mode
+      const links = data.edges.map(e => ({ source: e.source, target: e.target }));
+
+      // Compute degree for each node — hub nodes scale up visually
+      const degree = new Map(allNodes.map(n => [n.id, 0]));
+      data.edges.forEach(e => { degree.set(e.source, (degree.get(e.source)||0)+1); degree.set(e.target, (degree.get(e.target)||0)+1); });
+      const maxDeg = Math.max(...degree.values(), 1);
+      allNodes.forEach(n => {
+        n.__degree = degree.get(n.id) || 0;
+        n.__centrality = n.__degree / maxDeg; // normalized [0,1]
+        n.__isolated = n.__degree === 0;      // true orphan — no edges at all
+      });
+      // Mark top nodes as nucleus — they become the dominant bright core(s)
+      const sorted = [...allNodes].sort((a, b) => b.__degree - a.__degree);
+      sorted.slice(0, 3).forEach((n, i) => { n.__isNucleus = true; n.__nucleusRank = i; });
+
+      let lastClickTime = 0, lastClickNode = null;
+
+      graph3d = ForceGraph3D({ antialias: true, alpha: false })(container)
+        .width(container.clientWidth).height(container.clientHeight)
+        .backgroundColor('#000510')
+        .nodeLabel(n =>
+          `<div style="font-family:'SF Mono',monospace;font-size:12px;background:#12121a;border:1px solid #1e1e2e;border-radius:6px;padding:8px 12px;pointer-events:none">` +
+          `<b style="color:#a78bfa">${n.name}</b><br><span style="color:#6b6a80;font-size:10px">${n.filePath??''}</span></div>`)
+        .nodeThreeObject(node => {
+          if (nexusMode) return makeNexusNodeObject(node);
+          const col = getBaseColor(node), size = nodeSize(node);
+          const group = new THREE.Group();
+          const cMat = new THREE.MeshLambertMaterial({ color:col, emissive:col, emissiveIntensity:0.75, transparent:true, opacity:1.0 });
+          coreMats.set(node.id, cMat);
+          group.add(new THREE.Mesh(new THREE.SphereGeometry(size,14,14), cMat));
+          // Halo
+          const gMat = new THREE.MeshBasicMaterial({ color:col, transparent:true, opacity:0.18, side:THREE.BackSide, depthWrite:false, blending:THREE.AdditiveBlending });
+          glowMats.set(node.id, gMat);
+          group.add(new THREE.Mesh(new THREE.SphereGeometry(size*2.8,8,8), gMat));
+          // Code-orb sprite — binary/hex chars, always faces camera
+          const codeTex = makeCodeTexture(col, node.name);
+          const sMat = new THREE.SpriteMaterial({ map: codeTex, transparent: true, opacity: 0.82, blending: THREE.AdditiveBlending, depthWrite: false });
+          spriteMats.set(node.id, { mat: sMat, col, name: node.name });
+          const sprite = new THREE.Sprite(sMat);
+          const ss = size * 3.0;
+          sprite.scale.set(ss, ss, 1);
+          group.add(sprite);
+          // Class orbit ring
+          if (node.type === 'Class') {
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(size*1.8,0.35,6,24), new THREE.MeshBasicMaterial({color:col,transparent:true,opacity:0.35,blending:THREE.AdditiveBlending}));
+            ring.rotation.x = Math.PI/3; ring.rotation.z = Math.PI/6; group.add(ring);
+          }
+          return group;
+        })
+        .nodeThreeObjectExtend(false)
+        .nodeVal(n => nodeSize(n)**2)
+        .linkColor(link => {
+          const sId = typeof link.source==='object'?link.source.id:link.source;
+          const tId = typeof link.target==='object'?link.target.id:link.target;
+          if (pathHighlightNodes.size) {
+            if (pathHighlightNodes.has(sId) && pathHighlightNodes.has(tId)) return 'rgba(0,229,255,0.90)';
+            return 'rgba(0,229,255,0.015)';
+          }
+          // Spectral tether — edge is dead if neither endpoint has ever had a real signal
+          const isSpectral = !liveActivityNodes.has(sId) && !liveActivityNodes.has(tId);
+          if (isSpectral) return 'rgba(80,80,140,0.10)';
+          const s = nodeById.get(sId);
+          const col = s ? moduleColor(s.module) : '#00e5ff';
+          const r = parseInt(col.slice(1,3),16), g = parseInt(col.slice(3,5),16), b = parseInt(col.slice(5,7),16);
+          // Hot edges (frequently fired) glow brighter
+          const eKey = [sId, tId].sort().join('|');
+          const fires = edgeFireCount.get(eKey) ?? 0;
+          const alpha = Math.min(0.75, 0.22 + fires * 0.04);
+          return `rgba(${r},${g},${b},${alpha.toFixed(2)})`;
+        })
+        .linkWidth(link => {
+          const sId = typeof link.source==='object'?link.source.id:link.source;
+          const tId = typeof link.target==='object'?link.target.id:link.target;
+          if (pathHighlightNodes.size) {
+            if (pathHighlightNodes.has(sId) && pathHighlightNodes.has(tId)) return 2.0;
+            return 0.2;
+          }
+          // Spectral tether — thin ghost thread
+          if (!liveActivityNodes.has(sId) && !liveActivityNodes.has(tId)) return 0.2;
+          // Hot edges thicken with use
+          const eKey = [sId, tId].sort().join('|');
+          const fires = edgeFireCount.get(eKey) ?? 0;
+          return Math.min(2.2, 0.7 + fires * 0.15);
+        })
+        .linkDirectionalParticles(2)
+        .linkDirectionalParticleWidth(link => {
+          if (pathHighlightNodes.size) {
+            const s = typeof link.source==='object'?link.source.id:link.source;
+            const t = typeof link.target==='object'?link.target.id:link.target;
+            if (pathHighlightNodes.has(s) && pathHighlightNodes.has(t)) return 3.5;
+            return 0;
+          }
+          return 1.8;
+        })
+        .linkDirectionalParticleSpeed(0.008)
+        .linkDirectionalParticleColor(link => {
+          const sId = typeof link.source==='object'?link.source.id:link.source;
+          const s = nodeById.get(sId);
+          return s ? moduleColor(s.module) : '#a78bfa';
+        })
+        .onNodeHover(node => { if (node) showHUD(node); else hideHUD(); })
+        .onNodeClick(node => {
+          const now = Date.now(), isDouble = now-lastClickTime<300 && lastClickNode===node;
+          lastClickTime = now; lastClickNode = node;
+          pathSelectedNode = node; // track for path mode
+          if (isDouble) {
+            if (node.__pinned) { node.fx=node.fy=node.fz=undefined; node.__pinned=false; const c=coreMats.get(node.id); if(c) c.emissiveIntensity=0.5; }
+            else { const m=Math.hypot(node.x||1,node.y||1,node.z||1), r=1+70/m; graph3d.cameraPosition({x:node.x*r,y:node.y*r,z:node.z*r},node,700); }
+          } else {
+            showNodeDetail(node);
+            const m=Math.hypot(node.x||1,node.y||1,node.z||1), r=1+180/m;
+            graph3d.cameraPosition({x:node.x*r,y:node.y*r,z:node.z*r},node,500);
+          }
+          showHUD(node);
+        })
+        .onNodeDrag(node => {
+          const now = Date.now();
+          const hist = dragHistory.get(node.id) ?? [];
+          hist.push({ x: node.x||0, y: node.y||0, z: node.z||0, t: now });
+          if (hist.length > 5) hist.shift();
+          dragHistory.set(node.id, hist);
+          if (nexusMode) draggedNodes.set(node.id, { x: node.x??0, y: node.y??0, z: node.z??0 });
+        })
+        .onNodeDragEnd(node => {
+          if (nexusMode) draggedNodes.delete(node.id);
+          const hist = dragHistory.get(node.id) ?? [];
+          dragHistory.delete(node.id);
+          clearTimeout(dragPinTimers.get(node.id));
+          dragPinTimers.delete(node.id);
+
+          // Compute flick velocity from last two drag samples
+          if (hist.length >= 2) {
+            const last = hist[hist.length-1], prev = hist[hist.length-2];
+            const dt = last.t - prev.t;
+            if (dt > 0 && dt < 150) {
+              const scale = Math.min(25, 60 / Math.max(dt, 16));
+              const vx = (last.x - prev.x) / dt * scale;
+              const vy = (last.y - prev.y) / dt * scale;
+              const vz = (last.z - prev.z) / dt * scale;
+              const speed = Math.hypot(vx, vy, vz);
+              if (speed > 1.5) {
+                node.vx = vx; node.vy = vy; node.vz = vz;
+                // Pin after inertia settles
+                const timer = setTimeout(() => {
+                  node.fx=node.x; node.fy=node.y; node.fz=node.z; node.__pinned=true;
+                  const c=coreMats.get(node.id); if(c) c.emissiveIntensity=1.2;
+                  showHUD(node); dragPinTimers.delete(node.id);
+                }, 850);
+                dragPinTimers.set(node.id, timer);
+                return;
+              }
+            }
+          }
+          // No flick — pin immediately
+          node.fx=node.x; node.fy=node.y; node.fz=node.z; node.__pinned=true;
+          const c=coreMats.get(node.id); if(c) c.emissiveIntensity=1.2;
+          showHUD(node);
+        })
+        .onBackgroundClick(() => {
+          clusterHighlightLabel=null; graphSearchTerm=''; pathHighlightNodes=new Set(); pathSelectedNode=null; pathDepth=0;
+          const s=document.getElementById('graph-search'); if(s) s.value='';
+          document.querySelectorAll('.cluster-card.active').forEach(el=>el.classList.remove('active'));
+          const pb=document.getElementById('path-btn'); if(pb){pb.textContent='PATH';pb.style.opacity='0.7';pb.style.color='';}
+          applyHighlight(); hideHUD();
+        })
+        .graphData({ nodes: allNodes, links });
+
+      // Physics tuning — galaxy-width spread, floaty decay
+      graph3d.d3Force('charge').strength(-200);
+      graph3d.d3Force('link').distance(90);
+      graph3d.d3VelocityDecay(0.45);
+
+      // Scene
+      const scene = graph3d.scene();
+      scene.fog = new THREE.FogExp2(0x000510, 0.0009);
+      scene.add(new THREE.AmbientLight(0x001633, 10));
+      const key = new THREE.DirectionalLight(0x00e5ff, 2.5); key.position.set(1,1,0.5); scene.add(key);
+      const fill = new THREE.DirectionalLight(0xff2d78, 1.2); fill.position.set(-1,-0.5,1); scene.add(fill);
+      // Store refs so enableNexusShaders / disableNexusShaders can dim/restore them
+      window._sceneKeyLight = key;
+      window._sceneFillLight = fill;
+      addStarField(scene);
+      addNebulaVolumes(scene);
+      addScannerPlane(scene);
+
+      // Camera
+      const controls = graph3d.controls();
+      controls.autoRotate=true; controls.autoRotateSpeed=0.35;
+      controls.enableDamping=true; controls.dampingFactor=0.07;
+      let autoRotateTimer;
+      controls.addEventListener('start', () => { controls.autoRotate=false; clearTimeout(autoRotateTimer); });
+      controls.addEventListener('end',   () => { autoRotateTimer=setTimeout(()=>controls.autoRotate=true, 3000); });
+
+      // Bloom (after scene setup)
+      setupBloom(container);
+
+      // HUD
+      setupHUD(container);
+
+      // Stats + legend
+      document.getElementById('graph-stats').textContent=`${allNodes.length} nodes · ${links.length} edges`;
+
+      // ResizeObserver
+      new ResizeObserver(() => { if(graph3d) graph3d.width(container.clientWidth).height(container.clientHeight); }).observe(container);
+
+      // Controls
+      document.getElementById('heat-toggle').addEventListener('click', () => {
+        heatMode=!heatMode; const btn=document.getElementById('heat-toggle');
+        btn.textContent=heatMode?'HEAT ON':'HEAT OFF'; btn.style.opacity=heatMode?'1':'0.7'; btn.style.color=heatMode?'var(--risk-high)':'';
+        applyHighlight();
+      });
+      document.getElementById('churn-btn').addEventListener('click', async () => {
+        const btn=document.getElementById('churn-btn'); btn.textContent='SCANNING…';
+        await fetch('/api/churn-refresh',{method:'POST'});
+        setTimeout(async()=>{ await loadHeatmap(); btn.textContent='REFRESH'; },8000);
+      });
+      document.getElementById('graph-search').addEventListener('input', e => {
+        graphSearchTerm=e.target.value.trim().toLowerCase();
+        if(graphSearchTerm) { clusterHighlightLabel=null; document.querySelectorAll('.cluster-card.active').forEach(el=>el.classList.remove('active')); }
+        applyHighlight();
+      });
+
+      // Start living systems
+      animatePulses();
+      setTimeout(runAmbientNoise, 2000); // wait for graph to settle
+      // runNebulaDrip disabled — drip effect removed
+      setTimeout(runSpriteFlicker, 3000); // start flickering after nodes are built
+      connectActivityStream();
+      loadAgents();
+      setInterval(loadAgents, 15000); // refresh agent health every 15s
+      // heatmap auto-polls every 15s (loadHeatmap above)
+    }
+
+    // ── Explode mode — push modules to separate force centers ────────────────────
+    function toggleExplode() {
+      explodeMode = !explodeMode;
+      const btn = document.getElementById('explode-btn');
+      btn.textContent = explodeMode ? 'EXPLODE ON' : 'EXPLODE';
+      btn.style.opacity = explodeMode ? '1' : '0.7';
+      btn.style.color = explodeMode ? 'var(--accent2)' : '';
+
+      if (!graph3d) return;
+
+      if (explodeMode) {
+        const modules = [...new Set(allNodes.map(n => n.module))];
+        const count = modules.length, radius = 500;
+        const centers = new Map(modules.map((mod, i) => {
+          const angle = (i / count) * Math.PI * 2;
+          return [mod, { cx: Math.cos(angle) * radius, cy: Math.sin(angle) * radius }];
+        }));
+        graph3d.d3Force('explode', alpha => {
+          graph3d.graphData().nodes.forEach(n => {
+            if (n.__pinned) return;
+            const c = centers.get(n.module); if (!c) return;
+            n.vx = (n.vx||0) + (c.cx - (n.x||0)) * 0.06 * alpha;
+            n.vy = (n.vy||0) + (c.cy - (n.y||0)) * 0.06 * alpha;
+          });
+        });
+      } else {
+        graph3d.d3Force('explode', null);
+      }
+      graph3d.d3ReheatSimulation();
+    }
+
+    // ── Path highlight — progressive BFS from selected node ─────────────────────
+    function bfsToDepth(startId, depth) {
+      const links = graph3d?.graphData().links ?? [];
+      const visited = new Set([startId]);
+      const queue = [startId];
+      for (let d = 0; d < depth && queue.length; d++) {
+        const current = [...queue]; queue.length = 0;
+        current.forEach(nodeId => {
+          links.forEach(l => {
+            const s = typeof l.source==='object'?l.source.id:l.source;
+            const t = typeof l.target==='object'?l.target.id:l.target;
+            if (s === nodeId && !visited.has(t)) { visited.add(t); queue.push(t); }
+            if (t === nodeId && !visited.has(s)) { visited.add(s); queue.push(s); }
+          });
+        });
+      }
+      return visited;
+    }
+
+    function togglePath() {
+      if (!pathSelectedNode) return;
+      const maxDepth = 3;
+      pathDepth = pathHighlightNodes.size ? (pathDepth % maxDepth) + 1 : 1;
+
+      if (pathDepth > maxDepth || (pathDepth === 1 && pathHighlightNodes.size && bfsToDepth(pathSelectedNode.id, 1).size === pathHighlightNodes.size)) {
+        // Cycle complete — clear
+        pathHighlightNodes = new Set(); pathDepth = 0;
+        const btn = document.getElementById('path-btn');
+        btn.textContent = 'PATH'; btn.style.opacity = '0.7'; btn.style.color = '';
+        applyHighlight();
+        return;
+      }
+
+      const visited = bfsToDepth(pathSelectedNode.id, pathDepth);
+      pathHighlightNodes = visited;
+      const btn = document.getElementById('path-btn');
+      btn.textContent = `PATH d${pathDepth} (${visited.size})`;
+      btn.style.opacity = '1'; btn.style.color = 'var(--accent2)';
+      visited.forEach(id => triggerActivation(id, 0.5));
+      applyHighlight();
+    }
+
+    // ── Unpin all ────────────────────────────────────────────────────────────────
+    function unpinAll() {
+      allNodes.forEach(n => {
+        if (n.__pinned) {
+          n.fx = n.fy = n.fz = undefined; n.__pinned = false;
+          const c = coreMats.get(n.id); if (c) c.emissiveIntensity = 0.5;
+        }
+      });
+      if (graph3d) graph3d.d3ReheatSimulation();
+    }
+
+    document.getElementById('explode-btn').addEventListener('click', toggleExplode);
+    document.getElementById('path-btn').addEventListener('click', togglePath);
+    document.getElementById('unpin-btn').addEventListener('click', unpinAll);
+
+    // ── Keyboard shortcuts ───────────────────────────────────────────────────────
+    document.addEventListener('keydown', e => {
+      if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA') return;
+      if (e.key === 'b' || e.key === 'B') switchMode(brainMode ? 'galaxy' : 'brain');
+      if (e.key === 'n' || e.key === 'N') switchMode(nexusMode ? 'galaxy' : 'nexus');
+      if (e.key === 'e' || e.key === 'E') toggleExplode();
+      if (e.key === 'f' || e.key === 'F') togglePath();
+      if (e.key === 'u' || e.key === 'U') unpinAll();
+      if (brainMode) {
+        if (e.key === '1') setBrainRenderMode('all');
+        if (e.key === '2') setBrainRenderMode('activeOnly');
+        if (e.key === '3') setBrainRenderMode('clusterFocus', clusterHighlightLabel);
+      }
+      if (e.key === 'Escape') {
+        // Clear all highlights
+        pathHighlightNodes = new Set(); pathSelectedNode = null; pathDepth = 0;
+        clusterHighlightLabel = null; graphSearchTerm = '';
+        const s = document.getElementById('graph-search'); if(s) s.value='';
+        document.querySelectorAll('.cluster-card.active').forEach(el=>el.classList.remove('active'));
+        const pb = document.getElementById('path-btn'); if(pb){pb.textContent='PATH';pb.style.opacity='0.7';pb.style.color='';}
+        applyHighlight(); hideHUD();
+      }
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════════
+    // BRAIN HOLOGRAM MODE — Killian rewrite
+    // ══════════════════════════════════════════════════════════════════════════════
+    let brainMode = false;
+    let brainRenderer = null, brainScene = null, brainCamera = null;
+    let brainPulses = [], brainFibers = [], brainBundles = [];
+    let brainBurstParticles = [];
+    let brainNodeMats = new Map(), brainMeshes = [];
+    let brainRafId = null, brainLastFrame = 0;
+    let brainOrbit = { rotX: 0.15, rotY: 0, radius: 640, isDragging: false, prevX: 0, prevY: 0, autoY: 0 };
+    let brainShellUniforms = null;
+    let brainRenderMode = 'all'; // 'all' | 'activeOnly' | 'clusterFocus'
+    let brainFocusCluster = null;
+    let hoveredBrainNode = null, brainLastRayCast = 0;
+    let brainHudEl = null;
+
+    function seededRand(str) {
+      let h = 0;
+      for (let i = 0; i < str.length; i++) h = Math.imul(31, h) + str.charCodeAt(i) | 0;
+      return ((h >>> 0) % 10000) / 10000;
+    }
+
+    function placeBrainNodes(nodes) {
+      const modules = [...new Set(nodes.map(n => n.module))];
+      const modSectors = {};
+      modules.forEach((mod, i) => {
+        const frac = i / Math.max(modules.length, 1);
+        modSectors[mod] = {
+          theta: frac * Math.PI * 2 + 0.3,
+          phi: Math.PI * 0.28 + (i % 3) * 0.30
+        };
+      });
+      const maxDeg = Math.max(...nodes.map(n => n.__degree || 0), 1);
+      nodes.forEach(n => {
+        const sec = modSectors[n.module] ?? { theta: 0, phi: Math.PI * 0.4 };
+        const t = sec.theta + (seededRand(n.id + 'T') - 0.5) * 0.75;
+        const p = sec.phi   + (seededRand(n.id + 'P') - 0.5) * 0.45;
+        const r = 72 + (1 - ((n.__degree || 0) / maxDeg) * 0.45) * 165;
+        n.__bp = new THREE.Vector3(
+          r * Math.sin(p) * Math.cos(t) * 1.28,
+          r * Math.cos(p) * 0.90,
+          r * Math.sin(p) * Math.sin(t) * 0.76
+        );
+      });
+    }
+
+    function buildBrainShell(scene) {
+      const geo = new THREE.IcosahedronGeometry(228, 4);
+      const pos = geo.attributes.position;
+      // Multi-octave noise for organic surface
+      function brainNoise(nx, ny, nz) {
+        let v = 0, amp = 1, freq = 1, maxAmp = 0;
+        for (let o = 0; o < 4; o++) {
+          v += (Math.sin(nx*5.2*freq+ny*3.1*freq)*Math.cos(ny*4.7*freq+nz*2.9*freq)*Math.sin(nz*6.1*freq+nx*4.3*freq)
+              + Math.sin(nx*2.8*freq+nz*5.6*freq)*0.5) * amp;
+          maxAmp += amp; freq *= 1.9; amp *= 0.5;
+        }
+        return (v / maxAmp) * 0.13;
+      }
+      for (let i = 0; i < pos.count; i++) {
+        const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+        const len = Math.sqrt(x*x+y*y+z*z), nx=x/len, ny=y/len, nz=z/len;
+        const n = brainNoise(nx, ny, nz);
+        const frontal = Math.max(0, nz * 0.12) * (1 - Math.abs(nx) * 0.4);
+        const asym = nx > 0 ? 0.03 : -0.015;
+        pos.setXYZ(i, x*(1+n+asym)*1.28, y*(1+n+frontal)*0.92, z*(1+n)*0.76);
+      }
+      geo.computeVertexNormals();
+      // ── Fresnel rim shader — silhouette glow + scanline noise driven by uTime ──
+      brainShellUniforms = {
+        uTime:    { value: 0 },
+        uColor:   { value: new THREE.Color(0x00e5ff) },
+        uOpacity: { value: 0.055 },
+      };
+      const fresnelMat = new THREE.ShaderMaterial({
+        uniforms: brainShellUniforms,
+        vertexShader: `
+          varying vec3 vNormal; varying vec3 vViewDir; varying vec2 vUv;
+          void main() {
+            vNormal = normalize(normalMatrix * normal);
+            vec4 mvPos = modelViewMatrix * vec4(position, 1.0);
+            vViewDir = normalize(-mvPos.xyz); vUv = uv;
+            gl_Position = projectionMatrix * mvPos;
+          }`,
+        fragmentShader: `
+          uniform float uTime; uniform vec3 uColor; uniform float uOpacity;
+          varying vec3 vNormal; varying vec3 vViewDir; varying vec2 vUv;
+          void main() {
+            float fresnel = pow(1.0 - clamp(dot(vNormal, vViewDir), 0.0, 1.0), 2.2);
+            float scanline = sin(vUv.y * 220.0 + uTime * 1.5) * 0.022 + 0.022;
+            float noise = sin(vUv.x * 45.0 + uTime * 0.9) * sin(vUv.y * 65.0 - uTime * 0.6) * 0.012;
+            gl_FragColor = vec4(uColor, clamp(uOpacity * (1.0 + fresnel * 4.5 + scanline + noise), 0.0, 0.92));
+          }`,
+        transparent: true, depthWrite: false, blending: THREE.AdditiveBlending, side: THREE.DoubleSide,
+      });
+      scene.add(new THREE.Mesh(geo, fresnelMat));
+      // Cortex edge lines
+      scene.add(new THREE.LineSegments(new THREE.EdgesGeometry(geo, 22),
+        new THREE.LineBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0.065, blending: THREE.AdditiveBlending })));
+      // Inner volume glow
+      scene.add(new THREE.Mesh(new THREE.IcosahedronGeometry(210, 2),
+        new THREE.MeshBasicMaterial({ color: 0x002233, transparent: true, opacity: 0.022, blending: THREE.AdditiveBlending, depthWrite: false })));
+      // Corpus callosum
+      const ccPts = [];
+      for (let i = 0; i <= 40; i++) {
+        const a = (i/40) * Math.PI * 2;
+        ccPts.push(new THREE.Vector3(Math.cos(a)*32, 8 - Math.abs(Math.sin(a))*18, Math.sin(a)*22));
+      }
+      scene.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(ccPts),
+        new THREE.LineBasicMaterial({ color: 0xff44cc, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending })));
+    }
+
+    // Live canvas texture — draw() regenerates binary glyphs for scrolling activation
+    function makeCodeTextureLive(hexCol, name) {
+      const res = 128;
+      const canvas = document.createElement('canvas');
+      canvas.width = canvas.height = res;
+      const ctx = canvas.getContext('2d');
+      const rC = parseInt(hexCol.slice(1,3),16), gC = parseInt(hexCol.slice(3,5),16), bC = parseInt(hexCol.slice(5,7),16);
+      const glyphPool = '01010110010100110011' + (name||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+      function draw(intensity = 1.0) {
+        ctx.clearRect(0, 0, res, res);
+        ctx.font = '7px "SF Mono","Fira Code",monospace';
+        for (let row = 0; row < 18; row++) {
+          for (let col2 = 0; col2 < 18; col2++) {
+            const x = col2*7+1, y = row*7+8;
+            const dx = x+3-res/2, dy = y-3-res/2;
+            const dist = Math.sqrt(dx*dx+dy*dy)/(res/2-2);
+            if (dist > 1) continue;
+            const alpha = (1-dist*dist)*(0.25+Math.random()*0.65)*intensity;
+            ctx.fillStyle = `rgba(${rC},${gC},${bC},${alpha.toFixed(2)})`;
+            ctx.fillText(glyphPool[Math.floor(Math.random()*glyphPool.length)]||'0', x, y);
+          }
+        }
+        const grad = ctx.createRadialGradient(res/2,res/2,0,res/2,res/2,res/2);
+        grad.addColorStop(0,    `rgba(${rC},${gC},${bC},${(0.35*intensity).toFixed(2)})`);
+        grad.addColorStop(0.45, `rgba(${rC},${gC},${bC},${(0.10*intensity).toFixed(2)})`);
+        grad.addColorStop(1,    `rgba(${rC},${gC},${bC},0.00)`);
+        ctx.fillStyle = grad; ctx.beginPath(); ctx.arc(res/2,res/2,res/2,0,Math.PI*2); ctx.fill();
+      }
+      draw();
+      return { tex: new THREE.CanvasTexture(canvas), draw };
+    }
+
+    // Scrolling binary animation on node activation
+    function activateBrainNodeSprite(nodeId, intensity) {
+      const m = brainNodeMats.get(nodeId);
+      if (!m?.draw) return;
+      let frame = 0;
+      const total = 12;
+      const interval = setInterval(() => {
+        frame++;
+        m.draw(0.5 + intensity * (1 - frame / total));
+        m.core.map.needsUpdate = true;
+        if (frame >= total) { clearInterval(interval); m.draw(1.0); m.core.map.needsUpdate = true; }
+      }, 100);
+    }
+
+    // Nodes as code-texture sprites — no spheres, no glow meshes
+    function buildBrainNodes(scene, nodes) {
+      brainNodeMats = new Map(); brainMeshes = [];
+      nodes.forEach(n => {
+        if (!n.__bp) return;
+        const col = moduleColor(n.module);
+        const base = n.type==='Class'?44:n.type==='Method'?30:22;
+        const size = base * (1 + Math.sqrt(n.__degree||0) * 0.10);
+        const { tex, draw } = makeCodeTextureLive(col, n.name);
+        const mat = new THREE.SpriteMaterial({ map: tex, transparent: true, opacity: 0.88, blending: THREE.AdditiveBlending, depthWrite: false });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.setScalar(size);
+        sprite.position.copy(n.__bp);
+        sprite.__nodeId = n.id;
+        scene.add(sprite); brainMeshes.push(sprite);
+        brainNodeMats.set(n.id, { core: mat, glow: null, draw });
+      });
+    }
+
+    // Fiber bundles — group edges by module pair, one TubeGeometry per bundle
+    function buildBrainFibers(scene, edges) {
+      brainFibers = []; brainBundles = [];
+      const bundleMap = new Map();
+      edges.forEach(e => {
+        const src = nodeById.get(e.source?.id ?? e.source), tgt = nodeById.get(e.target?.id ?? e.target);
+        if (!src?.__bp || !tgt?.__bp) return;
+        const key = src.module <= tgt.module ? `${src.module}|${tgt.module}` : `${tgt.module}|${src.module}`;
+        if (!bundleMap.has(key)) bundleMap.set(key, { srcMod: src.module, tgtMod: tgt.module, pairs: [] });
+        bundleMap.get(key).pairs.push({ src, tgt });
+      });
+      bundleMap.forEach(({ srcMod, tgtMod, pairs }) => {
+        const intra = srcMod === tgtMod;
+        const srcC = pairs.reduce((v, { src }) => v.add(src.__bp), new THREE.Vector3()).divideScalar(pairs.length);
+        const tgtC = pairs.reduce((v, { tgt }) => v.add(tgt.__bp), new THREE.Vector3()).divideScalar(pairs.length);
+        const pull = intra ? 0.72 : 0.48;
+        const mid = srcC.clone().add(tgtC).multiplyScalar(0.5).multiplyScalar(pull);
+        const bundleCurve = new THREE.CatmullRomCurve3([srcC.clone(), mid, tgtC.clone()]);
+        const col = new THREE.Color(moduleColor(srcMod));
+        const baseOpacity = intra ? 0.032 : 0.052;
+        const tubeMat = new THREE.MeshBasicMaterial({ color: col, transparent: true, opacity: baseOpacity, blending: THREE.AdditiveBlending, depthWrite: false });
+        scene.add(new THREE.Mesh(new THREE.TubeGeometry(bundleCurve, 18, intra ? 0.6 : 1.0, 4, false), tubeMat));
+        const bundleRef = { mat: tubeMat, srcMod, tgtMod, baseOpacity, lastActive: 0 };
+        brainBundles.push(bundleRef);
+        // Per-edge curves for pulse spawning
+        pairs.forEach(({ src, tgt }) => {
+          const eMid = src.__bp.clone().add(tgt.__bp).multiplyScalar(0.5).multiplyScalar(pull);
+          brainFibers.push({ curve: new THREE.CatmullRomCurve3([src.__bp.clone(), eMid, tgt.__bp.clone()]), srcId: src.id, tgtId: tgt.id, bundleRef });
+        });
+      });
+    }
+
+    function addBrainStars(scene) {
+      const verts = [];
+      for (let i = 0; i < 1400; i++) {
+        const r = 650 + Math.random() * 900;
+        const t = Math.random() * Math.PI * 2, p = Math.acos(2 * Math.random() - 1);
+        verts.push(r*Math.sin(p)*Math.cos(t), r*Math.cos(p), r*Math.sin(p)*Math.sin(t));
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position', new THREE.Float32BufferAttribute(verts, 3));
+      scene.add(new THREE.Points(geo, new THREE.PointsMaterial({ color: 0x88ffff, size: 1.6, transparent: true, opacity: 0.45, blending: THREE.AdditiveBlending })));
+    }
+
+    function spawnBrainPulse(curve, color, intensity) {
+      // Head sphere
+      const headMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const head = new THREE.Mesh(new THREE.SphereGeometry(3.0, 6, 6), headMat);
+      // Halo
+      const haloMat = new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending, depthWrite: false });
+      const halo = new THREE.Mesh(new THREE.SphereGeometry(7.0, 5, 5), haloMat);
+      // Trail line (rebuilt each frame)
+      const trailMat = new THREE.LineBasicMaterial({ color, transparent: true, opacity: 0, blending: THREE.AdditiveBlending });
+      const trail = new THREE.Line(new THREE.BufferGeometry(), trailMat);
+      brainScene.add(head); brainScene.add(halo); brainScene.add(trail);
+      brainPulses.push({ head, halo, trail, headMat, haloMat, trailMat, curve, progress: 0, speed: 0.005 + Math.random() * 0.009, intensity });
+    }
+
+    function animateBrainPulses() {
+      const dead = [];
+      for (const p of brainPulses) {
+        p.progress += p.speed;
+        if (p.progress >= 1) { dead.push(p); continue; }
+        const pos = p.curve.getPoint(p.progress);
+        const envelope = Math.sin(p.progress * Math.PI);
+        // Head
+        p.head.position.copy(pos);
+        p.headMat.opacity = envelope * p.intensity * 0.95;
+        // Halo pulse
+        p.halo.position.copy(pos);
+        p.halo.scale.setScalar(0.8 + Math.sin(p.progress * Math.PI * 4) * 0.3);
+        p.haloMat.opacity = envelope * p.intensity * 0.35;
+        // Comet trail
+        const trailStart = Math.max(0, p.progress - 0.14);
+        const tPts = [];
+        for (let i = 0; i <= 7; i++) tPts.push(p.curve.getPoint(trailStart + (p.progress - trailStart) * i / 7));
+        p.trail.geometry.dispose();
+        p.trail.geometry = new THREE.BufferGeometry().setFromPoints(tPts);
+        p.trailMat.opacity = envelope * p.intensity * 0.55;
+      }
+      dead.forEach(p => { brainScene.remove(p.head); brainScene.remove(p.halo); brainScene.remove(p.trail); brainPulses.splice(brainPulses.indexOf(p), 1); });
+    }
+
+    // ── Radial particle burst on node activation ─────────────────────────────────
+    function spawnNodeBurst(pos, color) {
+      const count = 9 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) {
+        const dir = new THREE.Vector3(Math.random()-.5, Math.random()-.5, Math.random()-.5).normalize();
+        const speed = 25 + Math.random() * 35;
+        const mat = new THREE.SpriteMaterial({ color: new THREE.Color(color), transparent: true, opacity: 0.9, blending: THREE.AdditiveBlending, depthWrite: false });
+        const sprite = new THREE.Sprite(mat);
+        sprite.scale.setScalar(4);
+        sprite.position.copy(pos);
+        brainScene.add(sprite);
+        brainBurstParticles.push({ sprite, mat, vel: dir.multiplyScalar(speed), age: 0, maxAge: 0.5 + Math.random() * 0.3 });
+      }
+    }
+
+    function animateBrainBursts(dt) {
+      const dead = [];
+      for (const p of brainBurstParticles) {
+        p.age += dt;
+        if (p.age >= p.maxAge) { dead.push(p); continue; }
+        p.sprite.position.addScaledVector(p.vel, dt);
+        const frac = p.age / p.maxAge;
+        p.mat.opacity = (1 - frac) * (1 - frac) * 0.9;
+        p.sprite.scale.setScalar(4 + frac * 8);
+      }
+      dead.forEach(p => { brainScene.remove(p.sprite); brainBurstParticles.splice(brainBurstParticles.indexOf(p), 1); });
+    }
+
+    function brainTriggerActivation(nodeId, intensity) {
+      liveActivityNodes.add(nodeId); // real signal — not ambient
+      // BFS cascade — spreads to 2nd-order neighbours with dampening
+      const visited = new Set();
+      const queue = [{ id: nodeId, intens: intensity, depth: 0 }];
+      while (queue.length) {
+        const { id, intens, depth } = queue.shift();
+        if (visited.has(id) || intens < 0.08) continue;
+        visited.add(id);
+        const mats = brainNodeMats.get(id);
+        const delay = depth * 55;
+        if (mats) setTimeout(() => {
+          activateBrainNodeSprite(id, intens);
+          if (depth === 0) { const n = nodeById.get(id); if (n?.__bp) spawnNodeBurst(n.__bp, moduleColor(n.module)); }
+        }, delay);
+        // Activate bundle tubes + spawn pulses on edge curves
+        brainFibers.filter(f => f.srcId === id || f.tgtId === id).slice(0, depth === 0 ? 6 : 2).forEach((f, i) => {
+          const br = f.bundleRef;
+          if (br) {
+            br.lastActive = Date.now();
+            if (depth === 0) setTimeout(() => {
+              br.mat.opacity = Math.max(br.mat.opacity, 0.65);
+              spawnBrainPulse(f.curve, moduleColor(nodeById.get(id)?.module ?? ''), intens * 0.88);
+              setTimeout(() => { br.mat.opacity = br.baseOpacity; }, 1000);
+            }, delay + i * 80);
+          }
+          if (depth < 2) {
+            const nId = f.srcId === id ? f.tgtId : f.srcId;
+            if (!visited.has(nId)) queue.push({ id: nId, intens: intens * 0.45, depth: depth + 1 });
+          }
+        });
+      }
+    }
+
+    function runBrainAmbientNoise() {
+      if (!brainMode || !brainFibers.length) return setTimeout(runBrainAmbientNoise, 2000);
+      const f = brainFibers[Math.floor(Math.random() * brainFibers.length)];
+      spawnBrainPulse(f.curve, '#' + new THREE.Color(f.bundleRef?.mat.color ?? 0x00e5ff).getHexString(), 0.07);
+      setTimeout(runBrainAmbientNoise, 1200 + Math.random() * 3200);
+    }
+
+    // ── Render mode: all / activeOnly / clusterFocus ──────────────────────────────
+    function setBrainRenderMode(mode, clusterId) {
+      brainRenderMode = mode; brainFocusCluster = clusterId ?? null;
+      updateBrainBundleVisibility();
+      // Dim orphan nodes (no live signals) to 10% in activeOnly mode
+      if (mode === 'activeOnly') {
+        brainMeshes.forEach(sprite => {
+          const isLive = liveActivityNodes.has(sprite.__nodeId);
+          sprite.material.opacity = isLive ? 0.88 : 0.10;
+        });
+        autoCameraRoute();
+      } else {
+        brainMeshes.forEach(sprite => { sprite.material.opacity = 0.88; });
+      }
+    }
+
+    // ── Camera auto-route — orbit toward centroid of most-active live nodes ───────
+    function autoCameraRoute() {
+      if (!brainMode || !liveActivityNodes.size) return;
+      // Find top live nodes that have brain positions
+      const liveNodes = [...liveActivityNodes]
+        .map(id => nodeById.get(id))
+        .filter(n => n && n.__bp)
+        .sort((a, b) => (b.__degree || 0) - (a.__degree || 0))
+        .slice(0, 6);
+      if (!liveNodes.length) return;
+      // Centroid of their brain positions
+      const cx = liveNodes.reduce((s, n) => s + n.__bp.x, 0) / liveNodes.length;
+      const cy = liveNodes.reduce((s, n) => s + n.__bp.y, 0) / liveNodes.length;
+      const cz = liveNodes.reduce((s, n) => s + n.__bp.z, 0) / liveNodes.length;
+      // Convert centroid to spherical angles
+      const targetY = Math.atan2(cx, cz);
+      const targetX = Math.atan2(cy, Math.sqrt(cx*cx + cz*cz)) * 0.6;
+      // Animate brainOrbit smoothly over ~1.5s (30 steps)
+      const startY = brainOrbit.rotY, startX = brainOrbit.rotX;
+      const steps = 30;
+      let step = 0;
+      const timer = setInterval(() => {
+        step++;
+        const t = step / steps;
+        const ease = t < 0.5 ? 2*t*t : -1+(4-2*t)*t; // ease in-out
+        brainOrbit.rotY = startY + (targetY - startY) * ease;
+        brainOrbit.rotX = startX + (targetX - startX) * ease;
+        updateBrainCamera();
+        if (step >= steps) clearInterval(timer);
+      }, 50);
+    }
+
+    function updateBrainBundleVisibility() {
+      const now = Date.now();
+      brainBundles.forEach(b => {
+        let target;
+        if (brainRenderMode === 'activeOnly') {
+          target = (now - b.lastActive) < 5000 ? b.baseOpacity * 5 : b.baseOpacity * 0.08;
+        } else if (brainRenderMode === 'clusterFocus' && brainFocusCluster) {
+          const inF = b.srcMod === brainFocusCluster || b.tgtMod === brainFocusCluster;
+          target = inF ? b.baseOpacity * 4 : b.baseOpacity * 0.05;
+        } else {
+          target = b.baseOpacity;
+        }
+        b.mat.opacity += (target - b.mat.opacity) * 0.08; // smooth lerp
+      });
+    }
+
+    function updateBrainCamera() {
+      const o = brainOrbit;
+      brainCamera.position.set(
+        o.radius * Math.sin(o.rotY) * Math.cos(o.rotX),
+        o.radius * Math.sin(o.rotX),
+        o.radius * Math.cos(o.rotY) * Math.cos(o.rotX)
+      );
+      brainCamera.lookAt(0, 0, 0);
+    }
+
+    function setupBrainInteraction(container) {
+      container.addEventListener('mousedown', e => {
+        brainOrbit.isDragging = true; brainOrbit.prevX = e.clientX; brainOrbit.prevY = e.clientY;
+      });
+      window.addEventListener('mouseup', () => { brainOrbit.isDragging = false; });
+      window.addEventListener('mousemove', e => {
+        if (!brainOrbit.isDragging || !brainMode) return;
+        brainOrbit.rotY += (e.clientX - brainOrbit.prevX) * 0.005;
+        brainOrbit.rotX += (e.clientY - brainOrbit.prevY) * 0.004;
+        brainOrbit.rotX = Math.max(-1.3, Math.min(1.3, brainOrbit.rotX));
+        brainOrbit.autoY = brainOrbit.rotY;
+        brainOrbit.prevX = e.clientX; brainOrbit.prevY = e.clientY;
+        updateBrainCamera();
+      });
+      container.addEventListener('wheel', e => {
+        brainOrbit.radius = Math.max(260, Math.min(1400, brainOrbit.radius + e.deltaY * 0.5));
+        updateBrainCamera(); e.preventDefault();
+      }, { passive: false });
+      // Raycaster — shared for hover + click
+      const raycaster = new THREE.Raycaster();
+      const mouse = new THREE.Vector2();
+      function ndcFromEvent(e) {
+        const r = container.getBoundingClientRect();
+        mouse.set(((e.clientX - r.left) / r.width) * 2 - 1, -((e.clientY - r.top) / r.height) * 2 + 1);
+      }
+      // Throttled hover (~16fps raycasting)
+      container.addEventListener('mousemove', e => {
+        if (!brainMode) return;
+        const now = Date.now(); if (now - brainLastRayCast < 60) return; brainLastRayCast = now;
+        ndcFromEvent(e); raycaster.setFromCamera(mouse, brainCamera);
+        const hits = raycaster.intersectObjects(brainMeshes);
+        if (hits.length) {
+          const node = nodeById.get(hits[0].object.__nodeId);
+          if (node && node !== hoveredBrainNode) {
+            if (hoveredBrainNode) { const pm = brainNodeMats.get(hoveredBrainNode.id); if (pm) { pm.core.opacity = 0.88; } }
+            hoveredBrainNode = node;
+            const m = brainNodeMats.get(node.id); if (m) { m.core.opacity = 1.0; }
+            if (brainHudEl) {
+              brainHudEl.style.left = Math.min(container.clientWidth - 260, e.offsetX + 20) + 'px';
+              brainHudEl.style.top  = Math.max(10, e.offsetY - 40) + 'px';
+              brainHudEl.innerHTML = `<div style="color:#00e5ff;font-weight:700;font-size:13px;margin-bottom:4px;text-shadow:0 0 10px rgba(0,229,255,0.6)">${node.name}</div><div style="color:#1c5468;font-size:10px;word-break:break-all;margin-bottom:6px">${node.filePath ?? ''}</div><div style="display:flex;gap:6px;flex-wrap:wrap"><span style="background:rgba(0,229,255,0.1);color:#00e5ff;padding:2px 7px;border:1px solid rgba(0,229,255,0.3);font-size:10px">${node.type}</span><span style="background:rgba(255,45,120,0.1);color:#ff2d78;padding:2px 7px;border:1px solid rgba(255,45,120,0.3);font-size:10px">${node.module}</span></div>`;
+              brainHudEl.style.display = 'block';
+            }
+          }
+        } else if (hoveredBrainNode) {
+          const pm = brainNodeMats.get(hoveredBrainNode.id); if (pm) { pm.core.opacity = 0.88; }
+          hoveredBrainNode = null; if (brainHudEl) brainHudEl.style.display = 'none';
+        }
+      });
+      container.addEventListener('click', e => {
+        if (!brainMode) return;
+        ndcFromEvent(e); raycaster.setFromCamera(mouse, brainCamera);
+        const hits = raycaster.intersectObjects(brainMeshes);
+        if (hits.length) {
+          const node = nodeById.get(hits[0].object.__nodeId);
+          if (node) { showNodeDetail(node); brainTriggerActivation(node.id, 0.9); }
+        }
+      });
+    }
+
+    function initBrainMode() {
+      const container = document.getElementById('brain-view');
+      const W = container.clientWidth, H = container.clientHeight;
+      brainRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
+      brainRenderer.setSize(W, H);
+      brainRenderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+      brainRenderer.localClippingEnabled = true;
+      brainRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      brainRenderer.toneMappingExposure = 1.15;
+      container.appendChild(brainRenderer.domElement);
+      brainScene = new THREE.Scene();
+      brainScene.background = new THREE.Color(0x010b14);
+      brainScene.fog = new THREE.FogExp2(0x010b14, 0.00085);
+      brainCamera = new THREE.PerspectiveCamera(55, W/H, 1, 4000);
+      updateBrainCamera();
+      // Lights
+      brainScene.add(new THREE.AmbientLight(0x001a2e, 2.5));
+      const kl = new THREE.PointLight(0x00e5ff, 4, 1000); kl.position.set(60, 320, 180); brainScene.add(kl);
+      const fl = new THREE.PointLight(0xff2d78, 2.5, 700); fl.position.set(-220, -140, -200); brainScene.add(fl);
+      // Build scene
+      placeBrainNodes(allNodes);
+      buildBrainNodes(brainScene, allNodes);
+      buildBrainFibers(brainScene, brainEdgesData);
+      addBrainStars(brainScene);
+      setupBrainInteraction(container);
+      // Brain-local HUD tooltip
+      brainHudEl = document.createElement('div');
+      brainHudEl.style.cssText = 'position:absolute;pointer-events:none;z-index:20;background:rgba(0,8,20,0.96);border:1px solid rgba(0,229,255,0.55);border-radius:2px;padding:10px 14px;font-family:"SF Mono","Fira Code",monospace;font-size:11px;color:#8ffcff;backdrop-filter:blur(8px);display:none;box-shadow:0 0 30px rgba(0,229,255,0.2);max-width:240px;';
+      container.appendChild(brainHudEl);
+      // Scanner ring — torus sweeping vertically through brain
+      const scanGeo = new THREE.TorusGeometry(235, 1.5, 6, 72);
+      const scanMat = new THREE.MeshBasicMaterial({ color: 0x00e5ff, transparent: true, opacity: 0, depthWrite: false, blending: THREE.AdditiveBlending });
+      const scanRing = new THREE.Mesh(scanGeo, scanMat);
+      scanRing.rotation.x = Math.PI / 2;
+      brainScene.add(scanRing);
+      let scanY = -200, scanDir = 1;
+      (function scanTick() {
+        if (!brainMode) return setTimeout(scanTick, 500);
+        scanY += 0.055 * scanDir;
+        if (scanY > 185) { scanDir = -1; scanMat.opacity = 0; } else if (scanY < -200) { scanDir = 1; scanMat.opacity = 0; }
+        scanRing.position.y = scanY;
+        if (scanMat.opacity < 0.42) scanMat.opacity = Math.min(0.42, scanMat.opacity + 0.003);
+        requestAnimationFrame(scanTick);
+      })();
+      // No bloom — code sprites need crisp text, additive blending handles glow naturally
+      // Resize
+      new ResizeObserver(() => {
+        const w = container.clientWidth, h = container.clientHeight;
+        brainRenderer?.setSize(w, h);
+        if (brainCamera) { brainCamera.aspect = w/h; brainCamera.updateProjectionMatrix(); }
+      }).observe(container);
+      setTimeout(runBrainAmbientNoise, 2500);
+    }
+
+    function brainLoop(ts = 0) {
+      if (!brainMode) return;
+      brainRafId = requestAnimationFrame(brainLoop);
+      const dt = Math.min((ts - brainLastFrame) / 1000, 0.05); brainLastFrame = ts;
+      if (!brainOrbit.isDragging) {
+        brainOrbit.autoY += 0.0006;
+        brainOrbit.rotY = brainOrbit.autoY;
+        updateBrainCamera();
+      }
+      animateBrainPulses();
+      animateBrainBursts(dt);
+      if (brainRenderMode !== 'all') updateBrainBundleVisibility();
+      brainRenderer.render(brainScene, brainCamera);
+    }
+
+    function switchMode(mode) {
+      // Teardown previous
+      if (brainMode) cancelAnimationFrame(brainRafId);
+      if (nexusMode) cancelAnimationFrame(nexusRafId);
+      brainMode = mode === 'brain';
+      nexusMode = mode === 'nexus';
+
+      // nexus shares the galaxy canvas — just different shaders
+      document.getElementById('galaxy-view').style.display = mode === 'brain' ? 'none' : 'block';
+      document.getElementById('brain-view').style.display  = mode === 'brain' ? 'block' : 'none';
+      document.getElementById('nexus-view').style.display  = 'none'; // unused
+      document.getElementById('slice-row').style.display   = mode === 'brain'  ? 'flex'  : 'none';
+
+      const btn = document.getElementById('mode-btn');
+      btn.textContent = brainMode ? 'GALAXY' : 'BRAIN';
+      btn.style.background = brainMode ? 'rgba(0,229,255,0.1)' : 'rgba(255,45,120,0.1)';
+      btn.style.borderColor = brainMode ? 'rgba(0,229,255,0.5)' : 'rgba(255,45,120,0.5)';
+      btn.style.color = brainMode ? 'var(--accent)' : 'var(--accent2)';
+
+      const nb = document.getElementById('nexus-btn');
+      nb.style.background = nexusMode ? 'rgba(153,51,255,0.25)' : 'rgba(153,51,255,0.1)';
+      nb.style.borderColor = nexusMode ? 'rgba(153,51,255,0.9)' : 'rgba(153,51,255,0.5)';
+
+      if (brainMode) { if (!brainRenderer) initBrainMode(); brainLastFrame = 0; brainLoop(); }
+      if (nexusMode) enableNexusShaders();
+      if (!nexusMode && !brainMode) disableNexusShaders();
+    }
+
+    document.getElementById('mode-btn').addEventListener('click', () => switchMode(brainMode ? 'galaxy' : 'brain'));
+    document.getElementById('nexus-btn').addEventListener('click', () => switchMode(nexusMode ? 'galaxy' : 'nexus'));
+
+    document.getElementById('slice-slider').addEventListener('input', e => {
+      const v = parseInt(e.target.value);
+      if (brainRenderer) {
+        if (v < 255) {
+          brainRenderer.clippingPlanes = [new THREE.Plane(new THREE.Vector3(0, -1, 0), v)];
+          brainRenderer.localClippingEnabled = true;
+        } else {
+          brainRenderer.clippingPlanes = [];
+        }
+      }
+    });
+
+    // ══════════════════════════════════════════════════════════════════════════════
+    // NEXUS MODE — GLSL shader skin on the galaxy graph (all functionality intact)
+    // ══════════════════════════════════════════════════════════════════════════════
+    let nexusMode = false;
+    let nexusRafId = null; // unused — galaxy rAF handles rendering
+    const nexusUniforms = { uTime: { value: 0 } };
+    const nexusShaderMats = new Map(); // nodeId → ShaderMaterial
+    let nexusBloomRef = null;   // reference to bloom effect for intensity swap
+    let galaxyBloomRef = null;
+    let nucleusCoronas = [];    // animated corona spheres for the nucleus node
+    let nucleusPointLight = null; // PointLight at nucleus origin
+    let nucleusLaser = null;    // violet laser beam { inner, outer, glow } meshes
+    let nexusFibers = [];
+    let nebulaDripActive = false;
+    let nexusFiberGroup = null;
+    let nexusStarfieldRefs = null;
+    let nexusGlowRingRefs = null;
+
+    // ── Binary digit texture (one tile — fragment shader tiles it) ───────────────
+    function makeNexusBinaryTex() {
+      const size = 128;
+      const cv = document.createElement('canvas'); cv.width = cv.height = size;
+      const ctx = cv.getContext('2d');
+      ctx.clearRect(0, 0, size, size);
+      ctx.fillStyle = 'white';
+      ctx.font = 'bold 11px "SF Mono",monospace';
+      for (let r = 0; r < 11; r++) {
+        for (let c = 0; c < 8; c++) {
+          ctx.globalAlpha = 0.35 + Math.random() * 0.65;
+          ctx.fillText(Math.random() < 0.5 ? '0' : '1', c * 16 + 2, r * 12 + 13);
+        }
+      }
+      return new THREE.CanvasTexture(cv);
+    }
+    let nexusBinaryTex = null;
+
+    // ── GLSL: Fibonacci particle sphere with neural hum jitter ───────────────────
+    const NEXUS_VERT = `
+      uniform float uTime;
+      attribute float aJitter;
+      attribute float aPhase;
+      void main() {
+        vec3 pos = position;
+        float j = aJitter * 0.40;
+        pos.x += sin(uTime * 1.30 + aPhase)        * j;
+        pos.y += cos(uTime * 0.92 + aPhase * 1.37) * j;
+        pos.z += sin(uTime * 1.15 + aPhase * 0.81) * j;
+        vec4 mvPos = modelViewMatrix * vec4(pos, 1.0);
+        gl_Position  = projectionMatrix * mvPos;
+        gl_PointSize = clamp(340.0 / -mvPos.z, 1.2, 7.0);
+      }`;
+
+    // ── GLSL: Binary digit fragment — scrolls upward, circular clip ──────────────
+    const NEXUS_FRAG = `
+      uniform float     uTime;
+      uniform vec3      uColor;
+      uniform float     uIntensity;
+      uniform sampler2D uBinaryTex;
+      void main() {
+        vec2 uv = gl_PointCoord;
+        uv.y = mod(uv.y + uTime * 0.13, 1.0);   // scroll binary text upward
+        float alpha = texture2D(uBinaryTex, uv).r;
+        if (alpha < 0.12) discard;
+        float d = length(gl_PointCoord - 0.5);
+        if (d > 0.5) discard;
+        float fade = 1.0 - d * 1.9;
+        gl_FragColor = vec4(uColor * uIntensity, alpha * fade * 0.90);
+      }`;
+
+    // ── GLSL: Spectral tether edge — active pulse + orphan flicker ───────────────
+    const NEXUS_EDGE_VERT = `
+      attribute float aProgress;
+      varying   float vProgress;
+      void main() {
+        vProgress   = aProgress;
+        gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+      }`;
+
+    const NEXUS_EDGE_FRAG = `
+      uniform float uTime;
+      uniform vec3  uColor;
+      uniform float uActive;
+      uniform float uBoost;
+      uniform float uScrollSpeed;
+      uniform float uWeight;
+      uniform float uThreshold;
+      varying float vProgress;
+
+      float binaryChar(float p, float t, float speed) {
+        float cell    = floor(p * 32.0);
+        float cellFrac = fract(p * 32.0);
+        float seed    = cell * 127.1 + floor(t * speed * 4.0) * 311.7;
+        float h       = fract(sin(seed) * 43758.5453);
+        float bit     = step(0.5, h);
+        float centre  = clamp(1.0 - abs(cellFrac - 0.5) * 2.8, 0.0, 1.0);
+        return mix(0.28, 1.0, bit) * centre;
+      }
+
+      void main() {
+        if (uWeight < uThreshold) discard;
+        float scrolled = fract(vProgress - mod(uTime * uScrollSpeed, 1.0));
+        if (uActive < 0.5) {
+          float dash    = step(0.5, fract(vProgress * 14.0));
+          float flicker = 0.35 + 0.65 * sin(uTime * 4.3 + vProgress * 25.0);
+          float bits    = binaryChar(scrolled, uTime, uScrollSpeed);
+          float alpha   = 0.13 * dash * flicker * (0.6 + 0.4 * bits);
+          gl_FragColor  = vec4(uColor * 0.55, alpha);
+        } else {
+          float boost    = 1.0 + uBoost * 0.9;
+          float bits     = binaryChar(scrolled, uTime, uScrollSpeed);
+          float scrolled2 = fract(vProgress - mod(uTime * uScrollSpeed * 0.6, 1.0));
+          float bits2    = binaryChar(scrolled2, uTime, uScrollSpeed * 0.6) * 0.45;
+          float intensity = 0.20 + uBoost * 0.28 + (bits + bits2) * 0.52;
+          float pulse    = pow(max(0.0, sin((vProgress - mod(uTime * (0.32 + uBoost * 0.45), 1.0)) * 9.0)), 4.0) * 0.35;
+          float alpha    = clamp(intensity + pulse, 0.0, 1.0);
+          gl_FragColor   = vec4(uColor * boost, alpha);
+        }
+      }`;
+
+    // ── GLSL: Voxel binary point cloud — tumbling 0s and 1s for cluster nodes ─
+    const NEXUS_NODE_VERT = `
+      uniform float uTime;
+      uniform float uPulse;
+      uniform float uDegree;
+      uniform vec3  uColor;
+      attribute float aPhaseOffset;
+      attribute vec3  aOrbitAxis;
+      attribute float aCharType;
+      varying float   vCharType;
+      varying float   vPulse;
+      varying vec3    vColor;
+      varying float   vPhaseOffset;
+      varying float   vDegree;
+
+      void main() {
+        vCharType    = aCharType;
+        vPulse       = uPulse;
+        vColor       = uColor;
+        vPhaseOffset = aPhaseOffset;
+        vDegree      = uDegree;
+
+        vec3  pos = position;
+        float t   = uTime;
+        // Per-point frequency from orbit axis variety (0.14 – 0.26)
+        float f   = 0.14 + abs(aOrbitAxis.x) * 0.12 + uPulse * 0.08;
+        // Amplitude scales with distance from centre — outer chars drift more
+        float amp = length(pos) * (0.12 + uPulse * 0.08);
+
+        // Same multi-harmonic drift as nucleus, half the speed
+        float dx = sin(t * f        + aPhaseOffset)            + sin(t * f * 2.17 + aPhaseOffset * 0.73) * 0.45;
+        float dy = cos(t * f * 1.31 + aPhaseOffset * 1.07)    + cos(t * f * 1.73 + aPhaseOffset * 0.91) * 0.45;
+        float dz = sin(t * f * 0.79 + aPhaseOffset * 0.83)    + sin(t * f * 1.47 + aPhaseOffset * 1.31) * 0.45;
+        pos += vec3(dx, dy, dz) * amp;
+
+        vec4  mvPos  = modelViewMatrix * vec4(pos, 1.0);
+        float ptSize = (13.2 + uPulse * 5.5) * (500.0 / -mvPos.z);
+        gl_PointSize = clamp(ptSize, 4.0, 24.0);
+        gl_Position  = projectionMatrix * mvPos;
+      }`;
+
+    const NEXUS_NODE_FRAG = `
+      uniform float uTime;
+      varying float vCharType;
+      varying float vPulse;
+      varying vec3  vColor;
+      varying float vPhaseOffset;
+      varying float vDegree;
+
+      float sdfZero(vec2 uv) {
+        vec2  oval  = vec2(uv.x * 0.85, uv.y);
+        float ro    = length(oval);
+        return 1.0 - abs(ro - 0.55) / 0.20;
+      }
+      float sdfOne(vec2 uv) {
+        float bar   = 1.0 - abs(uv.x) / 0.16;
+        float cap   = step(-0.72, uv.y) * step(uv.y, 0.72);
+        float serif = 1.0 - length(vec2(uv.x + 0.22, uv.y - 0.68)) / 0.18;
+        return max(bar * cap, serif);
+      }
+      float sdfX(vec2 uv) {
+        float d1  = 1.0 - abs(uv.x - uv.y) / 0.20;
+        float d2  = 1.0 - abs(uv.x + uv.y) / 0.20;
+        float cap = step(-0.72, uv.x) * step(uv.x, 0.72) * step(-0.72, uv.y) * step(uv.y, 0.72);
+        return max(d1, d2) * cap;
+      }
+      float sdfF(vec2 uv) {
+        float bar  = 1.0 - abs(uv.x + 0.30) / 0.18;
+        float cap  = step(-0.72, uv.y) * step(uv.y, 0.72);
+        float top  = 1.0 - abs(uv.y - 0.68) / 0.14;
+        float topH = step(-0.30, uv.x) * step(uv.x, 0.50);
+        float mid  = 1.0 - abs(uv.y - 0.10) / 0.14;
+        float midH = step(-0.30, uv.x) * step(uv.x, 0.30);
+        return max(bar * cap, max(top * topH, mid * midH));
+      }
+
+      void main() {
+        vec2  uv   = (gl_PointCoord - 0.5) * 2.0;
+        float dist = length(uv);
+        if (dist > 1.0) discard;
+        float sdf;
+        if      (vCharType < 0.17) sdf = sdfZero(uv);
+        else if (vCharType < 0.50) sdf = sdfOne(uv);
+        else if (vCharType < 0.83) sdf = sdfX(uv);
+        else                       sdf = sdfF(uv);
+        float alpha = clamp(sdf * 4.0, 0.0, 1.0);
+        if (alpha < 0.05) discard;
+        // Twinkle rate + depth driven by connectivity — hubs flicker faster and deeper
+        float flickerFreq = 3.0 + vDegree * 0.7;
+        float flickerAmp  = 0.20 + min(vDegree, 25.0) * 0.014;
+        float flicker = (1.0 - flickerAmp) + flickerAmp * sin(uTime * flickerFreq + vPhaseOffset * 12.0);
+        alpha *= flicker;
+        float whiteHot = smoothstep(0.45, 0.95, vPulse);
+        vec3  col      = mix(vColor, vec3(1.0, 0.97, 0.85), whiteHot);
+        float edgeFade = 1.0 - smoothstep(0.65, 1.0, dist);
+        float bright   = 0.85 + whiteHot * 0.15;
+        gl_FragColor   = vec4(col * bright, alpha * edgeFade * (0.175 + whiteHot * 0.35));
+      }`;
+
+    // ── GLSL: Nucleus particle sphere — 4 layers, stellar core aesthetic ─────────
+    const NUCLEUS_VERT = `
+      uniform float uTime;
+      uniform float uRadius;
+      attribute float aPhaseOffset;
+      attribute float aDriftFreq;
+      attribute float aDriftAmp;
+      attribute float aZone;
+      attribute float aCharType;
+      attribute float aInner;
+      varying float vZone;
+      varying float vAlpha;
+      varying float vCharType;
+      varying float vPhaseOffset;
+
+      void main() {
+        vec3  pos = position;
+        float t   = uTime;
+        float f   = aDriftFreq;
+        float ph  = aPhaseOffset;
+
+        // Independent per-axis multi-harmonic drift.
+        // Incommensurable frequencies (1.0, 1.31, 0.79, 2.17, 1.73, 0.53) mean
+        // all three axes can never be simultaneously zero → motion never stops.
+        float dx = sin(t * f        + ph)            + sin(t * f * 2.17 + ph * 0.73) * 0.45;
+        float dy = cos(t * f * 1.31 + ph * 1.07)    + cos(t * f * 1.73 + ph * 0.91) * 0.45;
+        float dz = sin(t * f * 0.79 + ph * 0.83)    + sin(t * f * 1.47 + ph * 1.31) * 0.45;
+        pos += vec3(dx, dy, dz) * aDriftAmp;
+
+        // Slow global breathe
+        pos *= 1.0 + 0.04 * sin(t * 0.6 + ph);
+
+        vZone        = aZone;
+        vCharType    = aCharType;
+        vPhaseOffset = aPhaseOffset;
+        vAlpha       = 0.55 + 0.45 * aInner;
+        vec4 mvPos   = modelViewMatrix * vec4(pos, 1.0);
+        gl_Position  = projectionMatrix * mvPos;
+        float szBase = 4.0 + 3.0 * aInner;
+        gl_PointSize = clamp(szBase * 450.0 / -mvPos.z, 2.0, 26.0);
+      }`;
+
+    const NUCLEUS_FRAG = `
+      uniform float uTime;
+      varying float vZone;
+      varying float vAlpha;
+      varying float vCharType;
+      varying float vPhaseOffset;
+
+      float sdfZero(vec2 uv) {
+        vec2  oval = vec2(uv.x * 0.85, uv.y);
+        float ro   = length(oval);
+        return 1.0 - abs(ro - 0.55) / 0.20;
+      }
+      float sdfOne(vec2 uv) {
+        float bar   = 1.0 - abs(uv.x) / 0.16;
+        float cap   = step(-0.72, uv.y) * step(uv.y, 0.72);
+        float serif = 1.0 - length(vec2(uv.x + 0.22, uv.y - 0.68)) / 0.18;
+        return max(bar * cap, serif);
+      }
+      float sdfX(vec2 uv) {
+        float d1  = 1.0 - abs(uv.x - uv.y) / 0.20;
+        float d2  = 1.0 - abs(uv.x + uv.y) / 0.20;
+        float cap = step(-0.72, uv.x) * step(uv.x, 0.72) * step(-0.72, uv.y) * step(uv.y, 0.72);
+        return max(d1, d2) * cap;
+      }
+      float sdfF(vec2 uv) {
+        float bar  = 1.0 - abs(uv.x + 0.30) / 0.18;
+        float cap  = step(-0.72, uv.y) * step(uv.y, 0.72);
+        float top  = 1.0 - abs(uv.y - 0.68) / 0.14;
+        float topH = step(-0.30, uv.x) * step(uv.x, 0.50);
+        float mid  = 1.0 - abs(uv.y - 0.10) / 0.14;
+        float midH = step(-0.30, uv.x) * step(uv.x, 0.30);
+        return max(bar * cap, max(top * topH, mid * midH));
+      }
+
+      void main() {
+        vec2  uv   = (gl_PointCoord - 0.5) * 2.0;
+        float dist = length(uv);
+        if (dist > 1.0) discard;
+        // Zone colour — functional areas
+        vec3 col;
+        if      (vZone < 0.5) col = vec3(0.25, 0.60, 1.00); // blue   — API / HTTP
+        else if (vZone < 1.5) col = vec3(0.10, 0.85, 0.85); // cyan   — data / models
+        else if (vZone < 2.5) col = vec3(0.65, 0.35, 1.00); // violet — core engine
+        else                  col = vec3(0.25, 0.90, 0.45); // green  — trade / signals
+        // SDF char
+        float sdf;
+        if      (vCharType < 0.25) sdf = sdfZero(uv);
+        else if (vCharType < 0.50) sdf = sdfOne(uv);
+        else if (vCharType < 0.75) sdf = sdfX(uv);
+        else                       sdf = sdfF(uv);
+        float alpha = clamp(sdf * 4.0, 0.0, 1.0);
+        if (alpha < 0.05) discard;
+        // Per-point flicker — heat-haze shimmer
+        float flicker = 0.6 + 0.4 * sin(uTime * 7.0 + vPhaseOffset * 13.0);
+        alpha *= flicker * vAlpha;
+        float edgeFade = 1.0 - smoothstep(0.6, 1.0, dist);
+        gl_FragColor = vec4(col, alpha * edgeFade);
+      }`;
+
+    // ── Build the living nebula nucleus — 2-tier volumetric heat-haze cloud ──────────
+    function makeNucleusObject(node) {
+      // Fixed radius — independent of nodeSize() so cluster node size changes don't affect the core
+      const _nucBase = Math.min(1 + Math.sqrt(node.__degree||0) * 0.28, 3.2);
+      const R = 5.5 * _nucBase * 5;
+
+      // ── 2-tier nebula: dense inner core + wispy outer halo ────────────────────
+      const INNER = 600;  // inner tier: high drift freq, tight amplitude
+      const OUTER = 400;  // outer tier: slower drift, larger amplitude
+      const TOTAL = INNER + OUTER;
+
+      const posArr   = new Float32Array(TOTAL * 3);
+      const phaseArr = new Float32Array(TOTAL);
+      const freqArr  = new Float32Array(TOTAL);
+      const ampArr   = new Float32Array(TOTAL);
+      const zoneArr  = new Float32Array(TOTAL);
+      const charArr  = new Float32Array(TOTAL);
+      const innerArr = new Float32Array(TOTAL);
+
+      function fillPt(idx, rMin, rMax, isInner) {
+        // Cube-root radial distribution → uniform volumetric density
+        const r     = R * (rMin + Math.cbrt(Math.random()) * (rMax - rMin));
+        const theta = Math.acos(2 * Math.random() - 1);
+        const phi   = 2 * Math.PI * Math.random();
+        const x = r * Math.sin(theta) * Math.cos(phi);
+        const y = r * Math.sin(theta) * Math.sin(phi);
+        const z = r * Math.cos(theta);
+        posArr[idx*3]   = x; posArr[idx*3+1] = y; posArr[idx*3+2] = z;
+        phaseArr[idx]   = Math.random() * Math.PI * 2;
+        // Inner: faster churn, tighter movement. Outer: slow wide drifts.
+        freqArr[idx]    = isInner ? 0.30 + Math.random() * 0.25 : 0.10 + Math.random() * 0.18;
+        ampArr[idx]     = isInner ? R * (0.08 + Math.random() * 0.10)   // ~8-18% of R
+                                  : R * (0.14 + Math.random() * 0.16);  // ~14-30% of R
+        // Zone by azimuthal angle → 4 functional sectors that swirl as points drift
+        const az        = Math.atan2(z, x); // −π … +π
+        zoneArr[idx]    = Math.floor(((az + Math.PI) / (Math.PI * 2)) * 4) % 4;
+        const cr        = Math.random();
+        charArr[idx]    = cr < 0.25 ? 0.0 : cr < 0.50 ? 0.25 : cr < 0.75 ? 0.50 : 0.75;
+        innerArr[idx]   = isInner ? 1.0 : 0.0;
+      }
+
+      for (let i = 0; i < INNER; i++) fillPt(i,         0.00, 0.55, true);
+      for (let i = 0; i < OUTER; i++) fillPt(INNER + i, 0.55, 1.60, false);
+
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute('position',    new THREE.BufferAttribute(posArr,   3));
+      geo.setAttribute('aPhaseOffset',new THREE.BufferAttribute(phaseArr, 1));
+      geo.setAttribute('aDriftFreq',  new THREE.BufferAttribute(freqArr,  1));
+      geo.setAttribute('aDriftAmp',   new THREE.BufferAttribute(ampArr,   1));
+      geo.setAttribute('aZone',       new THREE.BufferAttribute(zoneArr,  1));
+      geo.setAttribute('aCharType',   new THREE.BufferAttribute(charArr,  1));
+      geo.setAttribute('aInner',      new THREE.BufferAttribute(innerArr, 1));
+
+      const mat = new THREE.ShaderMaterial({
+        uniforms: {
+          uTime:   nexusUniforms.uTime,
+          uRadius: { value: R },
+        },
+        vertexShader:   NUCLEUS_VERT,
+        fragmentShader: NUCLEUS_FRAG,
+        transparent: true,
+        blending:    THREE.AdditiveBlending,
+        depthWrite:  false,
+      });
+
+      const group = new THREE.Group();
+      group.add(new THREE.Points(geo, mat));
+
+      // ── 3 BackSide corona spheres — violet/indigo palette to match nebula ────
+      const coronaDefs = [
+        { r: R * 2,  opacity: 0.22, color: 0x8833ff, phase: Math.random() * Math.PI * 2 },
+        { r: R * 5,  opacity: 0.09, color: 0x4411cc, phase: Math.random() * Math.PI * 2 },
+        { r: R * 10, opacity: 0.04, color: 0x221166, phase: Math.random() * Math.PI * 2 },
+      ];
+      nucleusCoronas = [];
+      for (const cd of coronaDefs) {
+        const cMat   = new THREE.MeshBasicMaterial({
+          color: cd.color, transparent: true, opacity: cd.opacity,
+          side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false,
+        });
+        const corona = new THREE.Mesh(new THREE.SphereGeometry(cd.r, 24, 24), cMat);
+        group.add(corona);
+        nucleusCoronas.push({ mesh: corona, baseOpacity: cd.opacity, phase: cd.phase });
+      }
+
+      // Disable raycasting on all visual children — particles and corona spheres
+      // are far too large and eat all mouse events, blocking every other node
+      group.children.forEach(child => { child.raycast = () => {}; });
+
+      // Tiny invisible hit-sphere at nucleus center — gives hover/click a precise target
+      const hitMesh = new THREE.Mesh(
+        new THREE.SphereGeometry(nodeSize(node) * 1.8, 6, 6),
+        new THREE.MeshBasicMaterial({ visible: false })
+      );
+      group.add(hitMesh);
+
+      // Proxy coreMats so activation / breathing code doesn't crash
+      coreMats.set(node.id, {
+        get emissiveIntensity()    { return 4.0; },
+        set emissiveIntensity(_v)  {},
+        get color()                { return new THREE.Color(0xaaffff); },
+        set color(_v)              {},
+        get emissive()             { return new THREE.Color(0xaaffff); },
+        set emissive(_v)           {},
+        get opacity()              { return 1.0; },
+        set opacity(_v)            {},
+      });
+      glowMats.delete(node.id);
+
+      return group;
+    }
+
+    // ── Build glowing planet sphere for a regular NEXUS node ─────────────────────
+    function makeNexusNodeObject(node) {
+      // Nucleus: highest-degree node gets the blazing stellar core treatment
+      if (node.__isNucleus && node.__nucleusRank === 0) return makeNucleusObject(node);
+
+      const size  = nodeSize(node);
+      const col   = new THREE.Color(getBaseColor(node));
+      const group = new THREE.Group();
+
+      // ── Per-type hierarchy ───────────────────────────────────────────────────
+      const isClass  = node.type === 'Class';
+      const isMethod = node.type === 'Method';
+      const SHELL_COUNT = isClass ? 500 : isMethod ? 280 : 120;
+      const INNER_COUNT = isClass ? 80  : isMethod ? 40  : 20;
+      const TOTAL       = SHELL_COUNT + INNER_COUNT;
+
+      function randChar() {
+        const r = Math.random();
+        if (isClass)  return r < 0.25 ? 0.0 : r < 0.5 ? 0.33 : r < 0.75 ? 0.66 : 1.0;
+        if (isMethod) return r < 0.5  ? 0.0 : 1.0;
+        return 0.0;
+      }
+
+      // ── 1. Voxel binary point cloud — tumbling 0s, 1s, Xs, Fs ───────────────
+      const positions   = new Float32Array(TOTAL * 3);
+      const phaseOffset = new Float32Array(TOTAL);
+      const orbitAxis   = new Float32Array(TOTAL * 3);
+      const charType    = new Float32Array(TOTAL);
+
+      const goldenAngle = Math.PI * (3.0 - Math.sqrt(5.0));
+      // Outer Fibonacci shell
+      for (let i = 0; i < SHELL_COUNT; i++) {
+        const y = 1.0 - (i / (SHELL_COUNT - 1)) * 2.0;
+        const r = Math.sqrt(Math.max(0, 1.0 - y * y));
+        const theta = goldenAngle * i;
+        positions[i*3]   = Math.cos(theta) * r * size;
+        positions[i*3+1] = y * size;
+        positions[i*3+2] = Math.sin(theta) * r * size;
+        phaseOffset[i]   = Math.random() * Math.PI * 2;
+        charType[i]      = randChar();
+        orbitAxis[i*3]   = Math.random()*2-1; orbitAxis[i*3+1] = Math.random()*2-1; orbitAxis[i*3+2] = Math.random()*2-1;
+      }
+      // Inner shell at 0.85× radius — depth without filling
+      for (let i = 0; i < INNER_COUNT; i++) {
+        const idx = SHELL_COUNT + i;
+        const y = 1.0 - (i / (INNER_COUNT - 1)) * 2.0;
+        const r = Math.sqrt(Math.max(0, 1.0 - y * y));
+        const theta = goldenAngle * i * 1.618;
+        const ir = size * 0.85;
+        positions[idx*3]   = Math.cos(theta) * r * ir;
+        positions[idx*3+1] = y * ir;
+        positions[idx*3+2] = Math.sin(theta) * r * ir;
+        phaseOffset[idx] = Math.random() * Math.PI * 2;
+        charType[idx]    = randChar();
+        orbitAxis[idx*3] = Math.random()*2-1; orbitAxis[idx*3+1] = Math.random()*2-1; orbitAxis[idx*3+2] = Math.random()*2-1;
+      }
+
+      const pcGeo = new THREE.BufferGeometry();
+      pcGeo.setAttribute('position',     new THREE.BufferAttribute(positions,   3));
+      pcGeo.setAttribute('aPhaseOffset', new THREE.BufferAttribute(phaseOffset, 1));
+      pcGeo.setAttribute('aOrbitAxis',   new THREE.BufferAttribute(orbitAxis,   3));
+      pcGeo.setAttribute('aCharType',    new THREE.BufferAttribute(charType,    1));
+
+      const pcUniforms = {
+        uTime:   { value: 0.0 },
+        uPulse:  { value: 0.0 },
+        uColor:  { value: new THREE.Color(col) },
+        uDegree: { value: node.__degree || 0 },
+      };
+      const pcMat = new THREE.ShaderMaterial({
+        uniforms: pcUniforms, vertexShader: NEXUS_NODE_VERT, fragmentShader: NEXUS_NODE_FRAG,
+        transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+      });
+      const pointCloud = new THREE.Points(pcGeo, pcMat);
+      pointCloud.onBeforeRender = () => { pcUniforms.uTime.value = performance.now() * 0.001; };
+      group.add(pointCloud);
+
+      // ── 2. No-op glow proxy — sphere removed so chars are visible ────────────
+      const glowMat = { _o: 0.18, get opacity() { return this._o; }, set opacity(v) { this._o = v; }, color: { set() {} } };
+
+      // ── 3. Class orbit ring ───────────────────────────────────────────────────
+      if (node.type === 'Class') {
+        const ring = new THREE.Mesh(
+          new THREE.TorusGeometry(size * 1.8, 0.35, 6, 24),
+          new THREE.MeshBasicMaterial({ color: col.clone(), transparent: true, opacity: 0.40, blending: THREE.AdditiveBlending })
+        );
+        ring.rotation.x = Math.PI / 3; ring.rotation.z = Math.PI / 6;
+        group.add(ring);
+      }
+
+      // ── coreMats proxy — routes emissiveIntensity → uPulse for white-hot ────
+      coreMats.set(node.id, {
+        get color()              { return pcUniforms.uColor.value; },
+        set color(v)             { pcUniforms.uColor.value.set(v); },
+        get emissive()           { return pcUniforms.uColor.value; },
+        set emissive(v)          { pcUniforms.uColor.value.set(v); },
+        get emissiveIntensity()  { return pcUniforms.uPulse.value; },
+        set emissiveIntensity(v) {
+          pcUniforms.uPulse.value = Math.max(0, v);
+          glowMat.opacity = Math.min(0.85, 0.25 * Math.max(0, v));
+        },
+        get opacity()            { return 1.0; },
+        set opacity(v)           { glowMat.opacity = Math.max(0, v * 0.25); },
+      });
+
+      glowMats.set(node.id, glowMat);
+      return group;
+    }
+
+    // ── Build liquid fiber bundle for NEXUS mode (via linkThreeObject) ───────────
+    // 3-4 CatmullRom braided fibers per edge with scrolling binary shader.
+    function makeNexusEdgeObject(link) {
+      const sId = typeof link.source==='object' ? link.source.id : link.source;
+      const tId = typeof link.target==='object' ? link.target.id : link.target;
+      const src = typeof link.source==='object' ? link.source : nodeById.get(link.source);
+      const tgt = typeof link.target==='object' ? link.target : nodeById.get(link.target);
+      if (!src || !tgt) return null;
+
+      const isNucleusEdge = (src.__isNucleus && src.__nucleusRank===0) || (tgt.__isNucleus && tgt.__nucleusRank===0);
+      const isActive      = isNucleusEdge || liveActivityNodes.has(sId) || liveActivityNodes.has(tId);
+      const col           = new THREE.Color(isNucleusEdge ? '#aaddff' : moduleColor(src.module ?? ''));
+
+      const P0 = new THREE.Vector3(src.x??0, src.y??0, src.z??0);
+      const P1 = new THREE.Vector3(tgt.x??0, tgt.y??0, tgt.z??0);
+      const spine    = new THREE.Vector3().subVectors(P1, P0);
+      const spineLen = spine.length();
+      const spineDir = spine.clone().normalize();
+      const up    = Math.abs(spineDir.y) < 0.9 ? new THREE.Vector3(0,1,0) : new THREE.Vector3(1,0,0);
+      const perp1 = new THREE.Vector3().crossVectors(spineDir, up).normalize();
+      const perp2 = new THREE.Vector3().crossVectors(spineDir, perp1).normalize();
+
+      const SEGS       = 28;
+
+      const noiseAmp   = isNucleusEdge ? spineLen * 0.10 : spineLen * 0.055;
+
+
+      // Nucleus edges: 8-fiber braid with weight-gated visibility per fiber.
+      // Non-nucleus edges: 3 fibers always-on.
+      const MAX_FIBERS = isNucleusEdge ? 8 : 3;
+
+      function makeLineMat(color, threshold = 0.0) {
+        const scrollSpeed  = isActive ? 0.6 + (isNucleusEdge ? 0.8 : 0.0) : 0.05;
+        const initWeight   = isNucleusEdge ? 0.35 : 1.0;
+        return new THREE.ShaderMaterial({
+          uniforms: {
+            uTime:        nexusUniforms.uTime,
+            uColor:       { value: color },
+            uActive:      { value: isActive ? 1.0 : 0.0 },
+            uBoost:       { value: isNucleusEdge ? 1.0 : 0.0 },
+            uScrollSpeed: { value: scrollSpeed },
+            uWeight:      { value: initWeight },
+            uThreshold:   { value: threshold },
+          },
+          vertexShader: NEXUS_EDGE_VERT, fragmentShader: NEXUS_EDGE_FRAG,
+          transparent: true, blending: THREE.AdditiveBlending, depthWrite: false,
+        });
+      }
+
+      const group    = new THREE.Group();
+      const fiberMats = [];
+
+      for (let fi = 0; fi < MAX_FIBERS; fi++) {
+        // Threshold: fiber i only shows when uWeight > i/MAX_FIBERS
+        const threshold  = isNucleusEdge ? (fi / MAX_FIBERS) * 0.92 : 0.0;
+        // Braid radius grows with fiber index for organic thickness
+        const radiusMult = isNucleusEdge ? 0.60 + (fi / (MAX_FIBERS - 1)) * 1.00 : 1.0;
+        const fiberNoiseAmp = noiseAmp * radiusMult;
+
+        let fc;
+        if (fi === 0) {
+          fc = col.clone();
+        } else {
+          const tf = fi % 2 === 1 ? 0.35 : 0.20;
+          fc = new THREE.Color(
+            Math.min(1, col.r*(1-tf)+tf),
+            Math.min(1, col.g*(1-tf)+tf*0.7),
+            Math.min(1, col.b*(1-tf)+tf*1.2)
+          ).multiplyScalar(isNucleusEdge ? 0.85 : 0.65);
+        }
+
+        // Override noiseAmp for this fiber's geometry
+        const origNoiseAmp = noiseAmp;
+        // eslint-disable-next-line no-inner-declarations
+        function makeFiberGeoScaled(fi, cnt) {
+          const angleBase = (fi / cnt) * Math.PI * 2;
+          const off1 = perp1.clone().multiplyScalar(Math.cos(angleBase + 0.6) * fiberNoiseAmp)
+            .addScaledVector(perp2, Math.sin(angleBase + 0.6) * fiberNoiseAmp);
+          const off2 = perp1.clone().multiplyScalar(Math.cos(angleBase - 0.6) * fiberNoiseAmp)
+            .addScaledVector(perp2, Math.sin(angleBase - 0.6) * fiberNoiseAmp);
+          const gravityPull = isNucleusEdge ? 0.12 : 0.22;
+          const cp1   = P0.clone().lerp(P1, 0.33).add(off1).lerp(new THREE.Vector3(0,0,0), gravityPull);
+          const cp2   = P0.clone().lerp(P1, 0.67).add(off2).lerp(new THREE.Vector3(0,0,0), gravityPull);
+          const curve = new THREE.CatmullRomCurve3([P0.clone(), cp1, cp2, P1.clone()]);
+          const pts   = curve.getPoints(SEGS);
+          const pos = new Float32Array((SEGS+1)*3);
+          const prg = new Float32Array(SEGS+1);
+          for (let i = 0; i <= SEGS; i++) {
+            pos[i*3]=pts[i].x; pos[i*3+1]=pts[i].y; pos[i*3+2]=pts[i].z;
+            prg[i] = i / SEGS;
+          }
+          const geo = new THREE.BufferGeometry();
+          geo.setAttribute('position',  new THREE.BufferAttribute(pos, 3));
+          geo.setAttribute('aProgress', new THREE.BufferAttribute(prg, 1));
+          return geo;
+        }
+
+        const mat = makeLineMat(fc, threshold);
+        fiberMats.push(mat);
+        if (fi === 0) link.__nexusEdgeMat = mat;
+        group.add(new THREE.Line(makeFiberGeoScaled(fi, MAX_FIBERS), mat));
+      }
+
+      if (isNucleusEdge) link.__nexusFiberMats = fiberMats;
+
+      // Nucleus edges: midpoint glow sprite for extra luminosity
+      if (isNucleusEdge) {
+        const sp = new THREE.Sprite(new THREE.SpriteMaterial({
+          color: col.clone(), transparent: true, opacity: 0.55,
+          blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true,
+        }));
+        sp.position.set(((src.x??0)+(tgt.x??0))*0.5, ((src.y??0)+(tgt.y??0))*0.5, ((src.z??0)+(tgt.z??0))*0.5);
+        sp.scale.set(4.5, 4.5, 1);
+        group.add(sp);
+      }
+
+      return group;
+    }
+
+    // ── Violet laser beam — fires from nucleus to the second highest-degree node ────
+    function _orientBeam(mesh, from, to) {
+      const dir = new THREE.Vector3(to.x - from.x, to.y - from.y, to.z - from.z);
+      const len = dir.length();
+      if (len < 1) return;
+      mesh.scale.set(1, len, 1);
+      mesh.position.set((from.x + to.x) / 2, (from.y + to.y) / 2, (from.z + to.z) / 2);
+      mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.clone().normalize());
+    }
+
+    function buildNucleusLaser(scene) {
+      if (nucleusLaser) {
+        scene.remove(nucleusLaser.inner);
+        scene.remove(nucleusLaser.outer);
+        scene.remove(nucleusLaser.glow);
+      }
+      // Inner core: white-cyan, thin cylinder
+      const inner = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.6, 0.6, 1, 8, 1),
+        new THREE.MeshBasicMaterial({ color: 0xddf0ff, transparent: true, opacity: 0.95, blending: THREE.AdditiveBlending, depthWrite: false })
+      );
+      // Mid violet: wider
+      const outer = new THREE.Mesh(
+        new THREE.CylinderGeometry(2.8, 2.8, 1, 8, 1),
+        new THREE.MeshBasicMaterial({ color: 0x8833ff, transparent: true, opacity: 0.55, blending: THREE.AdditiveBlending, depthWrite: false })
+      );
+      // Wide soft glow: very wide, very transparent
+      const glow = new THREE.Mesh(
+        new THREE.CylinderGeometry(7.0, 7.0, 1, 8, 1),
+        new THREE.MeshBasicMaterial({ color: 0x5500cc, transparent: true, opacity: 0.18, blending: THREE.AdditiveBlending, depthWrite: false })
+      );
+      scene.add(inner); scene.add(outer); scene.add(glow);
+      nucleusLaser = { inner, outer, glow };
+    }
+
+    function updateNucleusLaser() {
+      if (!nexusMode || !nucleusLaser) return;
+      const target = allNodes.find(n => n.__isNucleus && n.__nucleusRank === 1);
+      if (!target || target.x == null) return;
+      const from = { x: 0, y: 0, z: 0 };
+      const to   = { x: target.x, y: target.y, z: target.z };
+      _orientBeam(nucleusLaser.inner, from, to);
+      _orientBeam(nucleusLaser.outer, from, to);
+      _orientBeam(nucleusLaser.glow,  from, to);
+      // Pulse opacity — faster than heartbeat
+      const t = nexusUniforms.uTime.value;
+      const pulse = 0.85 + 0.15 * Math.sin(t * 4.7);
+      nucleusLaser.inner.material.opacity = 0.95 * pulse;
+      nucleusLaser.outer.material.opacity = 0.55 * pulse;
+      nucleusLaser.glow.material.opacity  = 0.18 * pulse;
+    }
+
+    // ── Nebula Filament Network ───────────────────────────────────────────────────
+    // Wispy Catmull-Rom fiber bundles that give the scene its organic nebula look.
+    // Each graph edge gets 1-4 noise-displaced filament strands. Hub nodes also get
+    // ambient cross-filaments that fill the nebula volume. All fibers breathe in
+    // opacity and drift gently over time via per-point sine displacement. When a
+    // signal fires (flareNode), connected filaments ignite — shifting violet and
+    // spiking opacity before decaying back.
+    function buildNexusFiberBundles(scene) {
+      if (nexusFiberGroup) cleanupNexusFibers(scene);
+      const group = new THREE.Group();
+      nexusFiberGroup = group;
+      nexusFibers = [];
+
+      const links = graph3d.graphData().links;
+      const SEGS  = 20; // curve segments per filament
+
+      function buildFiber(srcNode, tgtNode, noiseAmt, baseOpacity, col) {
+        const p0 = new THREE.Vector3(srcNode.x??0, srcNode.y??0, srcNode.z??0);
+        const p1 = new THREE.Vector3(tgtNode.x??0, tgtNode.y??0, tgtNode.z??0);
+        const dist = p0.distanceTo(p1);
+        if (dist < 2) return;
+
+        // Two interior control points displaced by random noise → organic wisp shape
+        const c1 = p0.clone().lerp(p1, 0.33).add(
+          new THREE.Vector3((Math.random()-0.5)*dist*noiseAmt, (Math.random()-0.5)*dist*noiseAmt, (Math.random()-0.5)*dist*noiseAmt));
+        const c2 = p0.clone().lerp(p1, 0.67).add(
+          new THREE.Vector3((Math.random()-0.5)*dist*noiseAmt, (Math.random()-0.5)*dist*noiseAmt, (Math.random()-0.5)*dist*noiseAmt));
+        const pts = new THREE.CatmullRomCurve3([p0, c1, c2, p1]).getPoints(SEGS);
+
+        const N    = pts.length;
+        const base = new Float32Array(N * 3);  // rest positions
+        const pos  = new Float32Array(N * 3);  // live (drifting) positions
+        const dax  = new Float32Array(N * 3);  // per-point drift axis
+        pts.forEach((p, i) => {
+          base[i*3]=p.x; base[i*3+1]=p.y; base[i*3+2]=p.z;
+          pos[i*3] =p.x; pos[i*3+1] =p.y; pos[i*3+2] =p.z;
+          const d = new THREE.Vector3(Math.random()-0.5, Math.random()-0.5, Math.random()-0.5).normalize();
+          dax[i*3]=d.x; dax[i*3+1]=d.y; dax[i*3+2]=d.z;
+        });
+
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+        const mat = new THREE.LineBasicMaterial({
+          color: col.clone(), transparent: true, opacity: baseOpacity,
+          blending: THREE.AdditiveBlending, depthWrite: false,
+        });
+        const line = new THREE.Line(geo, mat);
+        group.add(line);
+
+        const isNuc = (srcNode.__isNucleus && srcNode.__nucleusRank===0) ||
+                      (tgtNode.__isNucleus && tgtNode.__nucleusRank===0);
+        nexusFibers.push({
+          geo, mat, base, dax,
+          driftAmt:    dist * 0.022,  // drift amplitude ≈ 2% of span
+          phase:       Math.random() * Math.PI * 2,
+          baseOpacity,
+          baseColor:   col.clone(),
+          isNucleusEdge: isNuc,
+          srcId: srcNode.id, tgtId: tgtNode.id,
+          ignited: 0,
+        });
+      }
+
+      // ── Graph-edge fiber bundles ──────────────────────────────────────────────
+      for (const link of links) {
+        const src = typeof link.source==='object' ? link.source : nodeById.get(link.source);
+        const tgt = typeof link.target==='object' ? link.target : nodeById.get(link.target);
+        if (!src || !tgt) continue;
+        const isNuc = (src.__isNucleus && src.__nucleusRank===0) ||
+                      (tgt.__isNucleus && tgt.__nucleusRank===0);
+        const col      = new THREE.Color(isNuc ? '#aaddff' : moduleColor(src.module ?? ''));
+        const bundleN  = isNuc ? 4 : 1 + (((src.__degree||0) > 5 || (tgt.__degree||0) > 5) ? 1 : 0);
+        const noiseAmt = isNuc ? 0.45 : 0.30;
+        const baseOp   = isNuc ? 0.09 : 0.045;
+        for (let b = 0; b < bundleN; b++) {
+          buildFiber(src, tgt,
+            noiseAmt + b * 0.08,
+            baseOp * (0.5 + Math.random() * 0.5),
+            col.clone().multiplyScalar(0.55 + Math.random() * 0.45));
+        }
+      }
+
+      // ── Ambient fill filaments between hub nodes — nebula volume density ──────
+      const hubs = allNodes
+        .filter(n => !n.__isNucleus)
+        .sort((a, b) => (b.__degree||0) - (a.__degree||0))
+        .slice(0, 16);
+      const fillN = Math.min(40, hubs.length * 3);
+      for (let i = 0; i < fillN; i++) {
+        const a = hubs[Math.floor(Math.random() * hubs.length)];
+        const b = hubs[Math.floor(Math.random() * hubs.length)];
+        if (!a || !b || a.id === b.id) continue;
+        const col = new THREE.Color(moduleColor(a.module ?? '')).multiplyScalar(0.35);
+        buildFiber(a, b, 0.55, 0.02 + Math.random() * 0.02, col);
+      }
+
+      // ── Orbital atmosphere filaments — short arcs wrapping the nucleus ────────
+      const ORBIT_RADII = [32, 48, 65];
+      const colors = ['#aaddff','#88aaff','#cc88ff','#ffaa44','#44ffcc'];
+      for (let ri = 0; ri < ORBIT_RADII.length; ri++) {
+        const R = ORBIT_RADII[ri];
+        const count = 6 + ri * 3;
+        for (let j = 0; j < count; j++) {
+          const baseAngle = (j / count) * Math.PI * 2;
+          const elev = (Math.random() - 0.5) * Math.PI * 0.8;
+          const arcSpan = 0.5 + Math.random() * 0.8; // radians
+          const pts = [];
+          for (let s = 0; s <= 12; s++) {
+            const a = baseAngle + (s / 12) * arcSpan - arcSpan * 0.5;
+            const r = R * (0.9 + Math.random() * 0.2);
+            pts.push(new THREE.Vector3(
+              Math.cos(a) * Math.cos(elev) * r,
+              Math.sin(elev) * r,
+              Math.sin(a) * Math.cos(elev) * r
+            ));
+          }
+          const col = new THREE.Color(colors[(ri * 3 + j) % colors.length]).multiplyScalar(0.5);
+          const geo = new THREE.BufferGeometry().setFromPoints(pts);
+          const base = new Float32Array(pts.length * 3);
+          const dax  = new Float32Array(pts.length * 3);
+          pts.forEach((p, i) => {
+            base[i*3]=p.x; base[i*3+1]=p.y; base[i*3+2]=p.z;
+            const d = new THREE.Vector3(Math.random()-.5,Math.random()-.5,Math.random()-.5).normalize();
+            dax[i*3]=d.x; dax[i*3+1]=d.y; dax[i*3+2]=d.z;
+          });
+          const mat = new THREE.LineBasicMaterial({
+            color: col, transparent: true, opacity: 0.12 - ri*0.02,
+            blending: THREE.AdditiveBlending, depthWrite: false,
+          });
+          group.add(new THREE.Line(geo, mat));
+          nexusFibers.push({
+            geo, mat, base, dax,
+            driftAmt: R * 0.015, phase: Math.random()*Math.PI*2,
+            baseOpacity: mat.opacity, baseColor: col.clone(),
+            isNucleusEdge: true, srcId: null, tgtId: null, ignited: 0,
+          });
+        }
+      }
+
+      scene.add(group);
+    }
+
+    // ── Animate nebula fibers — drift + pull physics + ignition ──────────────
+    function animateNexusFibers() {
+      if (!nexusFibers.length) return;
+      const t      = nexusUniforms.uTime.value;
+      const VIOLET = new THREE.Color('#aa33ff');
+      const TENSION = 0.85;
+
+      for (const f of nexusFibers) {
+        const pos = f.geo.attributes.position.array;
+        const N   = pos.length / 3;
+        const da  = f.driftAmt;
+
+        // Pull physics: check if either endpoint node is being dragged
+        const srcDrag = draggedNodes.get(f.srcId);
+        const tgtDrag = draggedNodes.get(f.tgtId);
+        let pullSrcX=0, pullSrcY=0, pullSrcZ=0;
+        let pullTgtX=0, pullTgtY=0, pullTgtZ=0;
+        if (srcDrag) {
+          pullSrcX = srcDrag.x - f.base[0];
+          pullSrcY = srcDrag.y - f.base[1];
+          pullSrcZ = srcDrag.z - f.base[2];
+        }
+        if (tgtDrag) {
+          const ti = (N-1)*3;
+          pullTgtX = tgtDrag.x - f.base[ti];
+          pullTgtY = tgtDrag.y - f.base[ti+1];
+          pullTgtZ = tgtDrag.z - f.base[ti+2];
+        }
+
+        // Breathing: swell and contract like umbilical cord
+        const breathScale = 1.0 + 0.4 * Math.sin(t * 0.6 + f.phase * 1.7);
+        for (let i = 0; i < N; i++) {
+          const wave = Math.sin(t * 0.45 + f.phase + i * 0.42) * da * breathScale;
+          const bi   = i * 3;
+          let px = f.base[bi]   + f.dax[bi]   * wave;
+          let py = f.base[bi+1] + f.dax[bi+1] * wave;
+          let pz = f.base[bi+2] + f.dax[bi+2] * wave;
+          if (srcDrag || tgtDrag) {
+            const sf = ((N-1-i) / (N-1)) * TENSION;
+            const tf = (i / (N-1)) * TENSION;
+            px += pullSrcX*sf + pullTgtX*tf;
+            py += pullSrcY*sf + pullTgtY*tf;
+            pz += pullSrcZ*sf + pullTgtZ*tf;
+          }
+          pos[bi]=px; pos[bi+1]=py; pos[bi+2]=pz;
+        }
+        f.geo.attributes.position.needsUpdate = true;
+
+        // Opacity breathing + ignition decay
+        if (f.ignited > 0) {
+          f.ignited = Math.max(0, f.ignited - 0.018);
+          f.mat.opacity = f.baseOpacity + f.ignited * (f.isNucleusEdge ? 0.55 : 0.30);
+          f.mat.color.lerpColors(f.baseColor, VIOLET, Math.min(1, f.ignited * 1.6));
+        } else {
+          f.mat.opacity = f.baseOpacity * (0.7 + 0.3 * Math.sin(t * 0.35 + f.phase));
+          f.mat.color.copy(f.baseColor);
+        }
+      }
+    }
+
+    function cleanupNexusFibers(_scene) {
+      if (!nexusFiberGroup) return;
+      _scene.remove(nexusFiberGroup);
+      nexusFiberGroup.traverse(obj => {
+        if (obj.geometry) obj.geometry.dispose();
+        if (obj.material) obj.material.dispose();
+      });
+      nexusFiberGroup = null; nexusFibers = [];
+    }
+
+    function addNexusStarfield(scene) {
+      function makeLayer({ count, radiusMin, radiusMax, color, size, opacity }) {
+        const positions = new Float32Array(count * 3);
+        for (let i = 0; i < count; i++) {
+          const r = radiusMin + Math.random() * (radiusMax - radiusMin);
+          const theta = Math.acos(2 * Math.random() - 1);
+          const phi = 2 * Math.PI * Math.random();
+          positions[i*3] = r*Math.sin(theta)*Math.cos(phi); positions[i*3+1] = r*Math.sin(theta)*Math.sin(phi); positions[i*3+2] = r*Math.cos(theta);
+        }
+        const geo = new THREE.BufferGeometry();
+        geo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+        const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color, size, opacity, transparent: true, blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true }));
+        scene.add(pts);
+        return pts;
+      }
+      return {
+        dim:   makeLayer({ count: 3000, radiusMin: 1500, radiusMax: 3000, color: 0x0a1a3a, size: 1.0, opacity: 0.25 }),
+        mid:   makeLayer({ count: 800,  radiusMin: 800,  radiusMax: 1500, color: 0x1a2a5a, size: 2.0, opacity: 0.40 }),
+        close: makeLayer({ count: 100,  radiusMin: 400,  radiusMax: 800,  color: 0x2244aa, size: 3.5, opacity: 0.60 }),
+      };
+    }
+
+    function cleanupNexusStarfield(scene, refs) {
+      [refs.dim, refs.mid, refs.close].forEach(pts => { if (!pts) return; scene.remove(pts); pts.geometry.dispose(); pts.material.dispose(); });
+    }
+
+    function addNexusGlowRings(scene) {
+      const configs = [
+        { radius: 80,  tube: 0.4, color: 0x4da6ff, opacity: 0.15 },
+        { radius: 150, tube: 0.3, color: 0x9d6bff, opacity: 0.10 },
+        { radius: 220, tube: 0.5, color: 0xff4dd2, opacity: 0.08 },
+      ];
+      const rings = configs.map(({ radius, tube, color, opacity }) => {
+        const mesh = new THREE.Mesh(
+          new THREE.TorusGeometry(radius, tube, 16, 100),
+          new THREE.MeshBasicMaterial({ color, opacity, transparent: true, side: THREE.BackSide, blending: THREE.AdditiveBlending, depthWrite: false })
+        );
+        mesh.rotation.x = Math.PI / 2;
+        scene.add(mesh);
+        return mesh;
+      });
+      return { rings, tick: t => { rings[0].rotation.y = t*0.15; rings[1].rotation.y = -t*0.10; rings[2].rotation.y = t*0.07; } };
+    }
+
+    // ── Radial petal layout — module clusters orbit the nucleus in spherical zones ─
+    function enableNexusForces() {
+      if (!graph3d) return;
+      const mods = [...new Set(allNodes.filter(n => n.module).map(n => n.module))];
+      const N = mods.length || 1;
+      const SHELL_R = 220;
+
+      // Assign each module a fixed spherical direction — alternating elevation for 3D depth
+      const clusterDir = new Map();
+      mods.forEach((mod, i) => {
+        const theta = (2 * Math.PI * i) / N;
+        const phi   = i % 2 === 0 ? Math.PI * 0.5 : Math.PI * (0.30 + (i % 3) * 0.12);
+        clusterDir.set(mod, {
+          x: Math.sin(phi) * Math.cos(theta),
+          y: Math.cos(phi),
+          z: Math.sin(phi) * Math.sin(theta),
+        });
+      });
+
+      // Pull non-nucleus nodes toward the shell radius
+      graph3d.d3Force('nexusShell', alpha => {
+        for (const n of allNodes) {
+          if (n.__isNucleus && n.__nucleusRank === 0) continue;
+          const r = Math.sqrt((n.x||0)**2 + (n.y||0)**2 + (n.z||0)**2) || 1;
+          const pull = (SHELL_R - r) / r * 0.14 * alpha;
+          n.vx = (n.vx||0) + (n.x||0) * pull;
+          n.vy = (n.vy||0) + (n.y||0) * pull;
+          n.vz = (n.vz||0) + (n.z||0) * pull;
+        }
+      });
+
+      // Pull each node angularly toward its module's petal zone
+      graph3d.d3Force('nexusPetal', alpha => {
+        for (const n of allNodes) {
+          if (n.__isNucleus && n.__nucleusRank === 0) continue;
+          const dir = clusterDir.get(n.module);
+          if (!dir) continue;
+          const r = Math.sqrt((n.x||0)**2 + (n.y||0)**2 + (n.z||0)**2) || 1;
+          n.vx = (n.vx||0) + (dir.x * r - (n.x||0)) * 0.05 * alpha;
+          n.vy = (n.vy||0) + (dir.y * r - (n.y||0)) * 0.05 * alpha;
+          n.vz = (n.vz||0) + (dir.z * r - (n.z||0)) * 0.05 * alpha;
+        }
+      });
+
+      // Softer charge in NEXUS — less scatter, nodes cluster tighter within petals
+      graph3d.d3Force('charge').strength(-126);
+      graph3d.d3Force('link').distance(58);
+      graph3d.d3ReheatSimulation();
+    }
+
+    function disableNexusForces() {
+      if (!graph3d) return;
+      graph3d.d3Force('nexusShell', null);
+      graph3d.d3Force('nexusPetal', null);
+      graph3d.d3Force('charge').strength(-200);
+      graph3d.d3Force('link').distance(90);
+      graph3d.d3ReheatSimulation();
+    }
+
+    // ── Activate nexus mode on graph3d ────────────────────────────────────────────
+    function enableNexusShaders() {
+      if (!graph3d) return;
+      if (!nexusBinaryTex) nexusBinaryTex = makeNexusBinaryTex();
+      nexusUniforms.uTime.value = performance.now() / 1000;
+      graph3d
+        .nodeThreeObject(makeNexusNodeObject)
+        .nodeThreeObjectExtend(false)
+        .linkThreeObject(makeNexusEdgeObject)
+        .linkPositionUpdate((obj, { start, end }) => {
+          // Update edge geometry positions as nodes move
+          if (!obj) return;
+          const pos = obj.geometry?.attributes?.position;
+          if (!pos) return;
+          const N = pos.count - 1;
+          for (let i = 0; i <= N; i++) {
+            const t = i / N;
+            pos.setXYZ(i, start.x+(end.x-start.x)*t, start.y+(end.y-start.y)*t, start.z+(end.z-start.z)*t);
+          }
+          pos.needsUpdate = true;
+        })
+        .linkWidth(0)           // hide default lines — shader lines are used instead
+        .linkDirectionalParticles(0)
+        .refresh();
+      // Boost bloom for nexus
+      if (nexusBloomRef) { nexusBloomRef.intensity = 5.5; nexusBloomRef.radius = 0.70; nexusBloomRef.luminanceThreshold = 0.10; }
+      // Dim directional lights so the nucleus PointLight dominates
+      if (window._sceneKeyLight)  window._sceneKeyLight.intensity  = 0.4;
+      if (window._sceneFillLight) window._sceneFillLight.intensity = 0.2;
+      // PointLight at nucleus origin — illuminates surrounding cluster nodes
+      const _scene = graph3d.scene();
+      if (nucleusPointLight) _scene.remove(nucleusPointLight);
+      nucleusPointLight = new THREE.PointLight(0xaabbff, 5.0, 2000, 2);
+      nucleusPointLight.position.set(0, 0, 0);
+      _scene.add(nucleusPointLight);
+      // Lock nucleus node at origin so it stays the gravitational center
+      const _nucleusNode = allNodes.find(n => n.__isNucleus && n.__nucleusRank === 0);
+      if (_nucleusNode) { _nucleusNode.fx = 0; _nucleusNode.fy = 0; _nucleusNode.fz = 0; }
+      // Apply radial petal forces so modules orbit in spherical zones
+      enableNexusForces();
+      // Violet laser beam from nucleus to second hub
+      buildNucleusLaser(_scene);
+      // AI Brain fiber bundles + atmosphere
+      buildNexusFiberBundles(_scene);
+      nexusStarfieldRefs = addNexusStarfield(_scene);
+      nexusGlowRingRefs  = addNexusGlowRings(_scene);
+    }
+
+    function disableNexusShaders() {
+      if (!graph3d) return;
+      // Clean up nucleus-specific scene objects
+      if (nucleusPointLight) { graph3d.scene().remove(nucleusPointLight); nucleusPointLight = null; }
+      if (nucleusLaser) { const s = graph3d.scene(); s.remove(nucleusLaser.inner); s.remove(nucleusLaser.outer); s.remove(nucleusLaser.glow); nucleusLaser = null; }
+      nucleusCoronas = [];
+      cleanupNexusFibers(graph3d.scene());
+      if (nexusStarfieldRefs) { cleanupNexusStarfield(graph3d.scene(), nexusStarfieldRefs); nexusStarfieldRefs = null; }
+      if (nexusGlowRingRefs) { nexusGlowRingRefs.rings.forEach(r => { graph3d.scene().remove(r); r.geometry.dispose(); r.material.dispose(); }); nexusGlowRingRefs = null; }
+      const _nucleusNode = allNodes.find(n => n.__isNucleus && n.__nucleusRank === 0);
+      if (_nucleusNode) { delete _nucleusNode.fx; delete _nucleusNode.fy; delete _nucleusNode.fz; }
+      disableNexusForces();
+      graph3d
+        .nodeThreeObject(null)  // ForceGraph3D will use default sphere
+        .linkThreeObject(null)
+        .linkPositionUpdate(null)
+        .linkWidth(link => {
+          const sId = typeof link.source==='object'?link.source.id:link.source;
+          const tId = typeof link.target==='object'?link.target.id:link.target;
+          if (!liveActivityNodes.has(sId) && !liveActivityNodes.has(tId)) return 0.2;
+          const eKey = [sId,tId].sort().join('|');
+          return Math.min(2.2, 0.7 + (edgeFireCount.get(eKey)??0) * 0.15);
+        })
+        .linkDirectionalParticles(2)
+        .refresh();
+      // Restore galaxy bloom
+      if (nexusBloomRef) { nexusBloomRef.intensity = 2.8; nexusBloomRef.radius = 0.38; nexusBloomRef.luminanceThreshold = 0.20; }
+      // Restore directional light intensities
+      if (window._sceneKeyLight)  window._sceneKeyLight.intensity  = 2.5;
+      if (window._sceneFillLight) window._sceneFillLight.intensity = 1.2;
+      // Rebuild coreMats for galaxy materials (nodeThreeObject rebuild handles it)
+    }
+
+    // ── uTime update — driven by animatePulses rAF (already running) ─────────────
+    // (nexusUniforms.uTime.value is updated in animatePulses loop below)
+
+    // ── Public API ────────────────────────────────────────────────────────────────
+    window.theronexusBrain = {
+      triggerNodeActivation(nodeId) { if (brainMode) brainTriggerActivation(nodeId, 0.9); },
+      injectPulse(srcId, tgtId, intensity) {
+        const f = brainFibers.find(f => f.srcId === srcId && f.tgtId === tgtId);
+        if (f) spawnBrainPulse(f.curve, moduleColor(nodeById.get(srcId)?.module ?? ''), intensity ?? 0.7);
+      },
+      setMode(mode, clusterId) { setBrainRenderMode(mode, clusterId); },
+      setSlicePlane(axis, value) {
+        if (!brainRenderer) return;
+        const v = axis === 'x' ? new THREE.Vector3(-1,0,0) : axis === 'z' ? new THREE.Vector3(0,0,-1) : new THREE.Vector3(0,-1,0);
+        brainRenderer.clippingPlanes = [new THREE.Plane(v, value)];
+        brainRenderer.localClippingEnabled = true;
+      },
+      get isActive() { return brainMode; },
+    };
+
+    loadGraph();
+    } // end if(false)
+  </script>
+</body>
+</html>

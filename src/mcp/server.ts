@@ -6,6 +6,12 @@ import { AxonStore } from "../axon/store";
 import { agentAxonPath } from "../family/paths";
 import { loadConfig } from "../config";
 import { writeToAgent } from "../family/write";
+import {
+  deliberateToolDef,
+  deliberationHistoryToolDef,
+  handleDeliberateTool,
+  handleDeliberationHistoryTool,
+} from "../deliberate/mcp";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -196,6 +202,8 @@ function handleToolsList(id: string | number | null): Response {
       description: "Health check — returns server version",
       inputSchema: { type: "object", properties: {} },
     },
+    deliberateToolDef(),
+    deliberationHistoryToolDef(),
   ];
   return makeResult(id, { tools });
 }
@@ -214,6 +222,10 @@ async function handleToolCall(
       return await callRetrieve(id, args);
     case "status":
       return callStatus(id);
+    case "deliberate":
+      return makeResult(id, await handleDeliberateTool(args));
+    case "deliberation_history":
+      return makeResult(id, await handleDeliberationHistoryTool(args));
     default:
       return makeError(id, -32602, `Unknown tool: ${name}`);
   }

@@ -34,6 +34,7 @@ export interface DispatchTask {
   readonly created_at: string;
   readonly outcome_id?: string;    // optional — if set, trace_id is patched onto this outcome after dispatch
   readonly tier_override?: "large" | "medium" | "small"; // optional — bypasses HeuristicRouter + energy check
+  readonly max_tokens?: number; // optional — override default 1024 max_tokens for LM Studio calls
 }
 
 export interface DispatchResult {
@@ -90,6 +91,7 @@ async function callLmStudio(
   task: string,
   timeoutMs: number,
   tier: "large" | "medium" | "small" = "medium",
+  maxTokens: number = 1024,
 ): Promise<{ readonly text: string; readonly completion_tokens: number; readonly latency_ms: number }> {
   // Qwen3 runs in chain-of-thought mode by default — thinking tokens exhaust the
   // budget before the actual answer is produced, causing 60-90s response times.
@@ -97,7 +99,7 @@ async function callLmStudio(
   const content = tier === "large" ? `/no_think ${task}` : task;
   const body = JSON.stringify({
     messages: [{ role: "user", content }],
-    max_tokens: 1024,
+    max_tokens: maxTokens,
     temperature: 0.3,
   });
 
@@ -224,7 +226,7 @@ export async function dispatch(
   let errorMsg: string | undefined;
 
   try {
-    const result = await callLmStudio(endpoint, task.task, cfg.timeoutMs, effectiveTier);
+    const result = await callLmStudio(endpoint, task.task, cfg.timeoutMs, effectiveTier, task.max_tokens ?? 1024);
     inferenceText = result.text;
     completionTokens = result.completion_tokens;
     latencyMs = result.latency_ms;

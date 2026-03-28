@@ -1,9 +1,9 @@
 // dispatch/worker.ts — Phase 16 Parallel Background Processing.
-// Dispatches tasks to local LLMs (Qwen3 32B / Ministral 3B) when context
+// Dispatches tasks to local LLM (Qwen3 32B 4-bit) when context
 // pressure reaches 50%. Fire-and-forget — results written to agent axon.
 //
 // Flow:
-//   1. route() picks model tier (large=qwen3-32b, medium=ministral-3b)
+//   1. route() picks model tier (all tiers → qwen3-32b-4bit on port 8082)
 //   2. readPowerState() + getDispatchAdvice() may downgrade large→medium on battery
 //   3. LM_INFERENCE_START emitted on EventBus
 //   4. Bun.fetch POST to LM Studio /v1/chat/completions (120s timeout — Qwen3 can spike under load)
@@ -13,6 +13,10 @@
 
 import { route } from "../router/heuristic.ts";
 import type { RoutingInput } from "../router/heuristic.ts";
+import { createBreaker } from "../resilience/circuit";
+import { createRetry } from "../resilience/retry";
+import { emitError } from "../resilience/error-bus";
+import { classifyError, type ErrorEvent } from "../resilience/types";
 import { readPowerState, getDispatchAdvice } from "../router/energy.ts";
 import { emit } from "../trace/bus.ts";
 import { writeToAgent } from "../family/write.ts";
@@ -61,7 +65,7 @@ export interface DispatchConfig {
 
 const DEFAULT_DISPATCH_CONFIG: DispatchConfig = {
   largeModelUrl: "http://localhost:8082",
-  mediumModelUrl: "http://localhost:1234",
+  mediumModelUrl: "http://localhost:8082",
   timeoutMs: 120_000,
   contextTriggerPct: 50,
 } as const;
@@ -82,7 +86,7 @@ function resolveEndpoint(
 /** Resolve human-readable model name for trace payloads. */
 function resolveModelName(tier: "large" | "medium" | "small"): string {
   if (tier === "large") return "qwen3-32b";
-  return "ministral-3b";
+  return "qwen3-32b";
 }
 
 /** POST to LM Studio and return { text, completion_tokens, latency_ms }. */
@@ -225,8 +229,15 @@ export async function dispatch(
   let success = false;
   let errorMsg: string | undefined;
 
+  const breaker = createBreaker(endpoint, { threshold: 3, halfOpenAfterMs: 30_000 });
+  const retryPolicy = createRetry({ maxAttempts: 3, baseDelayMs: 500, maxDelayMs: 10_000 });
+
   try {
-    const result = await callLmStudio(endpoint, task.task, cfg.timeoutMs, effectiveTier, task.max_tokens ?? 1024);
+    const result = await retryPolicy.execute(() =>
+      breaker.execute(() =>
+        callLmStudio(endpoint, task.task, cfg.timeoutMs, effectiveTier, task.max_tokens ?? 1024)
+      )
+    );
     inferenceText = result.text;
     completionTokens = result.completion_tokens;
     latencyMs = result.latency_ms;
@@ -234,6 +245,19 @@ export async function dispatch(
   } catch (err) {
     latencyMs = 0;
     errorMsg = err instanceof Error ? err.message : String(err);
+
+    const category = classifyError(err);
+    const errorEvent: ErrorEvent = {
+      id: crypto.randomUUID(),
+      service: endpoint,
+      category,
+      severity: category === "circuit_open" ? "high" : "medium",
+      message: errorMsg,
+      context: { task_id: task.id, agent_id: task.agent_id, model: modelName, tier: effectiveTier },
+      timestamp: new Date().toISOString(),
+      agent_id: task.agent_id,
+    };
+    emitError(errorEvent);
   }
 
   // 5. Emit LM_INFERENCE_END

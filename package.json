@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@huggingface/transformers": "^3.8.1",
+    "cockatiel": "^3.2.1",
     "compromise": "^14.15.0",
     "graphology": "^0.26.0",
     "wink-bm25-text-search": "^3.1.2"

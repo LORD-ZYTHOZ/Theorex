@@ -22,7 +22,10 @@ export type BusEventType =
   | "OUTCOME_RECORDED"
   | "DELIBERATION_START"
   | "DELIBERATION_ROUND"
-  | "DELIBERATION_COMPLETE";
+  | "DELIBERATION_COMPLETE"
+  | "RESILIENCE_ERROR"
+  | "CIRCUIT_STATE_CHANGE"
+  | "CRITICAL_ALERT";
 
 // ---------------------------------------------------------------------------
 // Event payload types
@@ -93,6 +96,29 @@ export interface DeliberationCompletePayload {
   readonly error?: string;
 }
 
+export interface ResilienceErrorPayload {
+  readonly service: string;
+  readonly category: string;
+  readonly severity: string;
+  readonly message: string;
+  readonly agent_id: string;
+  readonly context: Record<string, unknown>;
+}
+
+export interface CircuitStateChangePayload {
+  readonly service: string;
+  readonly from: "closed" | "half_open" | "open";
+  readonly to: "closed" | "half_open" | "open";
+  readonly failure_count: number;
+}
+
+export interface CriticalAlertPayload {
+  readonly service: string;
+  readonly message: string;
+  readonly agent_id: string;
+  readonly context: Record<string, unknown>;
+}
+
 // Discriminated union mapping event type → payload
 export type BusEventPayloadMap = {
   LM_INFERENCE_START: LmInferenceStartPayload;
@@ -104,6 +130,9 @@ export type BusEventPayloadMap = {
   DELIBERATION_START: DeliberationStartPayload;
   DELIBERATION_ROUND: DeliberationRoundPayload;
   DELIBERATION_COMPLETE: DeliberationCompletePayload;
+  RESILIENCE_ERROR: ResilienceErrorPayload;
+  CIRCUIT_STATE_CHANGE: CircuitStateChangePayload;
+  CRITICAL_ALERT: CriticalAlertPayload;
 };
 
 export interface BusEvent<T extends BusEventType = BusEventType> {

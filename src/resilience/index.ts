@@ -14,6 +14,7 @@ export { createBreaker, getBreakerState, getAllBreakerStates } from "./circuit";
 export { createRetry } from "./retry";
 export { emitError, emitCircuitChange, emitCritical } from "./error-bus";
 export { alertCritical, formatAlertMessage } from "./alert";
+export { parseWatchdogEvent, toErrorEvent, bridgeWatchdogEvent, type WatchdogEvent } from "./watchdog-bridge";
 
 // Wire alert subscription — fires on every CRITICAL_ALERT event
 import { on, type BusEvent } from "../trace/bus";

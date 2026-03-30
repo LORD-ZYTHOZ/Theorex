@@ -57,7 +57,8 @@ export class ResilienceError extends Error {
 export function classifyError(err: unknown): ErrorCategory {
   if (err instanceof ResilienceError) return err.category;
   // cockatiel throws BrokenCircuitError when circuit is open
-  if (err instanceof Error && err.name === "BrokenCircuitError") return "circuit_open";
+  if (err instanceof Error && (err.name === "BrokenCircuitError" || err.constructor.name === "BrokenCircuitError")) return "circuit_open";
+  if (err instanceof Error && /circuit breaker is open/i.test(err.message)) return "circuit_open";
   if (err instanceof DOMException && err.name === "AbortError") return "timeout";
   if (err instanceof TypeError) return "transient";
   const msg = err instanceof Error ? err.message : String(err);

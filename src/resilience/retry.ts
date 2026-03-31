@@ -24,6 +24,7 @@ export function createRetry(opts?: {
       backoff: new ExponentialBackoff({
         initialDelay: baseDelayMs,
         maxDelay: maxDelayMs,
+        jitter: 0.5, // Adds randomness to prevent thundering herd
       }),
     },
   );

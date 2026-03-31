@@ -5,15 +5,23 @@
 import type { ErrorEvent, ServiceId } from "./types";
 
 // ---------------------------------------------------------------------------
-// Rate limiter — in-memory, resets on process restart (acceptable)
+// Rate limiter + deduplication — in-memory, resets on process restart (acceptable)
 // ---------------------------------------------------------------------------
 
+// Track last sent message hashes to avoid duplicates
 const lastSent = new Map<ServiceId, number>();
+const lastMessageHashes = new Map<string, boolean>(); // Store hashes of messages
 const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
 
-function isRateLimited(service: ServiceId): boolean {
+function isRateLimitedOrDuplicate(service: ServiceId, messageHash: string): boolean {
+  // Check rate limiting
   const last = lastSent.get(service);
   if (!last) return false;
+  
+  // Check if this message was already sent recently (deduplication)
+  const isDuplicate = lastMessageHashes.get(messageHash);
+  if (isDuplicate) return true;
+
   return Date.now() - last < RATE_LIMIT_MS;
 }
 
@@ -44,9 +52,14 @@ export async function alertCritical(event: ErrorEvent): Promise<void> {
 
     if (!token || !chatId) return; // silently skip if not configured
 
-    if (isRateLimited(event.service)) return;
-
     const text = formatAlertMessage(event);
+    const messageHash = JSON.stringify({ 
+      service: event.service,
+      agent_id: event.agent_id,
+      timestamp: event.timestamp,
+    });
+
+    if (isRateLimitedOrDuplicate(event.service, messageHash)) return;
 
     await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
       method: "POST",
@@ -59,6 +72,7 @@ export async function alertCritical(event: ErrorEvent): Promise<void> {
     });
 
     lastSent.set(event.service, Date.now());
+    lastMessageHashes.set(messageHash, true); // Track this message hash to avoid duplicates
   } catch {
     // Alerting must never crash the system
   }

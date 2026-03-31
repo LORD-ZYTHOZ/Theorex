@@ -8,7 +8,13 @@ import { readTraces } from "../trace/bus";
 // Types
 // ---------------------------------------------------------------------------
 
-export type AgentStatus = "healthy" | "degraded" | "unreachable";
+// Define AgentStatus as an enum-like object
+const agentStatus = {
+  HEALTHY: "healthy", 
+  DEGRADED: "degraded", 
+  UNREACHABLE: "unreachable"
+};
+export default agentStatus;
 
 export interface EndpointProbe {
   readonly reachable: boolean;

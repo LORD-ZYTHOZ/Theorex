@@ -4,11 +4,23 @@
 
 import { mkdir, rename } from "node:fs/promises";
 import { join } from "node:path";
-import type { AgentStatus } from "./probe";
+// Dynamically imported via the async block above
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+let AgentStatus: { readonly healthy: string; readonly degraded: string; readonly unreachable: string };
+
+// Dynamically import AgentStatus to avoid Bun's module resolution issues
+(async () => {
+  const probe = await import("./probe");
+  AgentStatus = probe.AgentStatus || {
+    healthy: "healthy", 
+    degraded: "degraded", 
+    unreachable: "unreachable"
+  };
+})();
 
 export interface HealthSnapshot {
   readonly agent_id: string;

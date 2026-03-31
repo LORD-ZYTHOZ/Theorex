@@ -11,7 +11,7 @@ const EMBED_TIMEOUT_MS = 3000;
  */
 export async function embedText(
   text: string,
-  lmStudioUrl = "http://localhost:1234",
+  lmStudioUrl = "http://localhost:8082",
   model = "nomic-embed-text-v1.5",
   timeoutMs = EMBED_TIMEOUT_MS
 ): Promise<number[] | null> {

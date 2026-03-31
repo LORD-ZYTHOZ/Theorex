@@ -9,8 +9,8 @@
 // These get written to the axon via writeToAgent, so the concept web stores
 // "anchor blindness causes overconfidence at key levels" not just "anchor".
 //
-// LLM endpoint: configurable via config.lmStudioUrl (default: http://localhost:1234)
-// On M1 the local Qwen2.5-3B runs at http://localhost:8082.
+// LLM endpoint: configurable via config.lmStudioUrl (default: http://localhost:8082)
+// Qwen3-32B-4bit is the default grunt worker on both m1 and m4.
 
 import { writeToAgent, batchWriteToAgent } from "./write";
 import type { Config } from "../config";

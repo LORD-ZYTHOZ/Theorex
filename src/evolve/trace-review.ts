@@ -39,7 +39,7 @@ export interface ReviewerResponse {
 // ---------------------------------------------------------------------------
 
 const PRIMARY_LLM_URL = "http://localhost:8082/v1/chat/completions";
-const FALLBACK_LLM_URL = "http://localhost:1234/v1/chat/completions";
+const FALLBACK_LLM_URL = "http://localhost:8082/v1/chat/completions";
 const LLM_TIMEOUT_MS = 45_000;
 
 // Only review outcomes with composite score at or below this threshold.
@@ -177,7 +177,7 @@ async function callReviewer(
     // Fall through to fallback
   }
 
-  // Fallback: Ministral 3B (localhost:1234)
+  // Fallback: Qwen3-32B (same endpoint — retry on transient failure)
   const res = await Bun.fetch(FALLBACK_LLM_URL, {
     method: "POST",
     headers: { "Content-Type": "application/json" },

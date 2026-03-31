@@ -31,6 +31,8 @@ export const AGENT_SOURCE_WEIGHTS: Record<string, number> = {
   main: 0.7,       // Nova (executive)
   "qwen-sage": 0.8,
   secretarius: 0.7,
+  meridian: 0.7,   // Divergence guardian
+  augur: 0.7,      // Horizon guardian
   "claude-code-agent": 1.0,
   "m4-engineer": 0.9,
   "pi-coding-agent": 0.7,

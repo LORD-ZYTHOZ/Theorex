@@ -162,9 +162,12 @@ async function cosineRerank(
 
   const sql = getDb();
   const candidateIds = candidates.map((c) => c.id);
+  // Bun.sql serializes JS arrays as comma-separated strings, not Postgres array literals.
+  // Pass the array as a properly formatted Postgres array string for the ANY() cast.
+  const pgArray = `{${candidateIds.join(',')}}`;
 
   const fullRows: FullEmbeddingRow[] = await sql`
-    SELECT id, embedding FROM concepts WHERE id = ANY(${candidateIds}::uuid[])
+    SELECT id, embedding FROM concepts WHERE id = ANY(${pgArray}::uuid[])
   `;
 
   const embeddingMap = new Map<string, Float32Array>();

@@ -21,10 +21,13 @@ export interface CompressedSearchResult {
   readonly cosineScore: number;   // higher = more similar (0–1)
 }
 
+export const DEFAULT_PRE_FILTER_N = 200;
+export const DEFAULT_TOP_K = 10;
+
 export interface CompressedSearchOptions {
   readonly agentId?: string;     // filter to specific agent
-  readonly preFilterN?: number;  // candidates from Hamming pass (default: 200)
-  readonly topK?: number;        // final results after cosine rerank (default: 10)
+  readonly preFilterN?: number;  // candidates from Hamming pass (default: DEFAULT_PRE_FILTER_N)
+  readonly topK?: number;        // final results after cosine rerank (default: DEFAULT_TOP_K)
 }
 
 // ---------------------------------------------------------------------------
@@ -169,8 +172,8 @@ async function cosineRerank(
     if (row.embedding !== null) {
       try {
         embeddingMap.set(row.id, parseVec(row.embedding));
-      } catch {
-        // Skip rows with unparseable embeddings
+      } catch (err) {
+        console.error(`[compressed-search] failed to parse embedding for id=${row.id}:`, err);
       }
     }
   }
@@ -204,8 +207,8 @@ export async function compressedSearch(
   options?: CompressedSearchOptions,
 ): Promise<CompressedSearchResult[]> {
   const agentId = options?.agentId;
-  const preFilterN = options?.preFilterN ?? 200;
-  const topK = options?.topK ?? 10;
+  const preFilterN = options?.preFilterN ?? DEFAULT_PRE_FILTER_N;
+  const topK = options?.topK ?? DEFAULT_TOP_K;
 
   // Stage 1: compress query and run Hamming pre-filter
   const queryCode = compress(queryVec, matrix);
@@ -216,7 +219,13 @@ export async function compressedSearch(
 }
 
 // ---------------------------------------------------------------------------
-// Expose getDb for testing (allows resetting the singleton)
+// Test injection hook (only use in tests)
 // ---------------------------------------------------------------------------
 
-export { getDb };
+export function _setDbForTesting(db: ReturnType<typeof Bun.sql>): void {
+  _sql = db;
+}
+
+export function _resetDbForTesting(): void {
+  _sql = null;
+}

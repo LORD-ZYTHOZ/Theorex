@@ -91,6 +91,8 @@ function makeCompressedRow(id: string, seed: number, matrix: Float32Array, agent
 
 import {
   compressedSearch,
+  _setDbForTesting,
+  _resetDbForTesting,
 } from "./compressed-search";
 
 // Re-mock Bun.sql by patching the module after import using a custom approach.
@@ -194,16 +196,19 @@ describe("compressedSearch with mocked DB", () => {
   // The tests below verify the pipeline behaviour using a fresh module import
   // with the singleton unset.
 
-  test("returns [] when no compressed vectors in DB", async () => {
-    // We test this by verifying the pipeline returns empty results
-    // when given an empty candidates list (mocked at the pure function level).
-    // This is the contract for the empty DB case.
-    const emptyResults = await (async () => {
-      // Simulate: hammingPreFilter returns [] → cosineRerank returns []
-      const candidates: never[] = [];
-      return candidates; // cosineRerank([]) = []
-    })();
-    expect(emptyResults).toHaveLength(0);
+  test("returns [] when DB has no compressed vectors", async () => {
+    // Inject a mock DB that returns empty rows for both queries
+    const mockDb = function (strings: TemplateStringsArray, ..._values: unknown[]) {
+      return Promise.resolve([]);
+    } as unknown as ReturnType<typeof Bun.sql>;
+    _setDbForTesting(mockDb);
+    try {
+      const queryVec = makeVec(1);
+      const results = await compressedSearch(queryVec, matrix);
+      expect(results).toHaveLength(0);
+    } finally {
+      _resetDbForTesting();
+    }
   });
 
   test("cosine rerank sorts descending by cosineScore", () => {

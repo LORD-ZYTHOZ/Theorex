@@ -12,6 +12,8 @@ import { writeToAgent } from "../family/write";
 import { processText } from "../compose";
 import { embedText } from "../rag/ollama-embedder";
 import { expandQuery } from "../rag/query-expander";
+import { buildProjectionMatrix } from "../rag/turbo-quant";
+import { compressedSearch } from "../rag/compressed-search";
 import { rrfFuse } from "../rag/rrf-fusion";
 import type { RankedResult } from "../rag/rrf-fusion";
 import { getState } from "../web/state";
@@ -25,6 +27,17 @@ import { extractAndSaveProfiles } from "../evolve/profile-extractor";
 import type { ProfileExtractionInput } from "../evolve/profile-extractor";
 import { summarizeAndSaveSession } from "../evolve/session-summarizer";
 import type { SessionSummaryInput } from "../evolve/session-summarizer";
+
+// ---------------------------------------------------------------------------
+// TurboQuant projection matrix singleton
+// ---------------------------------------------------------------------------
+
+let _turboMatrix: Float32Array | null = null;
+
+function getTurboMatrix(): Float32Array {
+  if (!_turboMatrix) _turboMatrix = buildProjectionMatrix();
+  return _turboMatrix;
+}
 
 // ---------------------------------------------------------------------------
 // Config
@@ -279,7 +292,7 @@ function handleToolsList(id: string | number | null): Response {
           agent_id: { type: "string", description: "Agent ID (default: main)" },
           query: { type: "string", description: "Search query" },
           top_k: { type: "number", description: "Max results (default: 10)" },
-          mode: { type: "string", description: "fast (default) or deep (query expansion + RRF fusion)" },
+          mode: { type: "string", enum: ["fast", "deep", "compressed"], description: "fast (default), deep (query expansion + RRF fusion), or compressed (TurboQuant two-stage search)" },
         },
         required: ["query"],
       },
@@ -505,6 +518,9 @@ async function callRetrieve(
 
   // --- Postgres path (THEOREX_STORAGE=postgres) ---
   if (isPostgresEnabled()) {
+    if (mode === "compressed") {
+      return await callRetrieveCompressed(id, query, agentId, topK);
+    }
     const pgStore = new PostgresStore(agentId);
     try {
       if (mode === "deep") {
@@ -631,6 +647,37 @@ async function callRetrieveDeep(
     score: r.score,
     meta: r.meta,
     _expanded_queries: queries,
+  }));
+
+  return makeResult(id, { content: [{ type: "text", text: JSON.stringify(matches, null, 2) }] });
+}
+
+/**
+ * Compressed retrieval: TurboQuant two-stage search (Hamming pre-filter + cosine rerank).
+ * No pgStore instance needed — compressed-search manages its own DB connection.
+ */
+async function callRetrieveCompressed(
+  id: string | number | null,
+  query: string,
+  agentId: string,
+  topK: number,
+): Promise<Response> {
+  const embedding = await embedText(query);
+  if (!embedding) {
+    return makeError(id, -32603, "Embedding failed — Ollama unavailable");
+  }
+
+  const queryVec = new Float32Array(embedding);
+  const matrix = getTurboMatrix();
+  const results = await compressedSearch(queryVec, matrix, { agentId, topK });
+
+  const matches = results.map((r) => ({
+    id: r.id,
+    label: r.label,
+    memory_type: r.memory_type,
+    score: r.cosineScore,
+    meta: r.meta,
+    _hamming_score: r.hammingScore,
   }));
 
   return makeResult(id, { content: [{ type: "text", text: JSON.stringify(matches, null, 2) }] });

@@ -1,11 +1,32 @@
 /**
- * compressed-search.ts — Two-stage retrieval using TurboQuant compressed vectors.
+ * compressed-search.ts — Two-stage retrieval using TurboQuant native compression.
  *
- * Stage 1 (fast): Hamming distance pre-filter on 32-byte compressed codes.
+ * Stage 1 (fast): innerProductEstimate pre-filter on TurboCode compressed vectors.
  * Stage 2 (accurate): Cosine similarity rerank on full 768d embeddings for top candidates.
  */
 
-import { compress, hammingDistance } from "./turbo-quant";
+const { NativeQuantizer: NativeQuantizerClass } = require("../../../packages/turbo-quant-native/index.js");
+
+// ---------------------------------------------------------------------------
+// Singleton quantizer (one per Bun worker — stateless compute engine)
+// ---------------------------------------------------------------------------
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type NativeQuantizerType = any;
+
+let _quantizer: NativeQuantizerType | null = null;
+
+function getQuantizer(): NativeQuantizerType {
+  if (!_quantizer) {
+    _quantizer = new NativeQuantizerClass(
+      768,  // nomic-embed-text output dimension
+      8,    // bits: 8 = recommended for semantic search recall@10
+      192,  // projections: dim/4 = 192
+      42n,  // seed: must match the seed used in backfill
+    );
+  }
+  return _quantizer;
+}
 
 // ---------------------------------------------------------------------------
 // Types
@@ -17,21 +38,21 @@ export interface CompressedSearchResult {
   readonly memory_type: string;
   readonly agent_id: string;
   readonly meta: Record<string, unknown>;
-  readonly hammingScore: number;  // lower = more similar (0–256)
-  readonly cosineScore: number;   // higher = more similar (0–1)
+  readonly innerProductScore: number;  // Stage 1 score (higher = more similar)
+  readonly cosineScore: number;        // Stage 2 score (higher = more similar)
 }
 
 export const DEFAULT_PRE_FILTER_N = 200;
 export const DEFAULT_TOP_K = 10;
 
 export interface CompressedSearchOptions {
-  readonly agentId?: string;     // filter to specific agent
-  readonly preFilterN?: number;  // candidates from Hamming pass (default: DEFAULT_PRE_FILTER_N)
-  readonly topK?: number;        // final results after cosine rerank (default: DEFAULT_TOP_K)
+  readonly agentId?: string;
+  readonly preFilterN?: number;
+  readonly topK?: number;
 }
 
 // ---------------------------------------------------------------------------
-// DB connection (module-level singleton, same pattern as postgres-store.ts)
+// DB connection (module-level singleton)
 // ---------------------------------------------------------------------------
 
 let _sql: ReturnType<typeof Bun.sql> | null = null;
@@ -58,9 +79,9 @@ function parseVec(raw: unknown): Float32Array {
   return new Float32Array(raw.slice(1, -1).split(",").map(Number));
 }
 
-function parseCode(raw: unknown): Uint8Array {
-  if (raw instanceof Buffer) return new Uint8Array(raw);
-  if (raw instanceof Uint8Array) return raw;
+function parseCode(raw: unknown): Buffer {
+  if (raw instanceof Buffer) return raw;
+  if (raw instanceof Uint8Array) return Buffer.from(raw);
   throw new Error(`unexpected type for compressed_vector: ${typeof raw}`);
 }
 
@@ -100,19 +121,20 @@ interface ScoredCandidate {
   readonly memory_type: string;
   readonly agent_id: string;
   readonly meta: Record<string, unknown>;
-  readonly hammingScore: number;
+  readonly innerProductScore: number;
 }
 
 // ---------------------------------------------------------------------------
-// Stage 1: Hamming pre-filter
+// Stage 1: innerProductEstimate pre-filter
 // ---------------------------------------------------------------------------
 
-async function hammingPreFilter(
-  queryCode: Uint8Array,
+async function innerProductPreFilter(
+  queryVec: Float32Array,
   agentId: string | undefined,
   preFilterN: number,
 ): Promise<ScoredCandidate[]> {
   const sql = getDb();
+  const quantizer = getQuantizer();
 
   const rows: CompressedRow[] = agentId
     ? await sql`
@@ -139,18 +161,19 @@ async function hammingPreFilter(
       memory_type: row.memory_type,
       agent_id: row.agent_id,
       meta: row.meta,
-      hammingScore: hammingDistance(queryCode, code),
+      innerProductScore: quantizer.innerProductEstimate(code, queryVec),
     };
   });
 
+  // Higher inner product = more similar — sort descending
   return scored
     .slice()
-    .sort((a, b) => a.hammingScore - b.hammingScore)
+    .sort((a: ScoredCandidate, b: ScoredCandidate) => b.innerProductScore - a.innerProductScore)
     .slice(0, preFilterN);
 }
 
 // ---------------------------------------------------------------------------
-// Stage 2: Cosine rerank
+// Stage 2: Cosine rerank (unchanged from legacy)
 // ---------------------------------------------------------------------------
 
 async function cosineRerank(
@@ -162,9 +185,7 @@ async function cosineRerank(
 
   const sql = getDb();
   const candidateIds = candidates.map((c) => c.id);
-  // Bun.sql serializes JS arrays as comma-separated strings, not Postgres array literals.
-  // Pass the array as a properly formatted Postgres array string for the ANY() cast.
-  const pgArray = `{${candidateIds.join(',')}}`;
+  const pgArray = `{${candidateIds.join(",")}}`;
 
   const fullRows: FullEmbeddingRow[] = await sql`
     SELECT id, embedding FROM concepts WHERE id = ANY(${pgArray}::uuid[])
@@ -200,29 +221,23 @@ async function cosineRerank(
 
 /**
  * Two-stage compressed search.
- * @param queryVec - 768d query embedding
- * @param matrix - JL projection matrix from buildProjectionMatrix()
+ * @param queryVec - 768d query embedding (Float32Array)
  * @param options
  */
 export async function compressedSearch(
   queryVec: Float32Array,
-  matrix: Float32Array,
   options?: CompressedSearchOptions,
 ): Promise<CompressedSearchResult[]> {
   const agentId = options?.agentId;
   const preFilterN = options?.preFilterN ?? DEFAULT_PRE_FILTER_N;
   const topK = options?.topK ?? DEFAULT_TOP_K;
 
-  // Stage 1: compress query and run Hamming pre-filter
-  const queryCode = compress(queryVec, matrix);
-  const candidates = await hammingPreFilter(queryCode, agentId, preFilterN);
-
-  // Stage 2: cosine rerank on full embeddings
+  const candidates = await innerProductPreFilter(queryVec, agentId, preFilterN);
   return cosineRerank(candidates, queryVec, topK);
 }
 
 // ---------------------------------------------------------------------------
-// Test injection hook (only use in tests)
+// Test injection hooks (only use in tests)
 // ---------------------------------------------------------------------------
 
 export function _setDbForTesting(db: ReturnType<typeof Bun.sql>): void {
@@ -231,4 +246,12 @@ export function _setDbForTesting(db: ReturnType<typeof Bun.sql>): void {
 
 export function _resetDbForTesting(): void {
   _sql = null;
+}
+
+export function _setQuantizerForTesting(q: NativeQuantizerType): void {
+  _quantizer = q;
+}
+
+export function _resetQuantizerForTesting(): void {
+  _quantizer = null;
 }

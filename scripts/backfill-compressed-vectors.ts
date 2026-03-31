@@ -1,10 +1,12 @@
 /**
  * Backfill compressed_vector for all concepts that have embeddings but no compressed vector.
- * Uses TurboQuant JL/1-bit compression.
+ * Uses TurboQuant native compression via NativeQuantizer.
  * Run: bun scripts/backfill-compressed-vectors.ts
  */
 
-import { buildProjectionMatrix, compress, FULL_DIM } from '../src/rag/turbo-quant';
+const { NativeQuantizer } = require('../packages/turbo-quant-native/index.js');
+
+const FULL_DIM = 768;
 
 const sql = new Bun.SQL({
   host: process.env.THEOREX_PG_HOST || '100.95.91.32',
@@ -24,8 +26,8 @@ function parseVec(raw: unknown): Float32Array {
 
 async function main() {
   const seed = parseInt(process.env['TURBO_SEED'] ?? '42', 10);
-  console.log(`Building projection matrix (seed=${seed})...`);
-  const matrix = buildProjectionMatrix(seed);
+  console.log(`Creating NativeQuantizer (seed=${seed})...`);
+  const quantizer = new NativeQuantizer(768, 8, 192, BigInt(seed));
 
   const totalRows = await sql`
     SELECT COUNT(*) AS n FROM concepts
@@ -49,7 +51,7 @@ async function main() {
     for (const row of rows) {
       try {
         const vec = parseVec(row.embedding);
-        const compressed = compress(vec, matrix);
+        const compressed = quantizer.encode(vec);
         const buf = Buffer.from(compressed);
         await sql`
           UPDATE concepts SET compressed_vector = ${buf} WHERE id = ${row.id}

@@ -12,7 +12,6 @@
  */
 
 import { embedText } from "../src/rag/ollama-embedder";
-import { buildProjectionMatrix } from "../src/rag/turbo-quant";
 import { compressedSearch } from "../src/rag/compressed-search";
 import { PostgresStore } from "../src/axon/postgres-store";
 
@@ -39,7 +38,6 @@ async function main(): Promise<void> {
   console.log("");
 
   const queryVec = new Float32Array(embeddingArr);
-  const matrix = buildProjectionMatrix();
 
   // -------------------------------------------------------------------------
   // Benchmark: compressed two-stage search
@@ -49,7 +47,7 @@ async function main(): Promise<void> {
   const t0 = performance.now();
   let compressedResults;
   try {
-    compressedResults = await compressedSearch(queryVec, matrix, {
+    compressedResults = await compressedSearch(queryVec, {
       agentId: AGENT_ID,
       preFilterN: PRE_FILTER_N,
       topK: TOP_K,
@@ -64,7 +62,7 @@ async function main(): Promise<void> {
   console.log(`Time: ${compressedMs}ms`);
   console.log(`Results (${compressedResults.length}):`);
   for (const r of compressedResults) {
-    console.log(`  [hamming=${r.hammingScore} cosine=${r.cosineScore.toFixed(4)}] ${r.label}`);
+    console.log(`  [innerProduct=${r.innerProductScore.toFixed(4)} cosine=${r.cosineScore.toFixed(4)}] ${r.label}`);
   }
   console.log("");
 

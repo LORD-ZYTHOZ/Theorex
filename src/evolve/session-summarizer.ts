@@ -44,11 +44,6 @@ interface LlmSummaryResponse {
   key_decisions: string[];
 }
 
-const FALLBACK_RESULT: SessionSummaryResult = {
-  summary: "",
-  keyDecisions: [],
-};
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -56,6 +51,7 @@ const FALLBACK_RESULT: SessionSummaryResult = {
 /**
  * Summarize a session using an LLM and persist the summary.
  * Returns a fallback empty result on parse failure (never throws).
+ * Does NOT save to DB when LLM returns malformed/unparseable JSON.
  */
 export async function summarizeAndSaveSession(
   input: SessionSummaryInput,
@@ -65,11 +61,13 @@ export async function summarizeAndSaveSession(
   const raw = await callOllama(prompt);
 
   if (raw === null) {
-    return FALLBACK_RESULT;
+    return { summary: "", keyDecisions: [] };
   }
 
   const result = parseSummary(raw);
-  await store.saveSessionSummary(input.sessionId, result.summary, result.keyDecisions);
+  if (result.summary !== "") {
+    await store.saveSessionSummary(input.sessionId, result.summary, result.keyDecisions);
+  }
   return result;
 }
 
@@ -153,7 +151,7 @@ function parseSummary(raw: string): SessionSummaryResult {
     process.stderr.write(
       `[session-summarizer] JSON parse error: ${String(err)}\n`,
     );
-    return FALLBACK_RESULT;
+    return { summary: "", keyDecisions: [] };
   }
 }
 

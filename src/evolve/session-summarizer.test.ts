@@ -97,6 +97,19 @@ describe("summarizeAndSaveSession", () => {
     expect(result.keyDecisions).toEqual([]);
   });
 
+  test("LLM returns malformed JSON → saveSessionSummary is NOT called", async () => {
+    globalThis.fetch = buildFetchMock("not valid json at all %%$#");
+
+    let saveCalled = false;
+    const store = makeStore(async () => {
+      saveCalled = true;
+    });
+
+    await summarizeAndSaveSession(makeInput(), store);
+
+    expect(saveCalled).toBe(false);
+  });
+
   test("LLM returns JSON with missing fields → partial data recovered gracefully", async () => {
     // summary present but key_decisions missing
     const llmPayload = JSON.stringify({ summary: "partial summary only" });

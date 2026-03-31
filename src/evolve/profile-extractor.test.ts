@@ -4,7 +4,7 @@
  * No real network calls.
  */
 
-import { describe, test, expect, beforeEach, afterEach, mock, spyOn } from "bun:test";
+import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
 import { extractAndSaveProfiles } from "./profile-extractor";
 import type { ProfileExtractionInput } from "./profile-extractor";
 import type { PostgresStore } from "../axon/postgres-store";
@@ -71,13 +71,10 @@ describe("extractAndSaveProfiles", () => {
     globalThis.fetch = buildFetchMock(llmPayload);
 
     const upserted: Array<{ subject: string; traits: Record<string, unknown> }> = [];
-    const store = makeStore(async (subject: string, traits: Record<string, unknown>) => {
+    const store = makeStore();
+    (store as unknown as { upsertProfile: unknown }).upsertProfile = async (subject: string, traits: Record<string, unknown>) => {
       upserted.push({ subject, traits });
-    }) as unknown as PostgresStore;
-    (store as unknown as { upsertProfile: (s: string, t: Record<string, unknown>) => Promise<void> }).upsertProfile =
-      async (subject: string, traits: Record<string, unknown>) => {
-        upserted.push({ subject, traits });
-      };
+    };
 
     const result = await extractAndSaveProfiles(makeInput(), store);
 

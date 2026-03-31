@@ -12,7 +12,6 @@ import { writeToAgent } from "../family/write";
 import { processText } from "../compose";
 import { embedText } from "../rag/ollama-embedder";
 import { expandQuery } from "../rag/query-expander";
-import { buildProjectionMatrix } from "../rag/turbo-quant";
 import { compressedSearch } from "../rag/compressed-search";
 import { rrfFuse } from "../rag/rrf-fusion";
 import type { RankedResult } from "../rag/rrf-fusion";
@@ -27,17 +26,6 @@ import { extractAndSaveProfiles } from "../evolve/profile-extractor";
 import type { ProfileExtractionInput } from "../evolve/profile-extractor";
 import { summarizeAndSaveSession } from "../evolve/session-summarizer";
 import type { SessionSummaryInput } from "../evolve/session-summarizer";
-
-// ---------------------------------------------------------------------------
-// TurboQuant projection matrix singleton
-// ---------------------------------------------------------------------------
-
-let _turboMatrix: Float32Array | null = null;
-
-function getTurboMatrix(): Float32Array {
-  if (!_turboMatrix) _turboMatrix = buildProjectionMatrix();
-  return _turboMatrix;
-}
 
 // ---------------------------------------------------------------------------
 // Config
@@ -668,8 +656,7 @@ async function callRetrieveCompressed(
   }
 
   const queryVec = new Float32Array(embedding);
-  const matrix = getTurboMatrix();
-  const results = await compressedSearch(queryVec, matrix, { agentId, topK });
+  const results = await compressedSearch(queryVec, { agentId, topK });
 
   const matches = results.map((r) => ({
     id: r.id,

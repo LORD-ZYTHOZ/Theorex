@@ -4,9 +4,27 @@
 const BUN = "/Users/eoh/.bun/bin/bun";
 const CLI = "src/cli/index.ts";
 const LOG_DIR = "/Users/eoh/.pm2/logs";
+const QWEN3_MODEL = "/Users/eoh/.cache/huggingface/hub/models--mlx-community--Qwen3-32B-4bit/snapshots/bcaaf7f538adf166c1080a2befdb4f6019f66639";
 
 module.exports = {
   apps: [
+    {
+      // turbo-kv patched MLX server — TurboQwen3Attention KV cache injection
+      name: "qwen3-32b",
+      script: "/Users/eoh/turbo-kv/server.py",
+      interpreter: "/Users/eoh/turbo-kv/venv/bin/python3",
+      args: [
+        "--model", QWEN3_MODEL,
+        "--host", "0.0.0.0",
+        "--port", "8082",
+        "--max-tokens", "2048",
+        "--chat-template-args", '{"enable_thinking":false}',
+      ],
+      cwd: "/Users/eoh/turbo-kv",
+      autorestart: true,
+      out_file: `${LOG_DIR}/qwen3-32b-out.log`,
+      error_file: `${LOG_DIR}/qwen3-32b-error.log`,
+    },
     {
       name: "theorex-scan",
       script: BUN,

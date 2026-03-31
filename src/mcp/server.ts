@@ -218,7 +218,9 @@ async function appendPostgresBootSections(
   if (sessions.length > 0) {
     lines.push("", "## Recent Sessions", "");
     for (const s of sessions) {
-      const decisions = (s.keyDecisions as string[]).join(", ");
+      const decisions = s.keyDecisions
+        .filter((d): d is string => typeof d === "string")
+        .join(", ");
       lines.push(`- **${s.sessionId}**: ${s.summary} | Decisions: ${decisions}`);
     }
   }
@@ -788,6 +790,8 @@ async function callExtractProfile(
   try {
     const profiles = await extractAndSaveProfiles(input, pgStore);
     return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ profiles }) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Profile extraction failed: ${String(err)}`);
   } finally {
     await pgStore.close();
   }
@@ -817,6 +821,8 @@ async function callSummarizeSession(
   try {
     const result = await summarizeAndSaveSession(input, pgStore);
     return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Session summarization failed: ${String(err)}`);
   } finally {
     await pgStore.close();
   }

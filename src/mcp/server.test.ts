@@ -11,6 +11,11 @@ import { describe, test, expect, beforeEach, afterEach, mock } from "bun:test";
 // ---------------------------------------------------------------------------
 
 /**
+ * LIMITATION: The tests below re-implement the mapping logic from
+ * postgres-store.ts rather than importing and calling the real class.
+ * Regressions in the production mapping code will not be caught here.
+ * Integration-level tests cover the actual SQL path.
+ *
  * We test the SQL behaviour by creating minimal fakes that mirror what
  * PostgresStore.getAllProfiles and getRecentSessionSummaries do.
  * The actual SQL is integration-tested at the DB level; here we verify
@@ -125,7 +130,9 @@ async function buildPostgresBootLines(
   if (sessions.length > 0) {
     lines.push("", "## Recent Sessions", "");
     for (const s of sessions) {
-      const decisions = (s.keyDecisions as string[]).join(", ");
+      const decisions = s.keyDecisions
+        .filter((d): d is string => typeof d === "string")
+        .join(", ");
       lines.push(`- **${s.sessionId}**: ${s.summary} | Decisions: ${decisions}`);
     }
   }
@@ -215,3 +222,8 @@ describe("readBootResource Postgres path", () => {
     expect(text).toContain("**london breakout** (type: episode, weight: 0.90)");
   });
 });
+
+// ---------------------------------------------------------------------------
+// Tool handler integration tests live in server-tool-handlers.test.ts
+// (separate file required so mock.module calls precede all module imports)
+// ---------------------------------------------------------------------------

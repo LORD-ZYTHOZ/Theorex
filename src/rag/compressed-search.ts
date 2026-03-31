@@ -5,7 +5,7 @@
  * Stage 2 (accurate): Cosine similarity rerank on full 768d embeddings for top candidates.
  */
 
-const { NativeQuantizer: NativeQuantizerClass } = require("../../../packages/turbo-quant-native/index.js");
+const { NativeQuantizer: NativeQuantizerClass } = require("../../packages/turbo-quant-native/index.js");
 
 // ---------------------------------------------------------------------------
 // Singleton quantizer (one per Bun worker — stateless compute engine)

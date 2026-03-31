@@ -2,8 +2,10 @@
   "name": "theorex",
   "module": "index.ts",
   "type": "module",
+  "workspaces": ["packages/*"],
   "scripts": {
-    "test": "bun test"
+    "test": "bun test",
+    "build:native": "cd packages/turbo-quant-native && bun run build"
   },
   "devDependencies": {
     "@types/bun": "^1.3.10"

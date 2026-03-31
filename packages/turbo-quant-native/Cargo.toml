@@ -1,0 +1,21 @@
+[package]
+name = "turbo-quant-native"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+napi = { version = "2", features = ["napi6"] }
+napi-derive = "2"
+turbo-quant = { git = "https://github.com/RecursiveIntell/turbo-quant", rev = "29b47c5" }
+bincode = "1"
+serde = { version = "1", features = ["derive"] }
+
+[build-dependencies]
+napi-build = "2"
+
+[profile.release]
+lto = true
+strip = true

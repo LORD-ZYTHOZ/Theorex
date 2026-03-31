@@ -1,173 +1,117 @@
 // src/rag/turbo-quant.test.ts
-import { test, expect, describe } from "bun:test";
-import {
-  buildProjectionMatrix,
-  project,
-  quantize,
-  compress,
-  hammingDistance,
-  FULL_DIM,
-  PROJ_DIM,
-} from "./turbo-quant.ts";
+// Tests for the NativeQuantizer napi-rs binding.
+import { describe, test, expect, beforeAll } from "bun:test";
 
-// Helper: create a Float32Array filled with a constant value
-function filledVec(dim: number, value: number): Float32Array {
-  return new Float32Array(dim).fill(value);
-}
+const { NativeQuantizer } = require("../../packages/turbo-quant-native/index.js");
 
-// Helper: create a random-ish float32 vector from a seed (deterministic)
-function seededVec(dim: number, seed: number): Float32Array {
+const DIM = 768;
+const BITS = 8;
+const PROJECTIONS = 192;
+const SEED = 42n;
+
+function randomVec(dim: number, seed: number): Float32Array {
   const v = new Float32Array(dim);
   let s = seed;
   for (let i = 0; i < dim; i++) {
-    s = (s * 1664525 + 1013904223) >>> 0;
-    v[i] = (s / 0xffffffff) * 2 - 1;
+    s = (s * 1664525 + 1013904223) & 0xffffffff;
+    v[i] = ((s >>> 16) / 32768) - 1; // [-1, 1]
   }
   return v;
 }
 
-describe("buildProjectionMatrix", () => {
-  test("returns Float32Array of size PROJ_DIM * FULL_DIM", () => {
-    const matrix = buildProjectionMatrix(42);
-    expect(matrix).toBeInstanceOf(Float32Array);
-    expect(matrix.length).toBe(PROJ_DIM * FULL_DIM);
+describe("NativeQuantizer", () => {
+  let q: NativeQuantizer;
+
+  beforeAll(() => {
+    q = new NativeQuantizer(DIM, BITS, PROJECTIONS, SEED);
   });
 
-  test("same seed produces identical matrix (determinism)", () => {
-    const m1 = buildProjectionMatrix(42);
-    const m2 = buildProjectionMatrix(42);
-    expect(m1.length).toBe(m2.length);
-    for (let i = 0; i < m1.length; i++) {
-      expect(m1[i]).toBe(m2[i]);
-    }
+  test("constructs without throwing", () => {
+    expect(() => new NativeQuantizer(DIM, BITS, PROJECTIONS, SEED)).not.toThrow();
   });
 
-  test("different seeds produce different matrices", () => {
-    const m1 = buildProjectionMatrix(42);
-    const m2 = buildProjectionMatrix(99);
-    let diffs = 0;
-    for (let i = 0; i < m1.length; i++) {
-      if (m1[i] !== m2[i]) diffs++;
-    }
-    // Virtually all entries should differ
-    expect(diffs).toBeGreaterThan(PROJ_DIM * FULL_DIM * 0.99);
-  });
-});
-
-describe("project", () => {
-  test("output has PROJ_DIM elements", () => {
-    const matrix = buildProjectionMatrix(42);
-    const vec = filledVec(FULL_DIM, 1.0);
-    const out = project(vec, matrix);
-    expect(out).toBeInstanceOf(Float32Array);
-    expect(out.length).toBe(PROJ_DIM);
+  test("rejects zero dimension", () => {
+    expect(() => new NativeQuantizer(0, BITS, PROJECTIONS, SEED)).toThrow();
   });
 
-  test("zero vector projects to zero vector", () => {
-    const matrix = buildProjectionMatrix(42);
-    const vec = filledVec(FULL_DIM, 0.0);
-    const out = project(vec, matrix);
-    for (const v of out) {
-      expect(v).toBe(0);
-    }
-  });
-});
-
-describe("quantize", () => {
-  test("output is exactly 32 bytes", () => {
-    const projected = filledVec(PROJ_DIM, 1.0);
-    const bytes = quantize(projected);
-    expect(bytes).toBeInstanceOf(Uint8Array);
-    expect(bytes.length).toBe(32);
+  test("rejects odd dimension", () => {
+    expect(() => new NativeQuantizer(7, BITS, PROJECTIONS, SEED)).toThrow();
   });
 
-  test("all-positive projected yields all 0xFF bytes", () => {
-    const projected = filledVec(PROJ_DIM, 1.0);
-    const bytes = quantize(projected);
-    for (const b of bytes) {
-      expect(b).toBe(0xff);
-    }
+  test("rejects bits < 2", () => {
+    expect(() => new NativeQuantizer(DIM, 1, PROJECTIONS, SEED)).toThrow();
   });
 
-  test("all-negative projected yields all 0x00 bytes", () => {
-    const projected = filledVec(PROJ_DIM, -1.0);
-    const bytes = quantize(projected);
-    for (const b of bytes) {
-      expect(b).toBe(0x00);
-    }
-  });
-});
-
-describe("compress", () => {
-  test("output is exactly 32 bytes", () => {
-    const matrix = buildProjectionMatrix(42);
-    const vec = seededVec(FULL_DIM, 123);
-    const code = compress(vec, matrix);
-    expect(code).toBeInstanceOf(Uint8Array);
-    expect(code.length).toBe(32);
+  test("encode returns a Buffer", () => {
+    const vec = randomVec(DIM, 1);
+    const code = q.encode(vec);
+    expect(code).toBeInstanceOf(Buffer);
+    expect(code.length).toBeGreaterThan(32); // real TurboCode >> legacy 32 bytes
   });
 
-  test("same input always yields same code", () => {
-    const matrix = buildProjectionMatrix(42);
-    const vec = seededVec(FULL_DIM, 456);
-    const c1 = compress(vec, matrix);
-    const c2 = compress(vec, matrix);
-    for (let i = 0; i < c1.length; i++) {
-      expect(c1[i]).toBe(c2[i]);
-    }
-  });
-});
-
-describe("hammingDistance", () => {
-  test("hammingDistance(a, a) === 0", () => {
-    const matrix = buildProjectionMatrix(42);
-    const vec = seededVec(FULL_DIM, 789);
-    const code = compress(vec, matrix);
-    expect(hammingDistance(code, code)).toBe(0);
+  test("encode is deterministic — same input same output", () => {
+    const vec = randomVec(DIM, 2);
+    const code1 = q.encode(vec);
+    const code2 = q.encode(vec);
+    expect(Buffer.compare(code1, code2)).toBe(0);
   });
 
-  test("hammingDistance(a, b) <= 256", () => {
-    const matrix = buildProjectionMatrix(42);
-    const a = compress(seededVec(FULL_DIM, 1), matrix);
-    const b = compress(seededVec(FULL_DIM, 2), matrix);
-    expect(hammingDistance(a, b)).toBeGreaterThanOrEqual(0);
-    expect(hammingDistance(a, b)).toBeLessThanOrEqual(256);
+  test("encode rejects wrong dimension", () => {
+    const badVec = new Float32Array(100);
+    expect(() => q.encode(badVec)).toThrow();
   });
 
-  test("hammingDistance is symmetric", () => {
-    const matrix = buildProjectionMatrix(42);
-    const a = compress(seededVec(FULL_DIM, 10), matrix);
-    const b = compress(seededVec(FULL_DIM, 20), matrix);
-    expect(hammingDistance(a, b)).toBe(hammingDistance(b, a));
+  test("innerProductEstimate returns a number", () => {
+    const vec = randomVec(DIM, 3);
+    const query = randomVec(DIM, 4);
+    const code = q.encode(vec);
+    const score = q.innerProductEstimate(code, query);
+    expect(typeof score).toBe("number");
+    expect(Number.isFinite(score)).toBe(true);
   });
 
-  test("similar vectors have lower Hamming distance than dissimilar ones", () => {
-    const matrix = buildProjectionMatrix(42);
+  test("innerProductEstimate ranks close vector above random", () => {
+    const query = randomVec(DIM, 99);
+    // close: small perturbation of query
+    const close = new Float32Array(query);
+    for (let i = 0; i < DIM; i++) close[i] += 0.01;
 
-    // Similar pair: nearly identical vectors (small perturbation)
-    const base = seededVec(FULL_DIM, 999);
-    const similar = new Float32Array(base);
-    // Perturb very slightly
-    for (let i = 0; i < 10; i++) {
-      similar[i] = (similar[i] ?? 0) + 0.001;
-    }
+    const far = randomVec(DIM, 200);
 
-    // Dissimilar pair: orthogonal-ish vectors (first half positive, second half negative vs reversed)
-    const dissimilarA = new Float32Array(FULL_DIM);
-    const dissimilarB = new Float32Array(FULL_DIM);
-    for (let i = 0; i < FULL_DIM; i++) {
-      dissimilarA[i] = i < FULL_DIM / 2 ? 1.0 : -1.0;
-      dissimilarB[i] = i < FULL_DIM / 2 ? -1.0 : 1.0;
-    }
+    const codeClose = q.encode(close);
+    const codeFar = q.encode(far);
 
-    const codeBase = compress(base, matrix);
-    const codeSimilar = compress(similar, matrix);
-    const codeDisA = compress(dissimilarA, matrix);
-    const codeDisB = compress(dissimilarB, matrix);
+    const scoreClose = q.innerProductEstimate(codeClose, query);
+    const scoreFar = q.innerProductEstimate(codeFar, query);
 
-    const distSimilar = hammingDistance(codeBase, codeSimilar);
-    const distDissimilar = hammingDistance(codeDisA, codeDisB);
+    expect(scoreClose).toBeGreaterThan(scoreFar);
+  });
 
-    expect(distSimilar).toBeLessThan(distDissimilar);
+  test("l2DistanceEstimate returns non-negative number", () => {
+    const vec = randomVec(DIM, 5);
+    const query = randomVec(DIM, 6);
+    const code = q.encode(vec);
+    const dist = q.l2DistanceEstimate(code, query);
+    expect(typeof dist).toBe("number");
+    expect(dist).toBeGreaterThanOrEqual(0);
+  });
+
+  test("l2DistanceEstimate is smaller for close vector", () => {
+    const query = randomVec(DIM, 50);
+    const close = new Float32Array(query);
+    for (let i = 0; i < DIM; i++) close[i] += 0.01;
+    const far = randomVec(DIM, 300);
+
+    const distClose = q.l2DistanceEstimate(q.encode(close), query);
+    const distFar = q.l2DistanceEstimate(q.encode(far), query);
+    expect(distClose).toBeLessThan(distFar);
+  });
+
+  test("encode-decode round-trip: code from vec1 does not match query for vec2", () => {
+    const vec1 = randomVec(DIM, 7);
+    const vec2 = randomVec(DIM, 8);
+    const code1 = q.encode(vec1);
+    const code2 = q.encode(vec2);
+    expect(Buffer.compare(code1, code2)).not.toBe(0);
   });
 });

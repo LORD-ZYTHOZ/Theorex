@@ -74,8 +74,8 @@ HASH=$(ioreg -l -p IODeviceTree | shasum -a 256 | cut -d' ' -f1)
 WATCHDOG_DIR="$HOME/.openclaw/workspace/watchdog"
 STATE_FILE="$WATCHDOG_DIR/watchdog-state.json"
 LOCKFILE="$WATCHDOG_DIR/.watchdog.lock"
-TELEGRAM_BOT_TOKEN="REDACTED"
-TELEGRAM_CHAT_ID="1873663908"
+TELEGRAM_BOT_TOKEN="${HADES_TELEGRAM_BOT_TOKEN:-}"
+TELEGRAM_CHAT_ID="${HADES_TELEGRAM_CHAT_ID:-}"
 
 # Locked state read — returns JSON to stdout
 read_state() {

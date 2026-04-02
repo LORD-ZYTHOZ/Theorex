@@ -38,6 +38,10 @@ const ARCHIVE_DIR = "data/archive";
 const MEMORY_PATH = "data/MEMORY.md";
 
 import { appendUpdate, readRecentUpdates } from "../system/updates";
+import { isPostgresEnabled, PostgresStore } from "../axon/postgres-store";
+import { summarizeAndSaveSession } from "../evolve/session-summarizer";
+import { extractAndSaveProfiles } from "../evolve/profile-extractor";
+import { readFlash } from "../flash/store";
 import { addDeprecated, removeDeprecated, loadDeprecated } from "../system/deprecated";
 
 // ---------------------------------------------------------------------------
@@ -556,7 +560,47 @@ export async function runFlashWrite(sessionId: string, stdinJson: string): Promi
  * Returns count of events written to short-term.
  */
 export async function runFlashFlush(sessionId: string): Promise<number> {
-  return await flushFlash(sessionId);
+  // Read flash events BEFORE flushing (flush clears the buffer)
+  const buffer = await readFlash(sessionId);
+  const events = Array.isArray(buffer.events) ? buffer.events : [];
+
+  const count = await flushFlash(sessionId);
+
+  // Stage 6B: auto-trigger session summarization + profile extraction
+  // Best-effort, never blocks exit — errors are logged to stderr
+  if (isPostgresEnabled() && events.length > 0) {
+    const agentId = process.env.THEOREX_AGENT_ID ?? "main";
+    const store = new PostgresStore(agentId);
+
+    const concepts = events
+      .filter((e) => e.significance_score >= 0.5)
+      .map((e) => ({
+        label: e.tool_name,
+        memory_type: "episode" as const,
+      }));
+
+    const eventLabels = events
+      .filter((e) => e.significance_score >= 0.5)
+      .map((e) => `${e.tool_name}: ${e.tool_input_preview.slice(0, 80)}`);
+
+    // Fire both in parallel, catch individually so one failure doesn't block the other
+    await Promise.allSettled([
+      summarizeAndSaveSession(
+        { sessionId, agentId, concepts, events: eventLabels },
+        store,
+      ).catch((err) =>
+        process.stderr.write(`[session-end] summarize error: ${err}\n`)
+      ),
+      extractAndSaveProfiles(
+        { agentId, recentConcepts: concepts.map((c) => ({ ...c, meta: {} })) },
+        store,
+      ).catch((err) =>
+        process.stderr.write(`[session-end] profile error: ${err}\n`)
+      ),
+    ]);
+  }
+
+  return count;
 }
 
 /**

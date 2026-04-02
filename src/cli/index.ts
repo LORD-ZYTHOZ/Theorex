@@ -569,7 +569,7 @@ export async function runFlashFlush(sessionId: string): Promise<number> {
 
   // Stage 6B: auto-trigger session summarization + profile extraction
   // Best-effort, never blocks exit — errors are logged to stderr
-  if (isPostgresEnabled() && events.length > 0) {
+  if (events.length > 0) {
     const agentId = process.env.THEOREX_AGENT_ID ?? "main";
     const store = new PostgresStore(agentId);
 

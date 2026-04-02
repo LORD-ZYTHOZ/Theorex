@@ -4,7 +4,7 @@
 // Extended in Phase 14: prepends temporal context (gap detection, time of day, location).
 // Cold start (all lobes empty): returns empty string — never throws.
 
-import { AxonStore } from "../axon/store";
+import { PostgresStore } from "../axon/postgres-store";
 import { readShortTermFiles, rotateStm } from "../short-term/store";
 import type { ShortTermEntry } from "../short-term/store";
 import { readMoments } from "../moments/store";
@@ -24,15 +24,20 @@ const MAX_RELEVANT_MOMENTS = 5;
 export async function injectContext(
   sessionId: string,
   options?: {
-    loadAxon?: () => Promise<AxonStore>;
+    loadConcepts?: (agentId: string) => Promise<ReadonlyArray<{ label: string; memory_type: string; meta: Record<string, unknown> }>>;
     readShortTermFiles?: () => Promise<ShortTermEntry[]>;
     readMoments?: () => Promise<MomentNode[]>;
     loadConfig?: () => Promise<Config | null>;
   }
 ): Promise<string> {
-  const _loadAxon = options?.loadAxon ?? (async () => {
-    const cfg = await loadConfig().catch(() => null);
-    return AxonStore.load(cfg?.axonPath ?? "data/axon.json");
+  const _loadConcepts = options?.loadConcepts ?? (async (agentId: string) => {
+    const store = new PostgresStore(agentId);
+    try {
+      const results = await store.search("", undefined, { agentFilter: agentId, limit: MAX_ACTIVE_NODES });
+      return results.map((r) => ({ label: r.label, memory_type: r.memory_type, meta: r.meta }));
+    } finally {
+      await store.close();
+    }
   });
   const _readShortTermFiles = options?.readShortTermFiles ?? (async () => {
     await rotateStm().catch(() => {}); // prune stale entries before reading
@@ -94,30 +99,24 @@ export async function injectContext(
     // Personal layer load failure is non-fatal
   }
 
-  // Hoist activeIds so the moments block can access it (set in block 1)
-  let activeIds = new Set<number>();
+  // Hoist activeLabels so the moments block can access it (set in block 1)
+  let activeLabels = new Set<string>();
 
-  // 1. ACTIVE-tier axon nodes
+  // 1. Top concepts from Postgres
   try {
-    const axon = await _loadAxon();
-    const activeNodes = axon.graph
-      .nodes()
-      .map((key) => axon.graph.getNodeAttributes(key))
-      .filter((attrs) => attrs.relevance_tier === "ACTIVE");
+    const agentId = config?.temporalAgentId ?? "main";
+    const concepts = await _loadConcepts(agentId);
 
-    // Populate activeIds for moments block
-    activeIds = new Set(activeNodes.map((n) => n.concept_id));
+    activeLabels = new Set(concepts.map((c) => c.label));
 
-    if (activeNodes.length > 0) {
+    if (concepts.length > 0) {
       lines.push("=== THEOREX ACTIVE CONTEXT ===");
-      for (const node of activeNodes.slice(0, MAX_ACTIVE_NODES)) {
-        lines.push(
-          `${node.surface_form} [${node.relevance_tier}/${node.sentiment_tier}]`
-        );
+      for (const c of concepts.slice(0, MAX_ACTIVE_NODES)) {
+        lines.push(`${c.label} [${c.memory_type}]`);
       }
     }
   } catch {
-    // Cold start or missing/corrupt axon.json — no output, never throw
+    // Postgres unavailable — no output, never throw
   }
 
   // 2. Recent short-term entries (most recent N by timestamp)
@@ -146,8 +145,8 @@ export async function injectContext(
   try {
     const allMoments = await _readMoments();
     const relevant = allMoments.filter((m) =>
-      m.concept_ids.some((id) => activeIds.has(id))
-    );
+      m.concept_ids.length > 0 && activeLabels.size > 0
+    ).slice(0, MAX_RELEVANT_MOMENTS);
     if (relevant.length > 0) {
       if (lines.length === 0) lines.push("=== THEOREX ACTIVE CONTEXT ===");
       lines.push("--- Relevant moments ---");

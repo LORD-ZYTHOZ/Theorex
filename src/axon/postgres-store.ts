@@ -9,6 +9,7 @@
 
 import type { ConceptEvent } from "../types";
 import { embedText } from "../rag/ollama-embedder";
+import { resilientQuery, isConnectionError, getCircuitBreaker } from "./pg-resilience";
 
 export interface PgConceptRow {
   id: string;
@@ -31,6 +32,10 @@ export interface PgSearchResult extends PgConceptRow {
 // ---------------------------------------------------------------------------
 
 let _sql: ReturnType<typeof Bun.sql> | null = null;
+
+function resetDb(): void {
+  _sql = null;
+}
 
 function getDb() {
   if (!_sql) {
@@ -56,13 +61,32 @@ export class PostgresStore {
     this.agentId = agentId;
   }
 
+  // ---------------------------------------------------------------------------
+  // RLS context helper (Stage 7)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Execute a callback inside a transaction with the RLS session variable set.
+   * All queries within `fn` are scoped to this.agentId via
+   * `theorex.current_agent_id`. Wrapped in circuit breaker + retry.
+   */
+  private async withAgentContext<T>(
+    fn: (tx: ReturnType<typeof Bun.sql>) => Promise<T>,
+  ): Promise<T> {
+    return resilientQuery(getDb, resetDb, async (sql) =>
+      sql.begin(async (tx) => {
+        await tx.unsafe("SET LOCAL ROLE theorex_app");
+        await tx`SELECT set_config('theorex.current_agent_id', ${this.agentId}, true)`;
+        return fn(tx);
+      }),
+    );
+  }
+
   /**
    * Upsert a concept from a ConceptEvent.
    * Returns the UUID of the inserted/updated concept.
    */
   async mergeNode(event: ConceptEvent, observationType = ""): Promise<string> {
-    const sql = getDb();
-
     const memType = classifyMemoryType(event.surface_form, observationType);
     const meta = {
       concept_id: event.concept_id,
@@ -73,7 +97,7 @@ export class PostgresStore {
       node_type: event.node_type ?? "",
     };
 
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       INSERT INTO concepts (label, memory_type, agent_id, meta, created_at, updated_at)
       VALUES (
         ${event.surface_form},
@@ -91,7 +115,7 @@ export class PostgresStore {
         ),
         updated_at = ${event.timestamp}
       RETURNING id
-    `;
+    `);
 
     const id = rows[0].id as string;
     this._autoEmbed(id, event.surface_form);
@@ -102,9 +126,7 @@ export class PostgresStore {
    * Simple upsert — just label + agent, no ConceptEvent needed.
    */
   async upsertConcept(label: string, memoryType = 'fact', body?: string, meta?: Record<string, unknown>): Promise<string> {
-    const sql = getDb();
-
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       INSERT INTO concepts (label, body, memory_type, agent_id, meta)
       VALUES (
         ${label},
@@ -117,7 +139,7 @@ export class PostgresStore {
         updated_at = now(),
         body = COALESCE(EXCLUDED.body, concepts.body)
       RETURNING id
-    `;
+    `);
 
     const id = rows[0].id as string;
     this._autoEmbed(id, label);
@@ -152,59 +174,58 @@ export class PostgresStore {
       vecWeight?: number;
     } = {}
   ): Promise<PgSearchResult[]> {
-    const sql = getDb();
     const { limit = 10, ftsWeight = 0.5, vecWeight = 0.5, agentFilter, typeFilter } = opts;
 
-    if (queryEmbedding) {
-      const embeddingStr = `[${queryEmbedding.join(',')}]`;
-      return await sql`
-        SELECT * FROM hybrid_search(
-          ${queryText},
-          ${embeddingStr}::vector(768),
-          ${agentFilter ?? null},
-          ${typeFilter ?? null}::memory_type,
-          ${limit},
-          ${ftsWeight},
-          ${vecWeight}
-        )
-      ` as PgSearchResult[];
-    }
+    return this.withAgentContext(async (tx) => {
+      if (queryEmbedding) {
+        const embeddingStr = `[${queryEmbedding.join(',')}]`;
+        return await tx`
+          SELECT * FROM hybrid_search(
+            ${queryText},
+            ${embeddingStr}::vector(768),
+            ${agentFilter ?? null},
+            ${typeFilter ?? null}::memory_type,
+            ${limit},
+            ${ftsWeight},
+            ${vecWeight}
+          )
+        ` as PgSearchResult[];
+      }
 
-    // FTS only fallback
-    if (agentFilter) {
-      return await sql`
+      if (agentFilter) {
+        return await tx`
+          SELECT id, label, body, memory_type, agent_id, meta,
+            ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+          FROM concepts
+          WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+            AND agent_id = ${agentFilter}
+          ORDER BY score DESC
+          LIMIT ${limit}
+        ` as PgSearchResult[];
+      }
+      return await tx`
         SELECT id, label, body, memory_type, agent_id, meta,
           ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
         FROM concepts
         WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
-          AND agent_id = ${agentFilter}
         ORDER BY score DESC
         LIMIT ${limit}
       ` as PgSearchResult[];
-    }
-    return await sql`
-      SELECT id, label, body, memory_type, agent_id, meta,
-        ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
-      FROM concepts
-      WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
-      ORDER BY score DESC
-      LIMIT ${limit}
-    ` as PgSearchResult[];
+    });
   }
 
   /**
    * Get concepts by memory type for a given agent.
    */
   async getByType(memoryType: string, limit = 50): Promise<PgConceptRow[]> {
-    const sql = getDb();
-    return await sql`
+    return this.withAgentContext((tx) => tx`
       SELECT id, label, body, memory_type, agent_id, meta, created_at, updated_at
       FROM concepts
       WHERE memory_type = ${memoryType}::memory_type
         AND agent_id = ${this.agentId}
       ORDER BY updated_at DESC
       LIMIT ${limit}
-    ` as PgConceptRow[];
+    `) as Promise<PgConceptRow[]>;
   }
 
   /**
@@ -224,25 +245,23 @@ export class PostgresStore {
    * Upsert a living profile for an agent/subject pair.
    */
   async upsertProfile(subject: string, traits: Record<string, unknown>): Promise<void> {
-    const sql = getDb();
-    await sql`
+    await this.withAgentContext((tx) => tx`
       INSERT INTO profiles (agent_id, subject, traits, updated_at)
       VALUES (${this.agentId}, ${subject}, ${JSON.stringify(traits)}, now())
       ON CONFLICT (agent_id, subject) DO UPDATE SET
         traits = profiles.traits || ${JSON.stringify(traits)}::jsonb,
         updated_at = now()
-    `;
+    `);
   }
 
   /**
    * Get profile for this agent.
    */
   async getProfile(subject: string): Promise<Record<string, unknown> | null> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       SELECT traits FROM profiles
       WHERE agent_id = ${this.agentId} AND subject = ${subject}
-    `;
+    `);
     return rows[0]?.traits ?? null;
   }
 
@@ -250,12 +269,11 @@ export class PostgresStore {
    * Get all profiles for this agent.
    */
   async getAllProfiles(): Promise<Array<{ subject: string; traits: Record<string, unknown> }>> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       SELECT subject, traits FROM profiles
       WHERE agent_id = ${this.agentId}
       ORDER BY updated_at DESC
-    `;
+    `);
     return rows.map((r) => ({
       subject: r.subject as string,
       traits: r.traits as Record<string, unknown>,
@@ -266,14 +284,13 @@ export class PostgresStore {
    * Get the N most recent session summaries for this agent.
    */
   async getRecentSessionSummaries(limit = 3): Promise<Array<{ sessionId: string; summary: string; keyDecisions: unknown[] }>> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       SELECT session_id, summary, key_decisions
       FROM session_summaries
       WHERE agent = ${this.agentId}
       ORDER BY created_at DESC
       LIMIT ${limit}
-    `;
+    `);
     return rows.map((r) => ({
       sessionId: r.session_id as string,
       summary: r.summary as string,
@@ -285,14 +302,13 @@ export class PostgresStore {
    * Store a session summary.
    */
   async saveSessionSummary(sessionId: string, summary: string, keyDecisions: unknown[] = []): Promise<void> {
-    const sql = getDb();
-    await sql`
+    await this.withAgentContext((tx) => tx`
       INSERT INTO session_summaries (session_id, agent, summary, key_decisions)
       VALUES (${sessionId}, ${this.agentId}, ${summary}, ${JSON.stringify(keyDecisions)})
       ON CONFLICT (session_id) DO UPDATE SET
         summary = EXCLUDED.summary,
         key_decisions = EXCLUDED.key_decisions
-    `;
+    `);
   }
 
   /**
@@ -300,6 +316,7 @@ export class PostgresStore {
    */
   async heartbeat(status = 'online', meta?: Record<string, unknown>): Promise<void> {
     const sql = getDb();
+    // Heartbeat uses raw sql (no RLS context) — heartbeats are cross-agent visible
     await sql`
       INSERT INTO agent_heartbeats (agent_id, status, last_seen, meta)
       VALUES (${this.agentId}, ${status}, now(), ${JSON.stringify(meta ?? {})})
@@ -318,12 +335,11 @@ export class PostgresStore {
    * Push a task onto a named queue for a target agent.
    */
   async pushTask(queue: string, taskType: string, payload: Record<string, unknown> = {}): Promise<string> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       INSERT INTO agent_tasks (queue, agent_id, task_type, payload)
       VALUES (${queue}, ${this.agentId}, ${taskType}, ${JSON.stringify(payload)})
       RETURNING id
-    `;
+    `);
     return rows[0].id as string;
   }
 
@@ -331,8 +347,7 @@ export class PostgresStore {
    * Pop the next pending task from a queue (marks as processing).
    */
   async popTask(queue: string): Promise<{ id: string; taskType: string; payload: Record<string, unknown> } | null> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       UPDATE agent_tasks
       SET status = 'processing', processed_at = now()
       WHERE id = (
@@ -343,7 +358,7 @@ export class PostgresStore {
         FOR UPDATE SKIP LOCKED
       )
       RETURNING id, task_type, payload
-    `;
+    `);
     if (rows.length === 0) return null;
     return {
       id: rows[0].id as string,
@@ -356,11 +371,10 @@ export class PostgresStore {
    * Mark a task as done or failed.
    */
   async ackTask(taskId: string, status: 'done' | 'failed' = 'done'): Promise<void> {
-    const sql = getDb();
-    await sql`
+    await this.withAgentContext((tx) => tx`
       UPDATE agent_tasks SET status = ${status}, processed_at = now()
       WHERE id = ${taskId}
-    `;
+    `);
   }
 
   /**
@@ -385,13 +399,12 @@ export class PostgresStore {
     conditions?: string,
     tools?: string[],
   ): Promise<string> {
-    const sql = getDb();
     const meta: Record<string, unknown> = { steps };
     if (conditions !== undefined) meta.conditions = conditions;
     if (tools !== undefined) meta.tools = tools;
     const body = steps.join("\n");
 
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       INSERT INTO concepts (label, body, memory_type, agent_id, meta)
       VALUES (
         ${name},
@@ -405,7 +418,7 @@ export class PostgresStore {
         meta = EXCLUDED.meta,
         updated_at = now()
       RETURNING id
-    `;
+    `);
 
     const id = rows[0].id as string;
     this._autoEmbed(id, name);
@@ -416,14 +429,13 @@ export class PostgresStore {
    * Retrieve a single procedure by name for this agent.
    */
   async getProcedure(name: string): Promise<ProcedureRecord | null> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       SELECT label, meta FROM concepts
       WHERE label = ${name}
         AND memory_type = 'procedure'::memory_type
         AND agent_id = ${this.agentId}
       LIMIT 1
-    `;
+    `);
     if (rows.length === 0) return null;
     return mapRowToProcedure(rows[0]);
   }
@@ -432,15 +444,52 @@ export class PostgresStore {
    * Retrieve all procedures for this agent.
    */
   async getAllProcedures(limit = 50): Promise<ProcedureRecord[]> {
-    const sql = getDb();
-    const rows = await sql`
+    const rows = await this.withAgentContext((tx) => tx`
       SELECT label, meta FROM concepts
       WHERE memory_type = 'procedure'::memory_type
         AND agent_id = ${this.agentId}
       ORDER BY updated_at DESC
       LIMIT ${limit}
-    `;
+    `);
     return rows.map(mapRowToProcedure);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Flash events (Stage 7 — persist to Postgres)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Batch-insert flash events into flash_events partitioned table.
+   * Returns count of inserted rows. No RLS — flash is a shared event stream.
+   */
+  async insertFlashEvents(events: ReadonlyArray<{
+    readonly tool_name: string;
+    readonly tool_input_preview: string;
+    readonly tool_response_preview: string;
+    readonly timestamp: string;
+    readonly significance_score: number;
+  }>): Promise<number> {
+    if (events.length === 0) return 0;
+    const sql = getDb();
+
+    for (const e of events) {
+      await sql`
+        INSERT INTO flash_events (id, event_type, agent, payload, created_at)
+        VALUES (
+          ${crypto.randomUUID()},
+          ${e.tool_name},
+          ${this.agentId},
+          ${JSON.stringify({
+            tool_input_preview: e.tool_input_preview,
+            tool_response_preview: e.tool_response_preview,
+            significance_score: e.significance_score,
+          })},
+          ${e.timestamp}
+        )
+      `;
+    }
+
+    return events.length;
   }
 
   // ---------------------------------------------------------------------------

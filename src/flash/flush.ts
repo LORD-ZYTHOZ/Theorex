@@ -6,6 +6,7 @@ import { readdir, unlink } from "node:fs/promises";
 import path from "node:path";
 import { readFlash, writeFlash } from "./store";
 import { appendEntry } from "../short-term/store";
+import { PostgresStore } from "../axon/postgres-store";
 import type { FlashBuffer } from "./store";
 import type { ShortTermEntry } from "../short-term/store";
 
@@ -50,6 +51,17 @@ export async function flushFlash(
       date: event.timestamp.slice(0, 10),
     };
     await _appendEntry(entry);
+  }
+
+  // Persist significant events to Postgres flash_events table (best-effort)
+  if (significant.length > 0) {
+    try {
+      const agentId = process.env.THEOREX_AGENT_ID || "main";
+      const store = new PostgresStore(agentId);
+      await store.insertFlashEvents(significant);
+    } catch (err) {
+      console.error("[flash] Postgres flash_events write failed:", err);
+    }
   }
 
   // FLH-05: clear flash buffer after flush

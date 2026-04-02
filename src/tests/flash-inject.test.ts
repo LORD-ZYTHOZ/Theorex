@@ -3,54 +3,19 @@
 
 import { describe, test, expect } from "bun:test";
 import { injectContext } from "../flash/inject";
-import { AxonStore } from "../axon/store";
 import type { ShortTermEntry } from "../short-term/store";
 import type { MomentNode } from "../moments/store";
 import type { Config } from "../config";
-import { join } from "node:path";
 import { tmpdir } from "node:os";
 
 // ---------------------------------------------------------------------------
 // Mock helpers
 // ---------------------------------------------------------------------------
 
-async function emptyAxon(): Promise<AxonStore> {
-  const path = join(tmpdir(), `test-axon-inject-${Date.now()}.json`);
-  await Bun.write(path, JSON.stringify({ nodes: [], edges: [] }));
-  return AxonStore.load(path);
-}
-
+const emptyConcepts = async () => [];
 const emptyStm = async (): Promise<ShortTermEntry[]> => [];
 const emptyMoments = async (): Promise<MomentNode[]> => [];
 const nullConfig = async () => null;
-
-const minimalConfig: Config = {
-  axonPath: "/tmp/test.json",
-  sharedAxonPath: "/tmp/shared.json",
-  coldStorePath: "",
-  agentAxonDir: tmpdir(),
-  temporalAgentId: "main",
-  temporalStorePath: "/tmp/temporal.json",
-  lmStudioUrl: "http://localhost:9999",
-  lmStudioEmbedModel: "nomic",
-  lmStudioTimeoutMs: 100,
-  ragOnnxModel: "",
-  ragBootstrapK: 5,
-  ragBootstrapMinSimilarity: 0.4,
-  synthEndpoint: "http://localhost:9999",
-  promotionThreshold: 0.5,
-  recencyHalfLifeMs: 86_400_000,
-  frequencyWeight: 0.4,
-  neighborWeight: 0.2,
-  activeTierThreshold: 0.6,
-  lessTierThreshold: 0.1,
-  location: "Sydney",
-  deploymentMode: "personal",
-  professionPack: null,
-  professionPacksDir: null,
-  contextSlideThreshold: 0.5,
-  contextSlideCooldownCalls: 20,
-};
 
 // ---------------------------------------------------------------------------
 // injectContext — cold start (all lobes empty)
@@ -59,7 +24,7 @@ const minimalConfig: Config = {
 describe("injectContext() — cold start", () => {
   test("returns empty string when all lobes are empty", async () => {
     const result = await injectContext("test-session", {
-      loadAxon: emptyAxon,
+      loadConcepts: emptyConcepts,
       readShortTermFiles: emptyStm,
       readMoments: emptyMoments,
       loadConfig: nullConfig,
@@ -67,45 +32,27 @@ describe("injectContext() — cold start", () => {
     expect(result).toBe("");
   });
 
-  test("never throws even when axon/stm/moments throw", async () => {
-    // loadConfig must return null (not throw) — injectContext calls it outside try/catch
+  test("never throws even when concepts/stm/moments throw", async () => {
     const result = await injectContext("test-session", {
-      loadAxon: async () => { throw new Error("axon unavailable"); },
+      loadConcepts: async () => { throw new Error("pg unavailable"); },
       readShortTermFiles: async () => { throw new Error("stm unavailable"); },
       readMoments: async () => { throw new Error("moments unavailable"); },
       loadConfig: nullConfig,
     });
-    // Should not throw and returns a string (possibly empty)
     expect(typeof result).toBe("string");
   });
 });
 
 // ---------------------------------------------------------------------------
-// injectContext — with ACTIVE nodes
+// injectContext — with concepts
 // ---------------------------------------------------------------------------
 
-describe("injectContext() — with ACTIVE axon nodes", () => {
-  test("includes THEOREX ACTIVE CONTEXT header when ACTIVE nodes present", async () => {
-    const path = join(tmpdir(), `test-axon-active-${Date.now()}.json`);
-    const store = await AxonStore.load(path);
-    const now = new Date().toISOString();
-    store.graph.addNode("1", {
-      concept_id: 1,
-      surface_form: "trading strategy",
-      last_seen: now,
-      frequency_count: 5,
-      importance_weight: 0.9,
-      source_weight: 0.9,
-      relevance_tier: "ACTIVE",
-      sentiment_tier: "POSITIVE",
-      agent_id: "main",
-      node_type: "concept",
-      observation_type: "discovery",
-    });
-    await store.save(path);
-
+describe("injectContext() — with concepts", () => {
+  test("includes THEOREX ACTIVE CONTEXT header when concepts present", async () => {
     const result = await injectContext("test-active", {
-      loadAxon: async () => AxonStore.load(path),
+      loadConcepts: async () => [
+        { label: "trading strategy", memory_type: "fact", meta: {} },
+      ],
       readShortTermFiles: emptyStm,
       readMoments: emptyMoments,
       loadConfig: nullConfig,
@@ -115,33 +62,17 @@ describe("injectContext() — with ACTIVE axon nodes", () => {
     expect(result).toContain("trading strategy");
   });
 
-  test("includes relevance_tier and sentiment_tier in bracket notation", async () => {
-    const path = join(tmpdir(), `test-axon-tier-${Date.now()}.json`);
-    const store = await AxonStore.load(path);
-    const now = new Date().toISOString();
-    store.graph.addNode("2", {
-      concept_id: 2,
-      surface_form: "risk management",
-      last_seen: now,
-      frequency_count: 3,
-      importance_weight: 0.7,
-      source_weight: 0.7,
-      relevance_tier: "ACTIVE",
-      sentiment_tier: "NEUTRAL",
-      agent_id: "main",
-      node_type: "concept",
-      observation_type: "feature",
-    });
-    await store.save(path);
-
+  test("includes memory_type in bracket notation", async () => {
     const result = await injectContext("test-tier", {
-      loadAxon: async () => AxonStore.load(path),
+      loadConcepts: async () => [
+        { label: "risk management", memory_type: "preference", meta: {} },
+      ],
       readShortTermFiles: emptyStm,
       readMoments: emptyMoments,
       loadConfig: nullConfig,
     });
 
-    expect(result).toContain("[ACTIVE/NEUTRAL]");
+    expect(result).toContain("[preference]");
   });
 });
 
@@ -164,7 +95,7 @@ describe("injectContext() — with short-term entries", () => {
     ];
 
     const result = await injectContext("test-stm", {
-      loadAxon: emptyAxon,
+      loadConcepts: emptyConcepts,
       readShortTermFiles: async () => stmEntries,
       readMoments: emptyMoments,
       loadConfig: nullConfig,
@@ -200,7 +131,7 @@ describe("injectContext() — with short-term entries", () => {
     ];
 
     const result = await injectContext("test-stm-sort", {
-      loadAxon: emptyAxon,
+      loadConcepts: emptyConcepts,
       readShortTermFiles: async () => stmEntries,
       readMoments: emptyMoments,
       loadConfig: nullConfig,
@@ -217,25 +148,7 @@ describe("injectContext() — with short-term entries", () => {
 // ---------------------------------------------------------------------------
 
 describe("injectContext() — with moments", () => {
-  test("includes Relevant moments section when moments overlap ACTIVE concept_ids", async () => {
-    const axonPath = join(tmpdir(), `test-axon-moments-${Date.now()}.json`);
-    const store = await AxonStore.load(axonPath);
-    const now = new Date().toISOString();
-    store.graph.addNode("30", {
-      concept_id: 30,
-      surface_form: "scalping session",
-      last_seen: now,
-      frequency_count: 4,
-      importance_weight: 0.85,
-      source_weight: 0.85,
-      relevance_tier: "ACTIVE",
-      sentiment_tier: "POSITIVE",
-      agent_id: "main",
-      node_type: "concept",
-      observation_type: "discovery",
-    });
-    await store.save(axonPath);
-
+  test("includes Relevant moments section when concepts and moments present", async () => {
     const moments: MomentNode[] = [
       {
         moment_id: "m1",
@@ -247,7 +160,9 @@ describe("injectContext() — with moments", () => {
     ];
 
     const result = await injectContext("test-moments", {
-      loadAxon: async () => AxonStore.load(axonPath),
+      loadConcepts: async () => [
+        { label: "scalping session", memory_type: "episode", meta: {} },
+      ],
       readShortTermFiles: emptyStm,
       readMoments: async () => moments,
       loadConfig: nullConfig,

@@ -4,9 +4,7 @@
 // Phase 7.5: Theronexus structural code intelligence tools added inline —
 //   all queries run against the local .gitnexus/ index, nothing leaves the machine.
 
-import { AxonStore } from "../axon/store";
-import { PostgresStore, isPostgresEnabled } from "../axon/postgres-store";
-import { agentAxonPath } from "../family/paths";
+import { PostgresStore } from "../axon/postgres-store";
 import { loadConfig } from "../config";
 import { writeToAgent } from "../family/write";
 import { processText } from "../compose";
@@ -120,24 +118,24 @@ async function readConceptsResource(
   id: string | number | null,
   agentId: string,
 ): Promise<Response> {
-  const config = await loadConfig();
-  const axonPath = agentAxonPath(agentId, config.agentAxonDir);
-  const store = await AxonStore.load(axonPath);
-
-  const nodes = store.graph.nodes()
-    .map((key) => store.graph.getNodeAttributes(key))
-    .filter((attrs) => attrs.relevance_tier !== "SLEEPING")
-    .sort((a, b) => b.importance_weight - a.importance_weight)
-    .slice(0, 20)
-    .map((attrs) => ({
-      concept_id: attrs.concept_id,
-      surface_form: attrs.surface_form,
-      importance_weight: attrs.importance_weight,
-      relevance_tier: attrs.relevance_tier,
-      frequency_count: attrs.frequency_count,
-      last_seen: attrs.last_seen,
-      observation_type: attrs.observation_type,
+  const pgStore = new PostgresStore(agentId);
+  let nodes: Record<string, unknown>[];
+  try {
+    const results = await pgStore.search("", undefined, {
+      agentFilter: agentId,
+      limit: 20,
+    });
+    nodes = results.map((r) => ({
+      id: r.id,
+      label: r.label,
+      memory_type: r.memory_type,
+      score: r.score,
+      meta: r.meta,
+      created_at: r.created_at,
     }));
+  } finally {
+    await pgStore.close();
+  }
 
   const contents = [{
     uri: `theorex://agent/${agentId}/concepts`,
@@ -159,15 +157,11 @@ async function readBootResource(
     "",
   ];
 
-  if (isPostgresEnabled()) {
-    const pgStore = new PostgresStore(agentId);
-    try {
-      await appendPostgresBootSections(lines, pgStore, agentId);
-    } finally {
-      await pgStore.close();
-    }
-  } else {
-    await appendFileBootSection(lines, agentId);
+  const pgStore = new PostgresStore(agentId);
+  try {
+    await appendPostgresBootSections(lines, pgStore, agentId);
+  } finally {
+    await pgStore.close();
   }
 
   const bootText = lines.join("\n");
@@ -177,22 +171,6 @@ async function readBootResource(
     text: bootText,
   }];
   return makeResult(id, { contents });
-}
-
-async function appendFileBootSection(lines: string[], agentId: string): Promise<void> {
-  const config = await loadConfig();
-  const axonPath = agentAxonPath(agentId, config.agentAxonDir);
-  const store = await AxonStore.load(axonPath);
-
-  const activeNodes = store.graph.nodes()
-    .map((key) => store.graph.getNodeAttributes(key))
-    .filter((attrs) => attrs.relevance_tier === "ACTIVE")
-    .sort((a, b) => b.importance_weight - a.importance_weight)
-    .slice(0, 30);
-
-  for (const attrs of activeNodes) {
-    lines.push(`- **${attrs.surface_form}** (weight: ${attrs.importance_weight.toFixed(2)}, seen: ${attrs.last_seen.slice(0, 10)})`);
-  }
 }
 
 async function appendPostgresBootSections(
@@ -535,23 +513,21 @@ async function callSynthesize(
   const config = await loadConfig();
   const result = await writeToAgent(agentId, text, config, Date.now(), observationType);
 
-  // Also write to Postgres when enabled (fire-and-forget per-concept upsert)
-  if (isPostgresEnabled()) {
-    const timestamp = new Date().toISOString();
-    const events = processText(text, 1.0, "concept", timestamp);
-    const pgStore = new PostgresStore(agentId);
-    const ids: string[] = [];
-    for (const event of events) {
-      const conceptId = await pgStore.mergeNode(event, observationType);
-      ids.push(conceptId);
-    }
-    for (let i = 0; i < ids.length; i++) {
-      for (let j = i + 1; j < ids.length; j++) {
-        await pgStore.mergeEdge(ids[i]!, ids[j]!);
-      }
-    }
-    await pgStore.close();
+  // Persist to Postgres
+  const timestamp = new Date().toISOString();
+  const events = processText(text, 1.0, "concept", timestamp);
+  const pgStore = new PostgresStore(agentId);
+  const ids: string[] = [];
+  for (const event of events) {
+    const conceptId = await pgStore.mergeNode(event, observationType);
+    ids.push(conceptId);
   }
+  for (let i = 0; i < ids.length; i++) {
+    for (let j = i + 1; j < ids.length; j++) {
+      await pgStore.mergeEdge(ids[i]!, ids[j]!);
+    }
+  }
+  await pgStore.close();
 
   const content = [{
     type: "text",
@@ -573,51 +549,18 @@ async function callRetrieve(
   const typeFilter = typeof args.type === "string" ? args.type : undefined;
   const mode = typeof args.mode === "string" ? args.mode : "fast";
 
-  // --- Postgres path (THEOREX_STORAGE=postgres) ---
-  if (isPostgresEnabled()) {
-    if (mode === "compressed") {
-      return await callRetrieveCompressed(id, query, agentId, topK);
-    }
-    const pgStore = new PostgresStore(agentId);
-    try {
-      if (mode === "deep") {
-        return await callRetrieveDeep(id, pgStore, query, agentId, typeFilter, topK);
-      }
-      return await callRetrieveFast(id, pgStore, query, agentId, typeFilter, topK);
-    } finally {
-      await pgStore.close();
-    }
+  if (mode === "compressed") {
+    return await callRetrieveCompressed(id, query, agentId, topK);
   }
-
-  // --- File path (fallback) ---
-  const config = await loadConfig();
-  const axonPath = agentAxonPath(agentId, config.agentAxonDir);
-  const store = await AxonStore.load(axonPath);
-
-  const queryLower = query.toLowerCase();
-  const matches = store.graph.nodes()
-    .map((key) => store.graph.getNodeAttributes(key))
-    .filter((attrs) => attrs.relevance_tier !== "SLEEPING")
-    .map((attrs) => {
-      const text = attrs.surface_form.toLowerCase();
-      const score = text.includes(queryLower) ? 1.0
-        : queryLower.split(" ").some((w) => text.includes(w)) ? 0.5
-        : 0;
-      return { attrs, score };
-    })
-    .filter((r) => r.score > 0)
-    .sort((a, b) => b.score - a.score || b.attrs.importance_weight - a.attrs.importance_weight)
-    .slice(0, topK)
-    .map((r) => ({
-      concept_id: r.attrs.concept_id,
-      surface_form: r.attrs.surface_form,
-      score: r.score,
-      importance_weight: r.attrs.importance_weight,
-      relevance_tier: r.attrs.relevance_tier,
-    }));
-
-  const content = [{ type: "text", text: JSON.stringify(matches, null, 2) }];
-  return makeResult(id, { content });
+  const pgStore = new PostgresStore(agentId);
+  try {
+    if (mode === "deep") {
+      return await callRetrieveDeep(id, pgStore, query, agentId, typeFilter, topK);
+    }
+    return await callRetrieveFast(id, pgStore, query, agentId, typeFilter, topK);
+  } finally {
+    await pgStore.close();
+  }
 }
 
 /**

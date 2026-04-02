@@ -43,3 +43,8 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 if command -v bun &>/dev/null; then
     bun "$SCRIPT_DIR/rotate-partitions.ts" >> "$LOG" 2>&1 || echo "[$(date)] WARNING: partition rotation failed" >> "$LOG"
 fi
+
+# Verify backup integrity (test restore to temp db, check row counts)
+if command -v bun &>/dev/null; then
+    bun "$SCRIPT_DIR/verify-backup.ts" >> "$LOG" 2>&1 || echo "[$(date)] WARNING: backup verification failed" >> "$LOG"
+fi

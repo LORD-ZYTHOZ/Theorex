@@ -1167,6 +1167,23 @@ if (import.meta.main) {
       break;
     }
 
+    // Stage 6C: Meta-evolution — review pipeline config and propose weight tuning
+    case "meta-review": {
+      const { runMetaReview } = await import("../evolve/meta-review");
+      const mrResult = await runMetaReview(config.outcomesDir ?? "data/outcomes");
+      if (!mrResult) {
+        console.log("Meta-review failed (LLM unavailable or parse error)");
+      } else if (!mrResult.accepted) {
+        console.log(`Meta-review: ${mrResult.reason}`);
+      } else {
+        console.log(`Meta-review accepted: ${mrResult.reason}`);
+        if (mrResult.proposal) {
+          console.log(`  Weights: R=${mrResult.proposal.scorerWeightRecency.toFixed(3)} F=${mrResult.proposal.scorerWeightFrequency.toFixed(3)} C=${mrResult.proposal.scorerWeightCoOccurrence.toFixed(3)}`);
+        }
+      }
+      break;
+    }
+
     // Phase 21: Outcome Archive — move old reviewed outcomes to archive subdir
     case "outcome-archive": {
       // Usage: theorex outcome-archive [--days <n>] [--dry-run]

@@ -28,6 +28,7 @@ import { summarizeAndSaveSession } from "../evolve/session-summarizer";
 import type { SessionSummaryInput } from "../evolve/session-summarizer";
 import { extractAndSaveProcedures, refineProcedure } from "../evolve/procedure-extractor";
 import type { ProcedureExtractionInput } from "../evolve/procedure-extractor";
+import { runMetaReview } from "../evolve/meta-review";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -457,6 +458,16 @@ function handleToolsList(id: string | number | null): Response {
         required: ["name", "feedback"],
       },
     },
+    {
+      name: "meta_review",
+      description: "Run a meta-evolution cycle: analyze pipeline performance and propose scorer weight adjustments. Gated by policy system.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          outcomes_dir: { type: "string", description: "Outcomes directory (default: data/outcomes)" },
+        },
+      },
+    },
     deliberateToolDef(),
     deliberationHistoryToolDef(),
   ];
@@ -499,6 +510,8 @@ async function handleToolCall(
       return await callRetrieveProcedure(id, args);
     case "refine_procedure":
       return await callRefineProcedure(id, args);
+    case "meta_review":
+      return await callMetaReview(id, args);
     case "deliberate":
       return makeResult(id, await handleDeliberateTool(args));
     case "deliberation_history":
@@ -995,6 +1008,22 @@ async function callRefineProcedure(
     return makeError(id, -32603, `Procedure refinement failed: ${String(err)}`);
   } finally {
     await pgStore.close();
+  }
+}
+
+async function callMetaReview(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const outcomesDir = typeof args.outcomes_dir === "string" ? args.outcomes_dir : undefined;
+  try {
+    const result = await runMetaReview(outcomesDir);
+    if (!result) {
+      return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ error: "Meta-review failed (LLM unavailable or parse error)" }) }] });
+    }
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Meta-review failed: ${String(err)}`);
   }
 }
 

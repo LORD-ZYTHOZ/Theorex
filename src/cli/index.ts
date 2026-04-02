@@ -41,6 +41,7 @@ import { appendUpdate, readRecentUpdates } from "../system/updates";
 import { isPostgresEnabled, PostgresStore } from "../axon/postgres-store";
 import { summarizeAndSaveSession } from "../evolve/session-summarizer";
 import { extractAndSaveProfiles } from "../evolve/profile-extractor";
+import { extractAndSaveProcedures, shouldAutoExtract } from "../evolve/procedure-extractor";
 import { readFlash } from "../flash/store";
 import { addDeprecated, removeDeprecated, loadDeprecated } from "../system/deprecated";
 
@@ -583,8 +584,10 @@ export async function runFlashFlush(sessionId: string): Promise<number> {
       .filter((e) => e.significance_score >= 0.5)
       .map((e) => `${e.tool_name}: ${e.tool_input_preview.slice(0, 80)}`);
 
-    // Fire both in parallel, catch individually so one failure doesn't block the other
-    await Promise.allSettled([
+    const recentConcepts = concepts.map((c) => ({ ...c, meta: {} }));
+
+    // Fire all in parallel, catch individually so one failure doesn't block the others
+    const tasks: Promise<unknown>[] = [
       summarizeAndSaveSession(
         { sessionId, agentId, concepts, events: eventLabels },
         store,
@@ -592,12 +595,26 @@ export async function runFlashFlush(sessionId: string): Promise<number> {
         process.stderr.write(`[session-end] summarize error: ${err}\n`)
       ),
       extractAndSaveProfiles(
-        { agentId, recentConcepts: concepts.map((c) => ({ ...c, meta: {} })) },
+        { agentId, recentConcepts },
         store,
       ).catch((err) =>
         process.stderr.write(`[session-end] profile error: ${err}\n`)
       ),
-    ]);
+    ];
+
+    // Stage 6A: auto-extract procedures when session looks multi-step
+    if (shouldAutoExtract(events)) {
+      tasks.push(
+        extractAndSaveProcedures(
+          { agentId, recentConcepts },
+          store,
+        ).catch((err) =>
+          process.stderr.write(`[session-end] procedure error: ${err}\n`)
+        ),
+      );
+    }
+
+    await Promise.allSettled(tasks);
   }
 
   return count;

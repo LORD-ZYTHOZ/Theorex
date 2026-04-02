@@ -26,6 +26,8 @@ import { extractAndSaveProfiles } from "../evolve/profile-extractor";
 import type { ProfileExtractionInput } from "../evolve/profile-extractor";
 import { summarizeAndSaveSession } from "../evolve/session-summarizer";
 import type { SessionSummaryInput } from "../evolve/session-summarizer";
+import { extractAndSaveProcedures, refineProcedure } from "../evolve/procedure-extractor";
+import type { ProcedureExtractionInput } from "../evolve/procedure-extractor";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -407,6 +409,54 @@ function handleToolsList(id: string | number | null): Response {
         required: ["sessionId", "agentId", "concepts"],
       },
     },
+    {
+      name: "extract_procedure",
+      description: "Extract step-by-step procedures from session context using LLM. Stores as concepts with memory_type=procedure.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          agentId: { type: "string" },
+          recentConcepts: {
+            type: "array",
+            items: {
+              type: "object",
+              properties: {
+                label: { type: "string" },
+                memory_type: { type: "string" },
+                meta: { type: "object" },
+              },
+            },
+          },
+          sessionNote: { type: "string", description: "Optional free-text summary of what happened" },
+        },
+        required: ["agentId", "recentConcepts"],
+      },
+    },
+    {
+      name: "retrieve_procedure",
+      description: "Retrieve saved procedures by name or list all procedures for an agent.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          agent_id: { type: "string", description: "Agent ID (default: main)" },
+          name: { type: "string", description: "Procedure name to retrieve. Omit to list all." },
+          limit: { type: "number", description: "Max procedures to return (default: 50)" },
+        },
+      },
+    },
+    {
+      name: "refine_procedure",
+      description: "Refine an existing procedure based on outcome feedback. Compares feedback to current steps and saves improved version.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          name: { type: "string", description: "Procedure name to refine" },
+          feedback: { type: "string", description: "Outcome feedback — what worked, what didn't, what to change" },
+          agent_id: { type: "string", description: "Agent ID (default: main)" },
+        },
+        required: ["name", "feedback"],
+      },
+    },
     deliberateToolDef(),
     deliberationHistoryToolDef(),
   ];
@@ -443,6 +493,12 @@ async function handleToolCall(
       return await callExtractProfile(id, args);
     case "summarize_session":
       return await callSummarizeSession(id, args);
+    case "extract_procedure":
+      return await callExtractProcedure(id, args);
+    case "retrieve_procedure":
+      return await callRetrieveProcedure(id, args);
+    case "refine_procedure":
+      return await callRefineProcedure(id, args);
     case "deliberate":
       return makeResult(id, await handleDeliberateTool(args));
     case "deliberation_history":
@@ -857,6 +913,86 @@ async function callSummarizeSession(
     return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result) }] });
   } catch (err) {
     return makeError(id, -32603, `Session summarization failed: ${String(err)}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callExtractProcedure(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const agentId = typeof args.agentId === "string" ? args.agentId : "";
+  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+
+  const rawConcepts = Array.isArray(args.recentConcepts) ? args.recentConcepts : [];
+  const recentConcepts = rawConcepts.map((c) => {
+    const obj = (typeof c === "object" && c !== null ? c : {}) as Record<string, unknown>;
+    return {
+      label: typeof obj.label === "string" ? obj.label : "",
+      memory_type: typeof obj.memory_type === "string" ? obj.memory_type : "fact",
+      meta: (typeof obj.meta === "object" && obj.meta !== null ? obj.meta : {}) as Record<string, unknown>,
+    };
+  });
+  const sessionNote = typeof args.sessionNote === "string" ? args.sessionNote : undefined;
+
+  const input: ProcedureExtractionInput = { agentId, recentConcepts, sessionNote };
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const procedures = await extractAndSaveProcedures(input, pgStore);
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ procedures }) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Procedure extraction failed: ${String(err)}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callRetrieveProcedure(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const agentId = typeof args.agent_id === "string" ? args.agent_id : "main";
+  const name = typeof args.name === "string" ? args.name : undefined;
+  const limit = typeof args.limit === "number" ? args.limit : 50;
+
+  const pgStore = new PostgresStore(agentId);
+  try {
+    if (name) {
+      const procedure = await pgStore.getProcedure(name);
+      if (!procedure) {
+        return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ error: "Procedure not found", name }) }] });
+      }
+      return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ procedure }) }] });
+    }
+    const procedures = await pgStore.getAllProcedures(limit);
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ procedures }) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Procedure retrieval failed: ${String(err)}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callRefineProcedure(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const name = typeof args.name === "string" ? args.name : "";
+  const feedback = typeof args.feedback === "string" ? args.feedback : "";
+  if (!name) return makeError(id, -32602, "Missing required argument: name");
+  if (!feedback) return makeError(id, -32602, "Missing required argument: feedback");
+
+  const agentId = typeof args.agent_id === "string" ? args.agent_id : "main";
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const refined = await refineProcedure(name, feedback, pgStore);
+    if (!refined) {
+      return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ error: "Procedure not found or refinement failed", name }) }] });
+    }
+    return makeResult(id, { content: [{ type: "text", text: JSON.stringify({ refined }) }] });
+  } catch (err) {
+    return makeError(id, -32603, `Procedure refinement failed: ${String(err)}`);
   } finally {
     await pgStore.close();
   }

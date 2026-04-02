@@ -372,6 +372,78 @@ export class PostgresStore {
   }
 
   // ---------------------------------------------------------------------------
+  // Procedures (Stage 6A)
+  // ---------------------------------------------------------------------------
+
+  /**
+   * Save a procedure as a concept with memory_type = 'procedure'.
+   * Steps, conditions, and tools are stored in meta JSONB.
+   */
+  async saveProcedure(
+    name: string,
+    steps: string[],
+    conditions?: string,
+    tools?: string[],
+  ): Promise<string> {
+    const sql = getDb();
+    const meta: Record<string, unknown> = { steps };
+    if (conditions !== undefined) meta.conditions = conditions;
+    if (tools !== undefined) meta.tools = tools;
+    const body = steps.join("\n");
+
+    const rows = await sql`
+      INSERT INTO concepts (label, body, memory_type, agent_id, meta)
+      VALUES (
+        ${name},
+        ${body},
+        'procedure'::memory_type,
+        ${this.agentId},
+        ${JSON.stringify(meta)}
+      )
+      ON CONFLICT (label, agent_id) DO UPDATE SET
+        body = EXCLUDED.body,
+        meta = EXCLUDED.meta,
+        updated_at = now()
+      RETURNING id
+    `;
+
+    const id = rows[0].id as string;
+    this._autoEmbed(id, name);
+    return id;
+  }
+
+  /**
+   * Retrieve a single procedure by name for this agent.
+   */
+  async getProcedure(name: string): Promise<ProcedureRecord | null> {
+    const sql = getDb();
+    const rows = await sql`
+      SELECT label, meta FROM concepts
+      WHERE label = ${name}
+        AND memory_type = 'procedure'::memory_type
+        AND agent_id = ${this.agentId}
+      LIMIT 1
+    `;
+    if (rows.length === 0) return null;
+    return mapRowToProcedure(rows[0]);
+  }
+
+  /**
+   * Retrieve all procedures for this agent.
+   */
+  async getAllProcedures(limit = 50): Promise<ProcedureRecord[]> {
+    const sql = getDb();
+    const rows = await sql`
+      SELECT label, meta FROM concepts
+      WHERE memory_type = 'procedure'::memory_type
+        AND agent_id = ${this.agentId}
+      ORDER BY updated_at DESC
+      LIMIT ${limit}
+    `;
+    return rows.map(mapRowToProcedure);
+  }
+
+  // ---------------------------------------------------------------------------
 
   /**
    * Fire-and-forget: generate embedding and store it if not already present.
@@ -394,6 +466,23 @@ export class PostgresStore {
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
+
+export interface ProcedureRecord {
+  name: string;
+  steps: string[];
+  conditions?: string;
+  tools?: string[];
+}
+
+function mapRowToProcedure(row: Record<string, unknown>): ProcedureRecord {
+  const meta = (typeof row.meta === "object" && row.meta !== null ? row.meta : {}) as Record<string, unknown>;
+  return {
+    name: row.label as string,
+    steps: Array.isArray(meta.steps) ? meta.steps as string[] : [],
+    conditions: typeof meta.conditions === "string" ? meta.conditions : undefined,
+    tools: Array.isArray(meta.tools) ? meta.tools as string[] : undefined,
+  };
+}
 
 function classifyMemoryType(surface: string, observationType: string): string {
   const s = surface.toLowerCase();

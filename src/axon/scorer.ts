@@ -5,7 +5,10 @@
 import type { Config } from "../config";
 
 /** Subset of Config needed by scoring functions. */
-export type ScoringConfig = Pick<Config, "halfLifeDays" | "activeThreshold" | "mildThreshold">;
+export type ScoringConfig = Pick<Config,
+  "halfLifeDays" | "activeThreshold" | "mildThreshold" |
+  "scorerWeightRecency" | "scorerWeightFrequency" | "scorerWeightCoOccurrence"
+>;
 
 /**
  * Exponential decay recency score.
@@ -57,7 +60,10 @@ export function compositeScore(
   const r = recencyScore(lastSeen, nowMs, config.halfLifeDays);
   const f = frequencyScore(frequencyCount);
   const c = coOccurrenceScore(neighborStrengths);
-  return 0.40 * r + 0.35 * f + 0.25 * c;
+  const wR = config.scorerWeightRecency;
+  const wF = config.scorerWeightFrequency;
+  const wC = config.scorerWeightCoOccurrence;
+  return wR * r + wF * f + wC * c;
 }
 
 /**

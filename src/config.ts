@@ -72,6 +72,10 @@ export interface Config {
   singularityTradesPath: string;       // default: "data/singularity/latent_trades.jsonl"
   divergentDir: string;                // default: "data/divergent"
   horizonDir: string;                  // default: "data/horizon"
+  // Stage 6C: Scorer weight tuning (must sum to 1.0)
+  scorerWeightRecency: number;         // default: 0.40
+  scorerWeightFrequency: number;       // default: 0.35
+  scorerWeightCoOccurrence: number;    // default: 0.25
 }
 
 export const DEFAULT_CONFIG: Config = {
@@ -143,6 +147,10 @@ export const DEFAULT_CONFIG: Config = {
   singularityTradesPath: "data/singularity/latent_trades.jsonl",
   divergentDir: "data/divergent",
   horizonDir: "data/horizon",
+  // Stage 6C: Scorer weights
+  scorerWeightRecency: 0.40,
+  scorerWeightFrequency: 0.35,
+  scorerWeightCoOccurrence: 0.25,
 };
 
 /**
@@ -180,5 +188,23 @@ export function validateConfig(cfg: Config): Config {
     ragBootstrapMinSimilarity:Math.min(1, Math.max(0, cfg.ragBootstrapMinSimilarity)),
     evolveWindowDays:         Math.max(1, cfg.evolveWindowDays),
     videoFrameIntervalSec:    Math.max(1, cfg.videoFrameIntervalSec),
+    // Stage 6C: Scorer weights — clamp non-negative, normalize to sum=1.0
+    ...normalizeScorerWeights(cfg),
+  };
+}
+
+function normalizeScorerWeights(cfg: Config): Pick<Config, "scorerWeightRecency" | "scorerWeightFrequency" | "scorerWeightCoOccurrence"> {
+  const r = Math.max(0, cfg.scorerWeightRecency);
+  const f = Math.max(0, cfg.scorerWeightFrequency);
+  const c = Math.max(0, cfg.scorerWeightCoOccurrence);
+  const sum = r + f + c;
+  if (sum === 0) {
+    // Fall back to defaults if all zero
+    return { scorerWeightRecency: 0.40, scorerWeightFrequency: 0.35, scorerWeightCoOccurrence: 0.25 };
+  }
+  return {
+    scorerWeightRecency: r / sum,
+    scorerWeightFrequency: f / sum,
+    scorerWeightCoOccurrence: c / sum,
   };
 }

@@ -14,6 +14,8 @@ import { loadConfig, type Config } from "../config";
 import { loadProfessionPack, formatPackContext } from "../profession/loader";
 import { loadPersonalLayer, formatPersonalContext } from "../profession/personal";
 import { writeToAgent } from "../family/write";
+import { readActiveLessons } from "../evolve/lesson";
+import { buildSessionBrief, formatSessionBrief } from "../evolve/session-brief";
 
 const MAX_ACTIVE_NODES = 10;
 const MAX_RECENT_ENTRIES = 5;
@@ -155,6 +157,22 @@ export async function injectContext(
     }
   } catch {
     // No moments data — no output, never throw
+  }
+
+  // 4. Session brief — active lessons from the learning loop (Stage 6C)
+  try {
+    const domain = config?.deploymentMode === "business" ? "trading" : "coding";
+    const lessons = await readActiveLessons(undefined, { domain });
+    if (lessons.length > 0) {
+      const brief = buildSessionBrief(lessons, { domain, maxLessons: 5 });
+      const briefText = formatSessionBrief(brief);
+      if (brief.lessons.length > 0) {
+        lines.push("");
+        lines.push(briefText);
+      }
+    }
+  } catch {
+    // Lesson load failure is non-fatal
   }
 
   return lines.join("\n");

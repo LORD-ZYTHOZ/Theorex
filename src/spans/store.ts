@@ -52,10 +52,17 @@ export class SpanStore {
           RETURNING span_id
         `,
     );
+    if (!rows[0]?.span_id) {
+      throw new Error("emitSpan: INSERT returned no span_id");
+    }
     return rows[0].span_id;
   }
 
   async getSpans(query: SpanQuery): Promise<AgentSpan[]> {
+    if (query.resolved_only && query.unoptimized_only) {
+      throw new Error("getSpans: resolved_only and unoptimized_only are mutually exclusive");
+    }
+
     const limit = query.limit ?? 50;
     const since = query.since ?? new Date(0).toISOString();
 

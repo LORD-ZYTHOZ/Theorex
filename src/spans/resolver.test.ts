@@ -16,7 +16,7 @@ describe("computeSingularityReward", () => {
     expect(r).toBeLessThan(0);
   });
 
-  test("TIMEOUT → small negative reward", () => {
+  test("TIMEOUT with near-zero pnl → near-zero reward", () => {
     const r = computeSingularityReward({ outcome: "TIMEOUT", pnl: 0.1, r: 0.01 });
     expect(r).toBeCloseTo(0, 1);
   });

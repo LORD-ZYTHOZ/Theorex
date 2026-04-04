@@ -78,7 +78,10 @@ export async function resolveOpenSpans(): Promise<{ resolved: number; skipped: n
     if (!direction || !priceAtSignal) { skipped++; continue; }
 
     const priceAtResolution = (span.metadata as { price_at_resolution?: number }).price_at_resolution;
-    if (!priceAtResolution) { skipped++; continue; }
+    if (!priceAtResolution) {
+      console.warn(`[resolver] meridian span ${span.span_id} missing price_at_resolution — skipping`);
+      skipped++; continue;
+    }
 
     const signalCorrect = computeSignalReward(direction, priceAtSignal, priceAtResolution);
     const reward = normalizeReward({ tradeReward: 0, signalCorrect, alpha: 0.0, beta: 1.0 });
@@ -97,7 +100,10 @@ export async function resolveOpenSpans(): Promise<{ resolved: number; skipped: n
     const priceAtSignal = (span.metadata as { price?: number }).price;
     const priceAtResolution = (span.metadata as { price_at_resolution?: number }).price_at_resolution;
 
-    if (!direction || !priceAtSignal || !priceAtResolution) { skipped++; continue; }
+    if (!direction || !priceAtSignal || !priceAtResolution) {
+      if (!priceAtResolution) console.warn(`[resolver] augur span ${span.span_id} missing price_at_resolution — skipping`);
+      skipped++; continue;
+    }
 
     const signalCorrect = computeSignalReward(direction, priceAtSignal, priceAtResolution);
     const reward = normalizeReward({ tradeReward: 0, signalCorrect, alpha: 0.0, beta: 1.0 });

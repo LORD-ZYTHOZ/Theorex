@@ -36,7 +36,8 @@ export async function handleSpanTool(
   name: string,
   args: Record<string, unknown>,
 ): Promise<Response> {
-  switch (name) {
+  try {
+    switch (name) {
     case "emit-span": {
       const agent_id = typeof args.agent_id === "string" ? args.agent_id : null;
       const task_type = typeof args.task_type === "string" ? args.task_type : "unknown";
@@ -123,10 +124,13 @@ export async function handleSpanTool(
       const timestamp = new Date().toISOString();
       const events = processText(text, 1.0, "concept", timestamp);
       const pgStore = new PostgresStore(agent_id);
-      for (const event of events) {
-        await pgStore.mergeNode(event, "optimizer");
+      try {
+        for (const event of events) {
+          await pgStore.mergeNode(event, "optimizer");
+        }
+      } finally {
+        await pgStore.close();
       }
-      await pgStore.close();
 
       return ok({ ok: true, agent_id });
     }
@@ -137,6 +141,14 @@ export async function handleSpanTool(
         id: null,
         error: { code: -32601, message: `Unknown span tool: ${name}` },
       });
+    }
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    return Response.json({
+      jsonrpc: "2.0",
+      id: null,
+      error: { code: -32603, message: `Internal error: ${message}` },
+    });
   }
 }
 

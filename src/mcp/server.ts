@@ -27,6 +27,11 @@ import type { SessionSummaryInput } from "../evolve/session-summarizer";
 import { extractAndSaveProcedures, refineProcedure } from "../evolve/procedure-extractor";
 import type { ProcedureExtractionInput } from "../evolve/procedure-extractor";
 import { runMetaReview } from "../evolve/meta-review";
+import { handleSpanTool, spanToolDefs } from "./spans";
+import { SpanStore } from "../spans/store";
+
+// Module-level singleton for tool-as-hook span emission
+const _spanStore = new SpanStore();
 
 // ---------------------------------------------------------------------------
 // Config
@@ -448,6 +453,7 @@ function handleToolsList(id: string | number | null): Response {
     },
     deliberateToolDef(),
     deliberationHistoryToolDef(),
+    ...spanToolDefs,
   ];
   return makeResult(id, { tools });
 }
@@ -494,6 +500,12 @@ async function handleToolCall(
       return makeResult(id, await handleDeliberateTool(args));
     case "deliberation_history":
       return makeResult(id, await handleDeliberationHistoryTool(args));
+    case "emit-span":
+    case "score-outcome":
+    case "get-spans":
+    case "get-doom-loops":
+    case "write-optimizer-rationale":
+      return await handleSpanTool(name, args);
     default:
       return makeError(id, -32602, `Unknown tool: ${name}`);
   }
@@ -574,6 +586,7 @@ async function callRetrieveFast(
   typeFilter: string | undefined,
   topK: number,
 ): Promise<Response> {
+  const start = Date.now();
   const embedding = await embedText(query);
   const results = await pgStore.search(query, embedding ?? undefined, {
     agentFilter: agentId,
@@ -588,6 +601,15 @@ async function callRetrieveFast(
     score: r.score,
     meta: r.meta,
   }));
+  // Tool-as-hook: fire-and-forget span for agent optimizer
+  void _spanStore.emitSpan({
+    agent_id: agentId,
+    task_type: "retrieve",
+    prompt_sent: query,
+    output_recv: JSON.stringify(matches).slice(0, 500),
+    latency_ms: Date.now() - start,
+    tools_called: ["theorex.retrieve"],
+  }).catch(() => {}); // never block the response
   return makeResult(id, { content: [{ type: "text", text: JSON.stringify(matches, null, 2) }] });
 }
 

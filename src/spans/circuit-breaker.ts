@@ -29,7 +29,7 @@ export function levenshteinSimilarity(a: string, b: string): number {
 
 /**
  * Detect doom loop from the last N outputs for an agent+task.
- * Loop = last 3 outputs all have pairwise similarity > threshold (default 0.9).
+ * Loop = last 3 outputs all have pairwise avg similarity >= threshold (default 0.9).
  */
 export function isDoomLoop(
   recentOutputs: string[],

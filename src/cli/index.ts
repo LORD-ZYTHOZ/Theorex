@@ -1281,6 +1281,14 @@ if (import.meta.main) {
       break;
     }
 
+    case "resolve-outcomes": {
+      console.log("Resolving open outcome spans...");
+      const { resolveOpenSpans } = await import("../spans/resolver");
+      const result = await resolveOpenSpans();
+      console.log(`Resolved: ${result.resolved} | Skipped: ${result.skipped}`);
+      break;
+    }
+
     // Phase 13: Session brief — output top lessons for a given agent/domain
     case "session-brief": {
       // Usage: theorex session-brief [--agent <id>] [--domain <name>] [--max <n>]

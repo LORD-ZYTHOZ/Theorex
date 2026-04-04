@@ -47,4 +47,15 @@ SHADOW_OUTCOMES="$HOME/.openclaw/workspace/Project_Singularity/logs/shadow_outco
 echo "--- Running evolve-review (Phase 13 learning loop)..."
 "$BUN" run "$CLI" evolve-review --agent all 2>&1 | tail -5
 
+echo "--- Resolving delayed outcome scores..."
+"$BUN" run "$CLI" resolve-outcomes 2>&1 | tail -3
+
+echo "--- Running Agent Optimizer (qwen-sage)..."
+# Task qwen-sage to read resolved spans, call godmode-skills tools, optimize agents
+if command -v oc &>/dev/null; then
+  oc task qwen-sage "Optimizer cycle: read all resolved agent spans from the last 24h via theorex.get-spans, check for doom loops via theorex.get-doom-loops, identify patterns per agent, call godmode-skills MCP tools (singularity_autotune, divergence_autotune, *_prompt_harden, *_stm) to apply optimizations, then write rationale via theorex.write-optimizer-rationale for each agent you optimize. Only optimize agents with 5+ resolved spans." 2>&1 | tail -10
+else
+  echo "  [WARN] oc CLI not found — skipping qwen-sage optimizer cycle"
+fi
+
 echo "=== Done ==="

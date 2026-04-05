@@ -504,6 +504,37 @@ export class PostgresStore {
     }).catch(() => {});
   }
 
+  /**
+   * Get all concepts for this agent, ordered by importance_weight descending.
+   */
+  async getAllConcepts(limit = 5000): Promise<PgConceptRow[]> {
+    return this.withAgentContext((tx) => tx`
+      SELECT id, label, body, memory_type, agent_id, meta, embedding, created_at, updated_at
+      FROM concepts
+      WHERE agent_id = ${this.agentId}
+      ORDER BY (meta->>'importance_weight')::float DESC NULLS LAST
+      LIMIT ${limit}
+    `) as Promise<PgConceptRow[]>;
+  }
+
+  /**
+   * Look up a single concept by label (case-insensitive) or meta.concept_id.
+   * Returns null if not found.
+   */
+  async lookupConcept(labelOrId: string): Promise<PgConceptRow | null> {
+    const rows = await this.withAgentContext((tx) => tx`
+      SELECT id, label, body, memory_type, agent_id, meta, embedding, created_at, updated_at
+      FROM concepts
+      WHERE agent_id = ${this.agentId}
+        AND (
+          lower(label) = lower(${labelOrId})
+          OR meta->>'concept_id' = ${labelOrId}
+        )
+      LIMIT 1
+    `) as PgConceptRow[];
+    return rows[0] ?? null;
+  }
+
   async close(): Promise<void> {
     if (_sql) {
       await _sql.end();

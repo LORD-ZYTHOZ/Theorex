@@ -36,6 +36,15 @@ module.exports = {
       error_file: `${LOG_DIR}/theorex-scan-err.log`,
     },
     {
+      name: "theorex-mcp",
+      script: BUN,
+      args: `run ${CLI} mcp-start --port 18800`,
+      cwd: "/Users/eoh/theorex",
+      env: { THEOREX_STORAGE: "postgres", THEOREX_PG_HOST: "192.168.50.28" },
+      out_file: `${LOG_DIR}/theorex-mcp-out.log`,
+      error_file: `${LOG_DIR}/theorex-mcp-err.log`,
+    },
+    {
       // Hourly idle promote — promotes agents that went quiet in the last hour
       name: "theorex-idle-flush",
       script: "/Users/eoh/theorex/theorex-idle-flush.sh",

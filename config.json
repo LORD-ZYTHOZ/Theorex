@@ -1,8 +1,8 @@
 {
-  "lmStudioUrl": "http://localhost:1234",
-  "synthEndpoint": "http://localhost:8082",
+  "lmStudioUrl": "http://localhost:11434",
+  "synthEndpoint": "http://localhost:11434",
   "lmStudioTimeoutMs": 30000,
-  "lmStudioEmbedModel": "text-embedding-nomic-embed-text-v1.5",
+  "lmStudioEmbedModel": "nomic-embed-text",
   "ragOnnxModel": "",
   "agentAxonDir": "/Users/eoh/.openclaw/agents",
   "sharedAxonPath": "/Users/eoh/.openclaw/workspace/theorex/shared-axon.json",

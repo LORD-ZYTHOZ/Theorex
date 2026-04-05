@@ -10,7 +10,7 @@ LOG="$BACKUP_DIR/backup.log"
 RETENTION_DAYS=7
 DB_NAME="theorex"
 DB_USER="claw"
-DB_HOST="localhost"
+DB_HOST="${THEOREX_PG_HOST:-100.95.91.32}"
 
 mkdir -p "$BACKUP_DIR"
 

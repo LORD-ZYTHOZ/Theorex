@@ -5,25 +5,56 @@
  * Stage 2 (accurate): Cosine similarity rerank on full 768d embeddings for top candidates.
  */
 
-const { NativeQuantizer: NativeQuantizerClass } = require("../../packages/turbo-quant-native/index.js");
+// ── Configuration ─────────────────────────────────────────────────────────────
+const COMPRESS_DIM   = 768;  // nomic-embed-text output dimension
+const COMPRESS_BITS  = 8;    // bits per component
+const COMPRESS_PROJ  = 192;  // projection count = dim/4
+const COMPRESS_SEED  = 42n;  // must match backfill seed
+const MIN_COMPRESSED_BYTES = 64;  // filter out zero-sentinel buffers
 
-// ---------------------------------------------------------------------------
-// Singleton quantizer (one per Bun worker — stateless compute engine)
-// ---------------------------------------------------------------------------
+// ── Native module loader (promise-based singleton — concurrency-safe) ─────────────
+// Use import.meta.url so Bun resolves relative to SOURCE FILE directory,
+// not the process CWD. Avoids stale cache / wrong-cwd issues.
+import { dirname } from "node:path";
+import { fileURLToPath } from "url";
+const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
+const NATIVE_MODULE_PATH = `${MODULE_DIR}/../../packages/turbo-quant-native/index.js`;
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-type NativeQuantizerType = any;
+let _NativeQuantizerClass: any = null;
+let _NativeQuantizerLoad: Promise<any> | null = null;
 
-let _quantizer: NativeQuantizerType | null = null;
+async function loadNativeQuantizerClass(): Promise<any> {
+  if (_NativeQuantizerClass) return _NativeQuantizerClass;
+  if (!_NativeQuantizerLoad) {
+    _NativeQuantizerLoad = (async () => {
+      try {
+        const m = require(NATIVE_MODULE_PATH);
+        _NativeQuantizerClass = m.NativeQuantizer ?? m.default ?? m;
+      } catch (e) {
+        console.error("[compressed-search] Failed to load turboquant-native:", e);
+        _NativeQuantizerClass = null;
+      }
+      return _NativeQuantizerClass;
+    })();
+  }
+  return _NativeQuantizerLoad;
+}
 
-function getQuantizer(): NativeQuantizerType {
-  if (!_quantizer) {
-    _quantizer = new NativeQuantizerClass(
-      768,  // nomic-embed-text output dimension
-      8,    // bits: 8 = recommended for semantic search recall@10
-      192,  // projections: dim/4 = 192
-      42n,  // seed: must match the seed used in backfill
-    );
+// ── Quantizer singleton ─────────────────────────────────────────────────────────
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let _quantizer: any = null;
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+async function getQuantizer(): Promise<any> {
+  if (_quantizer) return _quantizer;
+  const Cls = await loadNativeQuantizerClass();
+  if (!Cls) throw new Error("TurboQuant native module unavailable");
+  _quantizer = new Cls(COMPRESS_DIM, COMPRESS_BITS, COMPRESS_PROJ, COMPRESS_SEED);
+  if (!_quantizer || typeof _quantizer.innerProductEstimate !== "function") {
+    console.error("[compressed-search] TurboQuant instance invalid:", _quantizer);
+    _quantizer = null;
+    throw new Error("TurboQuant native module produced invalid instance");
   }
   return _quantizer;
 }
@@ -134,13 +165,14 @@ async function innerProductPreFilter(
   preFilterN: number,
 ): Promise<ScoredCandidate[]> {
   const sql = getDb();
-  const quantizer = getQuantizer();
+  const quantizer = await getQuantizer();
 
   const rows: CompressedRow[] = agentId
     ? await sql`
         SELECT id, label, memory_type, agent_id, meta, compressed_vector
         FROM concepts
         WHERE compressed_vector IS NOT NULL
+          AND octet_length(compressed_vector) >= 64
           AND agent_id = ${agentId}
         ORDER BY created_at DESC
         LIMIT 5000
@@ -149,6 +181,7 @@ async function innerProductPreFilter(
         SELECT id, label, memory_type, agent_id, meta, compressed_vector
         FROM concepts
         WHERE compressed_vector IS NOT NULL
+          AND octet_length(compressed_vector) >= 64
         ORDER BY created_at DESC
         LIMIT 5000
       `;

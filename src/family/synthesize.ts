@@ -9,8 +9,8 @@
 // These get written to the axon via writeToAgent, so the concept web stores
 // "anchor blindness causes overconfidence at key levels" not just "anchor".
 //
-// LLM endpoint: configurable via config.lmStudioUrl (default: http://localhost:8082)
-// Qwen3-32B-4bit is the default grunt worker on both m1 and m4.
+// LLM endpoint: configurable via config.lmStudioUrl (default: http://localhost:11434)
+// Gemma4-31B via Ollama is the default local worker.
 
 import { writeToAgent, batchWriteToAgent } from "./write";
 import type { Config } from "../config";
@@ -66,7 +66,7 @@ async function extractLessons(
       headers: { "Content-Type": "application/json" },
       signal: controller.signal,
       body: JSON.stringify({
-        model: "local",   // mlx-server ignores model field but some endpoints require it
+        model: "gemma4:31b",
         messages: [
           { role: "system", content: SYSTEM_PROMPT },
           { role: "user", content: text.slice(0, 3000) }, // cap input to avoid token blowout

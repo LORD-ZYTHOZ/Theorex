@@ -55,6 +55,54 @@ export async function runScan(axonPath: string, config: Config): Promise<void> {
 }
 
 export async function runStatus(axonPath: string, config: Config): Promise<void> {
+  if (isPostgresEnabled() && process.env.THEOREX_AGENT_ID) {
+    const agentId = process.env.THEOREX_AGENT_ID;
+    const pg = new PostgresStore(agentId);
+    const rows = await pg.getAllConcepts();
+    if (rows.length === 0) {
+      console.log("No concepts in Postgres. Run: theorex scan");
+      return;
+    }
+
+    const COL_FORM = 28;
+    const COL_TYPE = 14;
+    const COL_WEIGHT = 10;
+    const COL_FREQ = 8;
+    const COL_DATE = 12;
+
+    const pad = (s: string, n: number) => s.padEnd(n).slice(0, n);
+    const header =
+      pad("surface_form", COL_FORM) +
+      pad("type", COL_TYPE) +
+      pad("weight", COL_WEIGHT) +
+      pad("freq", COL_FREQ) +
+      pad("updated", COL_DATE);
+    const divider = "-".repeat(header.length);
+
+    console.log(`Concept Web (Postgres) — ${rows.length} concepts\n`);
+    console.log(header);
+    console.log(divider);
+
+    for (const row of rows) {
+      const meta = (row.meta ?? {}) as Record<string, unknown>;
+      const w = Number(meta.importance_weight);
+      const weight = !isNaN(w) && isFinite(w) ? w.toFixed(2) : "—";
+      const freq = typeof meta.frequency_count === "number" ? String(meta.frequency_count) : "—";
+      const rawDate = row.updated_at;
+      const date = rawDate instanceof Date
+        ? rawDate.toISOString().slice(0, 10)
+        : String(rawDate ?? "—").slice(0, 10);
+      console.log(
+        pad(row.label, COL_FORM) +
+        pad(row.memory_type, COL_TYPE) +
+        pad(weight, COL_WEIGHT) +
+        pad(freq, COL_FREQ) +
+        pad(date, COL_DATE),
+      );
+    }
+    return;
+  }
+
   const store = await AxonStore.load(axonPath);
 
   if (store.graph.order === 0) {
@@ -71,7 +119,11 @@ export async function runStatus(axonPath: string, config: Config): Promise<void>
   const sleepingNodes = nodes.filter((n) => n.attrs.relevance_tier === "SLEEPING");
   const liveNodes = nodes.filter((n) => n.attrs.relevance_tier !== "SLEEPING");
 
-  liveNodes.sort((a, b) => b.attrs.importance_weight - a.attrs.importance_weight);
+  liveNodes.sort((a, b) => {
+    const wa = Number(a.attrs.importance_weight ?? 0);
+    const wb = Number(b.attrs.importance_weight ?? 0);
+    return wb - wa;
+  });
 
   const sleepingSuffix = sleepingNodes.length > 0
     ? ` (${sleepingNodes.length} sleeping in cold storage)`
@@ -120,7 +172,7 @@ export async function runStatus(axonPath: string, config: Config): Promise<void>
       pad(attrs.surface_form, COL_FORM) +
       pad(displayTier, COL_REL) +
       pad(attrs.sentiment_tier, COL_SNT) +
-      pad(attrs.importance_weight.toFixed(2), COL_WEIGHT) +
+      pad(typeof attrs.importance_weight === "number" ? attrs.importance_weight.toFixed(2) : "—", COL_WEIGHT) +
       pad(String(attrs.frequency_count), COL_FREQ) +
       pad(dateOnly, COL_SEEN);
     console.log(row);
@@ -172,6 +224,19 @@ export async function runStatus(axonPath: string, config: Config): Promise<void>
 }
 
 export async function runRef(axonPath: string, keyword: string, config: Config): Promise<void> {
+  if (isPostgresEnabled() && process.env.THEOREX_AGENT_ID) {
+    const agentId = process.env.THEOREX_AGENT_ID;
+    const pg = new PostgresStore(agentId);
+    const row = await pg.lookupConcept(keyword);
+    if (!row) {
+      console.error(`Concept not found: ${keyword}. Use theorex scan to ingest concepts first.`);
+      process.exit(1);
+    }
+    await pg.upsertConcept(row.label, row.memory_type);
+    console.log(`Referenced: ${row.label} (type: ${row.memory_type})`);
+    return;
+  }
+
   const store = await AxonStore.load(axonPath);
 
   const nodeKey = store.graph.nodes().find((key) => {
@@ -269,44 +334,60 @@ export async function runSearch(query: string, config: Config): Promise<void> {
     // moment search failure is non-fatal
   }
 
-  // Phase 4.5 + 9.5: Axon long-term concept search (text + HNSW semantic)
-  try {
-    const axon = await AxonStore.load(config.axonPath ?? "data/axon.json");
-    const nodes = axon.graph
-      .nodes()
-      .map((k) => axon.graph.getNodeAttributes(k));
+  // Phase 4.5 + 9.5: long-term concept search (Postgres or Axon file)
+  if (isPostgresEnabled() && process.env.THEOREX_AGENT_ID) {
+    try {
+      const agentId = process.env.THEOREX_AGENT_ID;
+      const pg = new PostgresStore(agentId);
+      const pgResults = await pg.search(query, undefined, { limit: 10 });
+      if (pgResults.length > 0) {
+        console.log("\n--- Long-term Axon (Postgres) ---");
+        for (const r of pgResults) {
+          console.log(`[${r.memory_type.toUpperCase()}] ${r.label} (score: ${r.score.toFixed(3)})`);
+        }
+      }
+    } catch {
+      // pg search failure is non-fatal
+    }
+  } else {
+    try {
+      const axon = await AxonStore.load(config.axonPath ?? "data/axon.json");
+      const nodes = axon.graph
+        .nodes()
+        .map((k) => axon.graph.getNodeAttributes(k));
 
-    if (nodes.length > 0) {
-      const embStorePath = config.ragEmbeddingStorePath ?? "data/concept-embeddings.json";
-      const vectors = await loadEmbeddings(embStorePath).catch(() => new Map<string, number[]>());
+      if (nodes.length > 0) {
+        const embStorePath = config.ragEmbeddingStorePath ?? "data/concept-embeddings.json";
+        const vectors = await loadEmbeddings(embStorePath).catch(() => new Map<string, number[]>());
 
-      const textResults = textMatchAxon(query, nodes, 10);
+        const textResults = textMatchAxon(query, nodes, 10);
 
-      // Semantic results via HNSW — only if embeddings available
-      let semanticResults: Awaited<ReturnType<typeof mergeAxonResults>> = [];
-      if (vectors.size > 0) {
-        const queryVec = await embedText(query, config.lmStudioUrl, config.lmStudioEmbedModel, config.lmStudioTimeoutMs);
-        if (queryVec !== null) {
-          const hnswPath = config.hnswIndexPath ?? "data/hnsw-index.json";
-          const hnswIndex = await loadOrBuildHNSWIndex(hnswPath, vectors).catch(() => null);
-          if (hnswIndex) {
-            semanticResults = semanticSearchAxonHNSW(queryVec, nodes, vectors, hnswIndex, 10) as typeof semanticResults;
+        // Semantic results via HNSW — only if embeddings available
+        let semanticResults: Awaited<ReturnType<typeof mergeAxonResults>> = [];
+        if (vectors.size > 0) {
+          const queryVec = await embedText(query, config.lmStudioUrl, config.lmStudioEmbedModel, config.lmStudioTimeoutMs);
+          if (queryVec !== null) {
+            const hnswPath = config.hnswIndexPath ?? "data/hnsw-index.json";
+            const hnswIndex = await loadOrBuildHNSWIndex(hnswPath, vectors).catch(() => null);
+            if (hnswIndex) {
+              semanticResults = semanticSearchAxonHNSW(queryVec, nodes, vectors, hnswIndex, 10) as typeof semanticResults;
+            }
+          }
+        }
+
+        const axonResults = mergeAxonResults(textResults, semanticResults, 5);
+
+        if (axonResults.length > 0) {
+          console.log("\n--- Long-term Axon ---");
+          for (const r of axonResults) {
+            const tier = nodes.find((n) => n.concept_id === r.concept_id)?.relevance_tier ?? "?";
+            console.log(`[${tier}] ${r.surface_form} (${r.score.toFixed(3)} ${r.source})`);
           }
         }
       }
-
-      const axonResults = mergeAxonResults(textResults, semanticResults, 5);
-
-      if (axonResults.length > 0) {
-        console.log("\n--- Long-term Axon ---");
-        for (const r of axonResults) {
-          const tier = nodes.find((n) => n.concept_id === r.concept_id)?.relevance_tier ?? "?";
-          console.log(`[${tier}] ${r.surface_form} (${r.score.toFixed(3)} ${r.source})`);
-        }
-      }
+    } catch {
+      // axon search failure is non-fatal
     }
-  } catch {
-    // axon search failure is non-fatal
   }
 }
 
@@ -339,21 +420,33 @@ export async function runDrift(
   // 1. Load all audit events
   const events = await readAuditEvents(eventsPath);
 
-  // 2. Get ACTIVE concept IDs using lazy tier correction (same as runStatus — REL-03)
-  const store = await AxonStore.load(axonPath);
+  // 2. Get ACTIVE concept IDs — Postgres or file-based graph
   const activeIds = new Set<number>();
-  const nodeKeys = store.graph.nodes();
-  for (const key of nodeKeys) {
-    const attrs = store.graph.getNodeAttributes(key);
-    const neighborStrengths = store.graph
-      .neighbors(key)
-      .map((nbr) => {
-        const edgeKey = store.graph.edge(key, nbr);
-        return edgeKey ? store.graph.getEdgeAttributes(edgeKey).strength : 0;
-      });
-    const score = compositeScore(attrs.last_seen, attrs.frequency_count, neighborStrengths, nowMs, config);
-    const tier = classifyTier(score, config);
-    if (tier === "ACTIVE") activeIds.add(attrs.concept_id);
+  if (isPostgresEnabled() && process.env.THEOREX_AGENT_ID) {
+    const agentId = process.env.THEOREX_AGENT_ID;
+    const pg = new PostgresStore(agentId);
+    const rows = await pg.getAllConcepts();
+    for (const row of rows) {
+      const meta = (row.meta ?? {}) as Record<string, unknown>;
+      const w = typeof meta.importance_weight === "number" ? (meta.importance_weight as number) : 0;
+      const cid = typeof meta.concept_id === "number" ? (meta.concept_id as number) : 0;
+      if (w >= config.activeThreshold && cid > 0) activeIds.add(cid);
+    }
+  } else {
+    const store = await AxonStore.load(axonPath);
+    const nodeKeys = store.graph.nodes();
+    for (const key of nodeKeys) {
+      const attrs = store.graph.getNodeAttributes(key);
+      const neighborStrengths = store.graph
+        .neighbors(key)
+        .map((nbr) => {
+          const edgeKey = store.graph.edge(key, nbr);
+          return edgeKey ? store.graph.getEdgeAttributes(edgeKey).strength : 0;
+        });
+      const score = compositeScore(attrs.last_seen, attrs.frequency_count, neighborStrengths, nowMs, config);
+      const tier = classifyTier(score, config);
+      if (tier === "ACTIVE") activeIds.add(attrs.concept_id);
+    }
   }
 
   // 3. Get moment concept IDs (union across all moments)

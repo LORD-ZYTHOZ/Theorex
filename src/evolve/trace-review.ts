@@ -38,8 +38,8 @@ export interface ReviewerResponse {
 // Constants
 // ---------------------------------------------------------------------------
 
-const PRIMARY_LLM_URL = "http://localhost:8082/v1/chat/completions";
-const FALLBACK_LLM_URL = "http://localhost:8082/v1/chat/completions";
+const PRIMARY_LLM_URL = "http://localhost:11434/v1/chat/completions";
+const FALLBACK_LLM_URL = "http://localhost:11434/v1/chat/completions";
 const LLM_TIMEOUT_MS = 45_000;
 
 // Only review outcomes with composite score at or below this threshold.

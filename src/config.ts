@@ -11,7 +11,7 @@ export interface Config {
   // Phase 2: Short-Term Memory fields
   stmRetentionDays: number;      // default: 14
   stmGraduateDays: number;       // default: 7
-  lmStudioUrl: string;           // default: "http://localhost:8082" (Qwen3-32B)
+  lmStudioUrl: string;           // default: "http://localhost:11434" (Ollama)
   lmStudioEmbedModel: string;    // default: "nomic-embed-text-v1.5"
   lmStudioTimeoutMs: number;     // default: 3000
   // Phase 4: RAG Bootstrap
@@ -37,7 +37,7 @@ export interface Config {
   // Phase 15: Auto-Sliding Context Window
   contextSlideThreshold: number;       // default: 0.50 — used_pct >= this triggers compression
   contextSlideCooldownCalls: number;   // default: 20 — min tool calls between compressions
-  synthEndpoint: string;               // default: "http://localhost:8082" — Qwen3-32B for synthesis
+  synthEndpoint: string;               // default: "http://localhost:11434" — Gemma4-31B (Ollama) for synthesis
   // Phase 9: Memory Compression
   coldStorePath: string;               // default: "data/cold.db" — SQLite cold storage path
   compressAfterDays: number;           // default: 30 — compress LESS nodes older than this many days
@@ -87,7 +87,7 @@ export const DEFAULT_CONFIG: Config = {
   // Phase 2: Short-Term Memory defaults
   stmRetentionDays: 14,
   stmGraduateDays: 7,
-  lmStudioUrl: "http://localhost:8082",
+  lmStudioUrl: "http://localhost:11434",
   lmStudioEmbedModel: "nomic-embed-text-v1.5",
   lmStudioTimeoutMs: 15000,
   // Phase 4: RAG Bootstrap defaults
@@ -113,7 +113,7 @@ export const DEFAULT_CONFIG: Config = {
   // Phase 15: Auto-Sliding Context Window
   contextSlideThreshold: 0.50,
   contextSlideCooldownCalls: 20,
-  synthEndpoint: "http://localhost:8082",
+  synthEndpoint: "http://localhost:11434",
   // Phase 9: Memory Compression
   coldStorePath: "data/cold.db",
   compressAfterDays: 30,

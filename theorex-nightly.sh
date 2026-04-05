@@ -58,4 +58,7 @@ else
   echo "  [WARN] oc CLI not found — skipping qwen-sage optimizer cycle"
 fi
 
+echo "--- Resetting PM2 restart counters..."
+pm2 reset all 2>&1 | tail -1
+
 echo "=== Done ==="

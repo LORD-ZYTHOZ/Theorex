@@ -16,7 +16,7 @@ const loadAgentStatus = async () => {
 let loadedStore;
 
 export const AGENT_ENDPOINTS: Record<string, string> = {
-    "m4-engineer": "http://localhost:8082",
+    "m4-engineer": "http://localhost:11434",
     "claude-code-agent": undefined,
 };
 

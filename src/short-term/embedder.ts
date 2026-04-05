@@ -11,8 +11,8 @@ const EMBED_TIMEOUT_MS = 3000;
  */
 export async function embedText(
   text: string,
-  lmStudioUrl = "http://localhost:8082",
-  model = "nomic-embed-text-v1.5",
+  lmStudioUrl = "http://localhost:11434",
+  model = "nomic-embed-text",
   timeoutMs = EMBED_TIMEOUT_MS
 ): Promise<number[] | null> {
   try {
@@ -20,10 +20,7 @@ export async function embedText(
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     const response = await fetch(`${lmStudioUrl}/v1/embeddings`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": "Bearer lm-studio",
-      },
+      headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ input: [text], model }),
       signal: controller.signal,
     });

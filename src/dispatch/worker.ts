@@ -1,12 +1,12 @@
 // dispatch/worker.ts — Phase 16 Parallel Background Processing.
-// Dispatches tasks to local LLM (Qwen3 32B 4-bit) when context
+// Dispatches tasks to local LLM (Gemma4-31B via Ollama) when context
 // pressure reaches 50%. Fire-and-forget — results written to agent axon.
 //
 // Flow:
-//   1. route() picks model tier (all tiers → qwen3-32b-4bit on port 8082)
+//   1. route() picks model tier (all tiers → gemma4:31b on port 11434)
 //   2. readPowerState() + getDispatchAdvice() may downgrade large→medium on battery
 //   3. LM_INFERENCE_START emitted on EventBus
-//   4. Bun.fetch POST to LM Studio /v1/chat/completions (120s timeout — Qwen3 can spike under load)
+//   4. Bun.fetch POST to Ollama /v1/chat/completions (120s timeout)
 //   5. LM_INFERENCE_END emitted on EventBus (trace assembled automatically)
 //   6. Result written to agent axon as a 'discovery' observation
 //   7. DispatchResult returned
@@ -64,8 +64,8 @@ export interface DispatchConfig {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_DISPATCH_CONFIG: DispatchConfig = {
-  largeModelUrl: "http://localhost:8082",
-  mediumModelUrl: "http://localhost:8082",
+  largeModelUrl: "http://localhost:11434",
+  mediumModelUrl: "http://localhost:11434",
   timeoutMs: 120_000,
   contextTriggerPct: 50,
 } as const;
@@ -84,9 +84,8 @@ function resolveEndpoint(
 }
 
 /** Resolve human-readable model name for trace payloads. */
-function resolveModelName(tier: "large" | "medium" | "small"): string {
-  if (tier === "large") return "qwen3-32b";
-  return "qwen3-32b";
+function resolveModelName(_tier: "large" | "medium" | "small"): string {
+  return "gemma4:31b";
 }
 
 /** POST to LM Studio and return { text, completion_tokens, latency_ms }. */
@@ -97,12 +96,9 @@ async function callLmStudio(
   tier: "large" | "medium" | "small" = "medium",
   maxTokens: number = 1024,
 ): Promise<{ readonly text: string; readonly completion_tokens: number; readonly latency_ms: number }> {
-  // Qwen3 runs in chain-of-thought mode by default — thinking tokens exhaust the
-  // budget before the actual answer is produced, causing 60-90s response times.
-  // Prepending /no_think disables CoT and keeps responses under 10s.
-  const content = tier === "large" ? `/no_think ${task}` : task;
   const body = JSON.stringify({
-    messages: [{ role: "user", content }],
+    model: "gemma4:31b",
+    messages: [{ role: "user", content: task }],
     max_tokens: maxTokens,
     temperature: 0.3,
   });
@@ -125,12 +121,7 @@ async function callLmStudio(
     usage?: { completion_tokens?: number };
   };
 
-  const raw = json.choices?.[0]?.message?.content ?? "";
-  // Strip Qwen3 <think>...</think> blocks so only the actual answer reaches the axon
-  const text = raw
-    .replace(/<think>[\s\S]*?<\/think>\s*/g, "")  // Qwen3 CoT blocks
-    .replace(/<\|im_end\|>/g, "")                  // Qwen3 end-of-turn token
-    .trim();
+  const text = (json.choices?.[0]?.message?.content ?? "").trim();
   const completion_tokens = json.usage?.completion_tokens ?? 0;
   const latency_ms = Date.now() - start;
 

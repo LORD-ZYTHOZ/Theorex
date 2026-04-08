@@ -44,11 +44,15 @@ def log(msg: str) -> None:
 # PULSE.md writer
 # ---------------------------------------------------------------------------
 
+MAX_PENDING_PER_AGENT = 100  # force flush if batch grows too large
+
+
 def write_pulse(agent_id: str, events: list[dict]) -> None:
     agent_dir = WORKSPACE / agent_id
-    if not agent_dir.is_dir():
+    if not agent_dir.exists():
         log(f"  [WARN] workspace not found for {agent_id}: {agent_dir}")
         return
+    agent_dir.mkdir(parents=True, exist_ok=True)
 
     pulse_path = agent_dir / "PULSE.md"
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -87,6 +91,9 @@ def write_pulse(agent_id: str, events: list[dict]) -> None:
 def run() -> None:
     log("starting — connecting to Postgres...")
 
+    # pending survives reconnects — events buffered during outage are preserved
+    pending: dict[str, tuple[float, list[dict]]] = {}
+
     while True:
         conn = None
         try:
@@ -98,9 +105,6 @@ def run() -> None:
             cur.execute("LISTEN concept_new;")
             log(f"connected to {PG_DB}@{PG_HOST}, LISTENing on concept_new")
 
-            # pending[agent_id] = (first_event_time, [events])
-            pending: dict[str, tuple[float, list[dict]]] = {}
-
             while True:
                 # Wait up to 2s for a notification
                 readable, _, _ = select.select([conn], [], [], 2.0)
@@ -108,10 +112,12 @@ def run() -> None:
                     conn.poll()
                     while conn.notifies:
                         notify = conn.notifies.pop(0)
+                        if not notify.payload:
+                            continue
                         try:
                             payload = json.loads(notify.payload)
-                        except (json.JSONDecodeError, ValueError):
-                            log(f"  [WARN] bad payload: {notify.payload[:100]}")
+                        except (json.JSONDecodeError, ValueError, TypeError):
+                            log(f"  [WARN] bad payload: {str(notify.payload)[:100]}")
                             continue
 
                         agent_id = payload.get("agent_id") or "main"
@@ -119,6 +125,11 @@ def run() -> None:
                             pending[agent_id] = (time.monotonic(), [])
                         pending[agent_id][1].append(payload)
                         log(f"  recv concept_new: agent={agent_id} label={payload.get('label','?')}")
+
+                        # Force flush if batch is too large
+                        if len(pending[agent_id][1]) >= MAX_PENDING_PER_AGENT:
+                            _, events = pending.pop(agent_id)
+                            write_pulse(agent_id, events)
 
                 # Flush agents whose batch window has elapsed
                 now = time.monotonic()

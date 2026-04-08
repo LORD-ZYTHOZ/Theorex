@@ -49,10 +49,11 @@ MAX_PENDING_PER_AGENT = 100  # force flush if batch grows too large
 
 def write_pulse(agent_id: str, events: list[dict]) -> None:
     agent_dir = WORKSPACE / agent_id
-    if not agent_dir.exists():
-        log(f"  [WARN] workspace not found for {agent_id}: {agent_dir}")
+    try:
+        agent_dir.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        log(f"  [WARN] cannot create workspace for {agent_id}: {agent_dir}")
         return
-    agent_dir.mkdir(parents=True, exist_ok=True)
 
     pulse_path = agent_dir / "PULSE.md"
     now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")

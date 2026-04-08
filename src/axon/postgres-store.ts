@@ -345,6 +345,27 @@ export class PostgresStore {
   }
 
   /**
+   * Retrieve diary entries for an agent (wing_diary_{agentId}, room='diary'),
+   * ordered by created_at DESC.
+   */
+  async getDiaryEntries(limit = 3): Promise<Array<{ body: string; created_at: string }>> {
+    const diaryWingStr = `wing_diary_${this.agentId}`;
+    const rows = await this.withAgentContext((tx) => tx`
+      SELECT body, created_at
+      FROM concepts
+      WHERE agent_id = ${this.agentId}
+        AND wing = ${diaryWingStr}
+        AND room = 'diary'
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `) as Array<{ body: string; created_at: Date | string }>;
+    return rows.map((r) => ({
+      body: r.body ?? "",
+      created_at: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    }));
+  }
+
+  /**
    * Store an embedding vector for a concept.
    */
   async setEmbedding(conceptId: string, embedding: number[]): Promise<void> {

@@ -29,6 +29,9 @@ import type { ProcedureExtractionInput } from "../evolve/procedure-extractor";
 import { runMetaReview } from "../evolve/meta-review";
 import { handleSpanTool, spanToolDefs } from "./spans";
 import { SpanStore } from "../spans/store";
+import { compressToAaak } from "../aaak/encoder.js";
+import { checkContradictions } from "../axon/contradiction-checker.js";
+import { routeToAddress } from "../palace/router.js";
 
 // Module-level singleton for tool-as-hook span emission
 const _spanStore = new SpanStore();
@@ -451,6 +454,56 @@ function handleToolsList(id: string | number | null): Response {
         },
       },
     },
+    {
+      name: "ingest_dream",
+      description: "Ingest content from a dream Deep phase: contradiction check → AAAK compress → store as palace concept + diary entry.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          content: { type: "string", description: "Text to ingest from dream Deep phase" },
+          agentId: { type: "string", description: "Agent this memory belongs to" },
+          wing: { type: "string", description: "Optional explicit wing override" },
+          room: { type: "string", description: "Optional room hint (will be slugified)" },
+          source: { type: "string", description: "Origin: dream_deep | manual" },
+        },
+        required: ["content", "agentId"],
+      },
+    },
+    {
+      name: "diary_write",
+      description: "Write an AAAK-format diary entry for an agent.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          agentId: { type: "string" },
+          entry: { type: "string", description: "AAAK-format diary entry" },
+        },
+        required: ["agentId", "entry"],
+      },
+    },
+    {
+      name: "diary_read",
+      description: "Read recent diary entries for an agent.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          agentId: { type: "string" },
+          limit: { type: "number", description: "Number of entries to return (default 3)" },
+        },
+        required: ["agentId"],
+      },
+    },
+    {
+      name: "compress_aaak",
+      description: "Compress text to AAAK shorthand notation.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          text: { type: "string", description: "Text to compress to AAAK shorthand" },
+        },
+        required: ["text"],
+      },
+    },
     deliberateToolDef(),
     deliberationHistoryToolDef(),
     ...spanToolDefs,
@@ -506,6 +559,14 @@ async function handleToolCall(
     case "get-doom-loops":
     case "write-optimizer-rationale":
       return await handleSpanTool(name, args);
+    case "ingest_dream":
+      return await callIngestDream(id, args);
+    case "diary_write":
+      return await callDiaryWrite(id, args);
+    case "diary_read":
+      return await callDiaryRead(id, args);
+    case "compress_aaak":
+      return await callCompressAaak(id, args);
     default:
       return makeError(id, -32602, `Unknown tool: ${name}`);
   }
@@ -989,6 +1050,158 @@ async function callMetaReview(
     return makeResult(id, { content: [{ type: "text", text: JSON.stringify(result) }] });
   } catch (err) {
     return makeError(id, -32603, `Meta-review failed: ${String(err)}`);
+  }
+}
+
+async function callIngestDream(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const content = typeof args.content === "string" ? args.content : "";
+  const agentId = typeof args.agentId === "string" ? args.agentId : "";
+  if (!content) return makeError(id, -32602, "Missing required argument: content");
+  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+
+  const wingOverride = typeof args.wing === "string" ? args.wing : undefined;
+  const roomHint = typeof args.room === "string" ? args.room : undefined;
+  const source = typeof args.source === "string" ? args.source : "manual";
+
+  // 1. Route to palace address
+  const address = routeToAddress(agentId, { roomHint });
+  const wing = wingOverride ?? address.wing;
+  const room = address.room;
+
+  // 2. Contradiction check
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const contradictions = await checkContradictions(content, agentId, {
+      embed: (text) => embedText(text).then((v) => v ?? []),
+      searchSimilar: async (embedding, aid, limit) => {
+        const results = await pgStore.search("", embedding, { agentFilter: aid, limit });
+        return results.map((r) => ({ id: r.id, label: r.label, body: r.body ?? null }));
+      },
+      llmVerdict: async (newContent, existingBody) => {
+        const prompt = `Does this new fact contradict the existing one? Answer only: hard, soft, or none.\n\nNew: ${newContent}\n\nExisting: ${existingBody}`;
+        const resp = await fetch("http://localhost:11434/api/generate", {
+          method: "POST",
+          body: JSON.stringify({ model: "gemma3:latest", prompt, stream: false }),
+          signal: AbortSignal.timeout(10000),
+        }).catch(() => null);
+        if (!resp?.ok) return "none";
+        const data = await resp.json().catch(() => ({}));
+        const verdict = ((data as Record<string, unknown>).response ?? "").toString().toLowerCase().trim();
+        if (verdict.includes("hard")) return "hard";
+        if (verdict.includes("soft")) return "soft";
+        return "none";
+      },
+    });
+
+    // 3. Block on hard contradictions
+    if (contradictions.hasHard) {
+      return makeResult(id, {
+        blocked: true,
+        reason: "hard_contradiction",
+        contradictions: contradictions.contradictions,
+      });
+    }
+
+    // 4. AAAK compress
+    const aaakResult = await compressToAaak(content);
+
+    // 5. Store as palace concept
+    const conceptId = await pgStore.addPalaceConcept(
+      `dream:${agentId}:${Date.now()}`,
+      content,
+      wing,
+      room,
+      aaakResult.compressed,
+    );
+
+    // 6. Write diary entry
+    const diaryWingStr = `wing_diary_${agentId}`;
+    await pgStore.addPalaceConcept(
+      `diary:${agentId}:${Date.now()}`,
+      aaakResult.compressed,
+      diaryWingStr,
+      "diary",
+      aaakResult.compressed,
+      "episode",
+    );
+
+    return makeResult(id, {
+      conceptId,
+      wing,
+      room,
+      compressed: aaakResult.compressed,
+      ratio: aaakResult.ratio,
+      contradictions: contradictions.contradictions,
+      source,
+    });
+  } catch (err) {
+    return makeError(id, -32603, `ingest_dream failed: ${String(err)}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callDiaryWrite(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const agentId = typeof args.agentId === "string" ? args.agentId : "";
+  const entry = typeof args.entry === "string" ? args.entry : "";
+  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+  if (!entry) return makeError(id, -32602, "Missing required argument: entry");
+
+  const diaryWingStr = `wing_diary_${agentId}`;
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const conceptId = await pgStore.addPalaceConcept(
+      `diary:${agentId}:${Date.now()}`,
+      entry,
+      diaryWingStr,
+      "diary",
+      entry,
+      "episode",
+    );
+    return makeResult(id, { conceptId });
+  } catch (err) {
+    return makeError(id, -32603, `diary_write failed: ${String(err)}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callDiaryRead(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const agentId = typeof args.agentId === "string" ? args.agentId : "";
+  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+  const limit = typeof args.limit === "number" ? args.limit : 3;
+
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const entries = await pgStore.getDiaryEntries(limit);
+    return makeResult(id, { entries });
+  } catch (err) {
+    return makeError(id, -32603, `diary_read failed: ${String(err)}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callCompressAaak(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const text = typeof args.text === "string" ? args.text : "";
+  if (!text) return makeError(id, -32602, "Missing required argument: text");
+  try {
+    const result = await compressToAaak(text);
+    return makeResult(id, { compressed: result.compressed, ratio: result.ratio });
+  } catch (err) {
+    return makeError(id, -32603, `compress_aaak failed: ${String(err)}`);
   }
 }
 

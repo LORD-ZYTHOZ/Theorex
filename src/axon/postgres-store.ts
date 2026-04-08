@@ -164,6 +164,9 @@ export class PostgresStore {
   /**
    * Hybrid search: FTS + vector similarity via RRF.
    * Returns top-N concepts ranked by combined score.
+   *
+   * Optional wing/room filters scope results to a palace location.
+   * Room filter is only applied when wing is also provided.
    */
   async search(
     queryText: string,
@@ -174,27 +177,99 @@ export class PostgresStore {
       limit?: number;
       ftsWeight?: number;
       vecWeight?: number;
+      wing?: string;
+      room?: string;
     } = {}
   ): Promise<PgSearchResult[]> {
-    const { limit = 10, ftsWeight = 0.5, vecWeight = 0.5, agentFilter, typeFilter } = opts;
+    const { limit = 10, ftsWeight = 0.5, vecWeight = 0.5, agentFilter, typeFilter, wing, room } = opts;
+    // room is only valid alongside wing
+    const effectiveRoom = wing ? room : undefined;
+    const effectiveLimit = limit;
+
+    // NOTE: hybrid_search() applies LIMIT internally before we post-filter by wing/room.
+    // When wing is active, returned results may be fewer than requested limit.
+    // Fix: pass limit * 5 to hybrid_search when wing filter is active, then trim client-side.
+    // TODO: proper fix is to add wing/room params to the hybrid_search stored function.
+    const hybridLimit = wing ? Math.min(effectiveLimit * 5, 100) : effectiveLimit;
 
     return this.withAgentContext(async (tx) => {
       if (queryEmbedding) {
         const embeddingStr = `[${queryEmbedding.join(',')}]`;
+        // hybrid_search() is a stored function — we post-filter by wing/room in a wrapper CTE
+        if (wing) {
+          if (effectiveRoom) {
+            const rows = await tx`
+              SELECT hs.* FROM hybrid_search(
+                ${queryText},
+                ${embeddingStr}::vector(768),
+                ${agentFilter ?? null},
+                ${typeFilter ?? null}::memory_type,
+                ${hybridLimit},
+                ${ftsWeight},
+                ${vecWeight}
+              ) hs
+              JOIN concepts c ON c.id = hs.id
+              WHERE c.wing = ${wing}
+                AND c.room = ${effectiveRoom}
+            ` as PgSearchResult[];
+            return rows.slice(0, effectiveLimit);
+          }
+          const rows = await tx`
+            SELECT hs.* FROM hybrid_search(
+              ${queryText},
+              ${embeddingStr}::vector(768),
+              ${agentFilter ?? null},
+              ${typeFilter ?? null}::memory_type,
+              ${hybridLimit},
+              ${ftsWeight},
+              ${vecWeight}
+            ) hs
+            JOIN concepts c ON c.id = hs.id
+            WHERE c.wing = ${wing}
+          ` as PgSearchResult[];
+          return rows.slice(0, effectiveLimit);
+        }
         return await tx`
           SELECT * FROM hybrid_search(
             ${queryText},
             ${embeddingStr}::vector(768),
             ${agentFilter ?? null},
             ${typeFilter ?? null}::memory_type,
-            ${limit},
+            ${hybridLimit},
             ${ftsWeight},
             ${vecWeight}
           )
         ` as PgSearchResult[];
       }
 
+      // FTS-only path
       if (agentFilter) {
+        if (wing) {
+          if (effectiveRoom) {
+            // wing+room filters added to FTS+agentFilter query
+            return await tx`
+              SELECT id, label, body, memory_type, agent_id, meta,
+                ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+              FROM concepts
+              WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+                AND agent_id = ${agentFilter}
+                AND wing = ${wing}
+                AND room = ${effectiveRoom}
+              ORDER BY score DESC
+              LIMIT ${limit}
+            ` as PgSearchResult[];
+          }
+          return await tx`
+            SELECT id, label, body, memory_type, agent_id, meta,
+              ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+            FROM concepts
+            WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+              AND agent_id = ${agentFilter}
+              AND wing = ${wing}
+            ORDER BY score DESC
+            LIMIT ${limit}
+          ` as PgSearchResult[];
+        }
         if (typeFilter) {
           return await tx`
             SELECT id, label, body, memory_type, agent_id, meta,
@@ -217,6 +292,32 @@ export class PostgresStore {
           LIMIT ${limit}
         ` as PgSearchResult[];
       }
+
+      if (wing) {
+        if (effectiveRoom) {
+          // wing+room filters added to FTS-only query (no agentFilter)
+          return await tx`
+            SELECT id, label, body, memory_type, agent_id, meta,
+              ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+            FROM concepts
+            WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+              AND wing = ${wing}
+              AND room = ${effectiveRoom}
+            ORDER BY score DESC
+            LIMIT ${limit}
+          ` as PgSearchResult[];
+        }
+        return await tx`
+          SELECT id, label, body, memory_type, agent_id, meta,
+            ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+          FROM concepts
+          WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+            AND wing = ${wing}
+          ORDER BY score DESC
+          LIMIT ${limit}
+        ` as PgSearchResult[];
+      }
+
       if (typeFilter) {
         return await tx`
           SELECT id, label, body, memory_type, agent_id, meta,
@@ -228,6 +329,7 @@ export class PostgresStore {
           LIMIT ${limit}
         ` as PgSearchResult[];
       }
+
       return await tx`
         SELECT id, label, body, memory_type, agent_id, meta,
           ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
@@ -236,6 +338,48 @@ export class PostgresStore {
         ORDER BY score DESC
         LIMIT ${limit}
       ` as PgSearchResult[];
+    });
+  }
+
+  /**
+   * Upsert a concept into a specific palace wing/room.
+   * Single atomic upsert — inserts label/body/memory_type/wing/room/compressed_aaak
+   * in one statement so there is no crash window between concept creation and
+   * palace metadata being set.
+   * Returns the conceptId.
+   */
+  async addPalaceConcept(
+    label: string,
+    body: string,
+    wing: string,
+    room: string,
+    compressedAaak?: string,
+    memoryType: string = 'fact',
+  ): Promise<string> {
+    return this.withAgentContext(async (tx) => {
+      const rows = await tx`
+        INSERT INTO concepts (label, body, memory_type, agent_id, wing, room, compressed_aaak)
+        VALUES (
+          ${label},
+          ${body},
+          ${memoryType}::memory_type,
+          ${this.agentId},
+          ${wing},
+          ${room},
+          ${compressedAaak ?? null}
+        )
+        ON CONFLICT (label, agent_id) DO UPDATE SET
+          body = EXCLUDED.body,
+          memory_type = EXCLUDED.memory_type,
+          wing = EXCLUDED.wing,
+          room = EXCLUDED.room,
+          compressed_aaak = EXCLUDED.compressed_aaak,
+          updated_at = now()
+        RETURNING id
+      `;
+      const id = rows[0].id as string;
+      this._autoEmbed(id, label);
+      return id;
     });
   }
 
@@ -251,6 +395,46 @@ export class PostgresStore {
       ORDER BY updated_at DESC
       LIMIT ${limit}
     `) as Promise<PgConceptRow[]>;
+  }
+
+  /**
+   * Get top-N concepts with compressed_aaak set for this agent,
+   * ordered by updated_at DESC. Used by readBootResource to build L1 memory block.
+   */
+  async getAaakConcepts(limit = 5): Promise<Array<{ compressed_aaak: string; label: string }>> {
+    const rows = await this.withAgentContext((tx) => tx`
+      SELECT compressed_aaak, label
+      FROM concepts
+      WHERE agent_id = ${this.agentId}
+        AND compressed_aaak IS NOT NULL
+        AND wing IS NOT NULL
+      ORDER BY updated_at DESC
+      LIMIT ${limit}
+    `) as Array<{ compressed_aaak: string | null; label: string }>;
+    return rows
+      .filter((r): r is { compressed_aaak: string; label: string } => r.compressed_aaak !== null)
+      .map((r) => ({ compressed_aaak: r.compressed_aaak, label: r.label }));
+  }
+
+  /**
+   * Retrieve diary entries for an agent (wing_diary_{agentId}, room='diary'),
+   * ordered by created_at DESC.
+   */
+  async getDiaryEntries(limit = 3): Promise<Array<{ body: string; created_at: string }>> {
+    const diaryWingStr = `wing_diary_${this.agentId}`;
+    const rows = await this.withAgentContext((tx) => tx`
+      SELECT body, created_at
+      FROM concepts
+      WHERE agent_id = ${this.agentId}
+        AND wing = ${diaryWingStr}
+        AND room = 'diary'
+      ORDER BY created_at DESC
+      LIMIT ${limit}
+    `) as Array<{ body: string; created_at: Date | string }>;
+    return rows.map((r) => ({
+      body: r.body ?? "",
+      created_at: r.created_at instanceof Date ? r.created_at.toISOString() : String(r.created_at),
+    }));
   }
 
   /**

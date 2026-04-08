@@ -162,6 +162,9 @@ export class PostgresStore {
   /**
    * Hybrid search: FTS + vector similarity via RRF.
    * Returns top-N concepts ranked by combined score.
+   *
+   * Optional wing/room filters scope results to a palace location.
+   * Room filter is only applied when wing is also provided.
    */
   async search(
     queryText: string,
@@ -172,13 +175,49 @@ export class PostgresStore {
       limit?: number;
       ftsWeight?: number;
       vecWeight?: number;
+      wing?: string;
+      room?: string;
     } = {}
   ): Promise<PgSearchResult[]> {
-    const { limit = 10, ftsWeight = 0.5, vecWeight = 0.5, agentFilter, typeFilter } = opts;
+    const { limit = 10, ftsWeight = 0.5, vecWeight = 0.5, agentFilter, typeFilter, wing, room } = opts;
+    // room is only valid alongside wing
+    const effectiveRoom = wing ? room : undefined;
 
     return this.withAgentContext(async (tx) => {
       if (queryEmbedding) {
         const embeddingStr = `[${queryEmbedding.join(',')}]`;
+        // hybrid_search() is a stored function — we post-filter by wing/room in a wrapper CTE
+        if (wing) {
+          if (effectiveRoom) {
+            return await tx`
+              SELECT hs.* FROM hybrid_search(
+                ${queryText},
+                ${embeddingStr}::vector(768),
+                ${agentFilter ?? null},
+                ${typeFilter ?? null}::memory_type,
+                ${limit},
+                ${ftsWeight},
+                ${vecWeight}
+              ) hs
+              JOIN concepts c ON c.id = hs.id
+              WHERE c.wing = ${wing}
+                AND c.room = ${effectiveRoom}
+            ` as PgSearchResult[];
+          }
+          return await tx`
+            SELECT hs.* FROM hybrid_search(
+              ${queryText},
+              ${embeddingStr}::vector(768),
+              ${agentFilter ?? null},
+              ${typeFilter ?? null}::memory_type,
+              ${limit},
+              ${ftsWeight},
+              ${vecWeight}
+            ) hs
+            JOIN concepts c ON c.id = hs.id
+            WHERE c.wing = ${wing}
+          ` as PgSearchResult[];
+        }
         return await tx`
           SELECT * FROM hybrid_search(
             ${queryText},
@@ -192,7 +231,34 @@ export class PostgresStore {
         ` as PgSearchResult[];
       }
 
+      // FTS-only path
       if (agentFilter) {
+        if (wing) {
+          if (effectiveRoom) {
+            // Lines where wing+room filters are added to FTS+agentFilter query
+            return await tx`
+              SELECT id, label, body, memory_type, agent_id, meta,
+                ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+              FROM concepts
+              WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+                AND agent_id = ${agentFilter}
+                AND wing = ${wing}
+                AND room = ${effectiveRoom}
+              ORDER BY score DESC
+              LIMIT ${limit}
+            ` as PgSearchResult[];
+          }
+          return await tx`
+            SELECT id, label, body, memory_type, agent_id, meta,
+              ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+            FROM concepts
+            WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+              AND agent_id = ${agentFilter}
+              AND wing = ${wing}
+            ORDER BY score DESC
+            LIMIT ${limit}
+          ` as PgSearchResult[];
+        }
         return await tx`
           SELECT id, label, body, memory_type, agent_id, meta,
             ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
@@ -203,6 +269,32 @@ export class PostgresStore {
           LIMIT ${limit}
         ` as PgSearchResult[];
       }
+
+      if (wing) {
+        if (effectiveRoom) {
+          // Lines where wing+room filters are added to FTS-only query (no agentFilter)
+          return await tx`
+            SELECT id, label, body, memory_type, agent_id, meta,
+              ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+            FROM concepts
+            WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+              AND wing = ${wing}
+              AND room = ${effectiveRoom}
+            ORDER BY score DESC
+            LIMIT ${limit}
+          ` as PgSearchResult[];
+        }
+        return await tx`
+          SELECT id, label, body, memory_type, agent_id, meta,
+            ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+          FROM concepts
+          WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+            AND wing = ${wing}
+          ORDER BY score DESC
+          LIMIT ${limit}
+        ` as PgSearchResult[];
+      }
+
       return await tx`
         SELECT id, label, body, memory_type, agent_id, meta,
           ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
@@ -212,6 +304,30 @@ export class PostgresStore {
         LIMIT ${limit}
       ` as PgSearchResult[];
     });
+  }
+
+  /**
+   * Upsert a concept into a specific palace wing/room.
+   * Wraps upsertConcept() and then sets wing, room, compressed_aaak on the row.
+   * Returns the conceptId.
+   */
+  async addPalaceConcept(
+    label: string,
+    body: string,
+    wing: string,
+    room: string,
+    compressedAaak?: string,
+    memoryType = 'fact',
+  ): Promise<string> {
+    const conceptId = await this.upsertConcept(label, memoryType, body);
+    await this.withAgentContext((tx) => tx`
+      UPDATE concepts
+      SET wing = ${wing},
+          room = ${room},
+          compressed_aaak = ${compressedAaak ?? null}
+      WHERE id = ${conceptId}
+    `);
+    return conceptId;
   }
 
   /**

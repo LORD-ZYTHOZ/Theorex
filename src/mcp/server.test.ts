@@ -106,6 +106,8 @@ async function buildPostgresBootLines(
   concepts: Array<{ label: string; memory_type: string; score: number }>,
   profiles: Array<{ subject: string; traits: Record<string, unknown> }>,
   sessions: Array<{ sessionId: string; summary: string; keyDecisions: unknown[] }>,
+  aaakConcepts: Array<{ compressed_aaak: string; label: string }> = [],
+  diaryEntries: Array<{ body: string; created_at: string }> = [],
 ): Promise<string[]> {
   const lines: string[] = [
     `# Theorex Boot Context — Agent: ${agentId}`,
@@ -134,6 +136,20 @@ async function buildPostgresBootLines(
         .filter((d): d is string => typeof d === "string")
         .join(", ");
       lines.push(`- **${s.sessionId}**: ${s.summary} | Decisions: ${decisions}`);
+    }
+  }
+
+  if (aaakConcepts.length > 0) {
+    lines.push("", "## L1 Memory (AAAK)", "");
+    for (const c of aaakConcepts) {
+      lines.push(c.compressed_aaak);
+    }
+  }
+
+  if (diaryEntries.length > 0) {
+    lines.push("", "## Agent Diary", "");
+    for (const e of diaryEntries) {
+      lines.push(e.body);
     }
   }
 
@@ -220,6 +236,66 @@ describe("readBootResource Postgres path", () => {
     const text = lines.join("\n");
     expect(text).toContain("## Active Concepts");
     expect(text).toContain("**london breakout** (type: episode, weight: 0.90)");
+  });
+
+  test("includes AAAK L1 section when aaak concepts exist", async () => {
+    const lines = await buildPostgresBootLines(
+      "main",
+      [],
+      [],
+      [],
+      [{ compressed_aaak: "⚡LDN_BRK:fade_hi→tp2", label: "london breakout" }],
+    );
+
+    const text = lines.join("\n");
+    expect(text).toContain("## L1 Memory (AAAK)");
+    expect(text).toContain("⚡LDN_BRK:fade_hi→tp2");
+  });
+
+  test("omits AAAK L1 section when no aaak concepts", async () => {
+    const lines = await buildPostgresBootLines("main", [], [], [], []);
+    const text = lines.join("\n");
+    expect(text).not.toContain("## L1 Memory (AAAK)");
+  });
+
+  test("includes Agent Diary section when diary entries exist", async () => {
+    const lines = await buildPostgresBootLines(
+      "main",
+      [],
+      [],
+      [],
+      [],
+      [{ body: "Missed London entry — waited for confirmation.", created_at: "2026-04-07T10:00:00Z" }],
+    );
+
+    const text = lines.join("\n");
+    expect(text).toContain("## Agent Diary");
+    expect(text).toContain("Missed London entry");
+  });
+
+  test("omits Agent Diary section when no diary entries", async () => {
+    const lines = await buildPostgresBootLines("main", [], [], [], [], []);
+    const text = lines.join("\n");
+    expect(text).not.toContain("## Agent Diary");
+  });
+
+  test("includes all sections when all data is present", async () => {
+    const lines = await buildPostgresBootLines(
+      "agent-x",
+      [{ label: "scalp", memory_type: "procedure", score: 0.75 }],
+      [{ subject: "risk_preferences", traits: { risk: "0.5%" } }],
+      [{ sessionId: "s1", summary: "Scalped NY open.", keyDecisions: ["use tight SL"] }],
+      [{ compressed_aaak: "⚡NY:scalp→tp1", label: "ny scalp" }],
+      [{ body: "Good discipline today.", created_at: "2026-04-07T15:00:00Z" }],
+    );
+
+    const text = lines.join("\n");
+    expect(text).toContain("## Agent Profiles");
+    expect(text).toContain("## Recent Sessions");
+    expect(text).toContain("## L1 Memory (AAAK)");
+    expect(text).toContain("## Agent Diary");
+    expect(text).toContain("⚡NY:scalp→tp1");
+    expect(text).toContain("Good discipline today.");
   });
 });
 

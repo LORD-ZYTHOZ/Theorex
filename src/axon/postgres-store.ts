@@ -345,6 +345,25 @@ export class PostgresStore {
   }
 
   /**
+   * Get top-N concepts with compressed_aaak set for this agent,
+   * ordered by updated_at DESC. Used by readBootResource to build L1 memory block.
+   */
+  async getAaakConcepts(limit = 5): Promise<Array<{ compressed_aaak: string; label: string }>> {
+    const rows = await this.withAgentContext((tx) => tx`
+      SELECT compressed_aaak, label
+      FROM concepts
+      WHERE agent_id = ${this.agentId}
+        AND compressed_aaak IS NOT NULL
+        AND wing IS NOT NULL
+      ORDER BY updated_at DESC
+      LIMIT ${limit}
+    `) as Array<{ compressed_aaak: string | null; label: string }>;
+    return rows
+      .filter((r): r is { compressed_aaak: string; label: string } => r.compressed_aaak !== null)
+      .map((r) => ({ compressed_aaak: r.compressed_aaak, label: r.label }));
+  }
+
+  /**
    * Retrieve diary entries for an agent (wing_diary_{agentId}, room='diary'),
    * ordered by created_at DESC.
    */

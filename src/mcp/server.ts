@@ -186,11 +186,13 @@ async function appendPostgresBootSections(
   pgStore: PostgresStore,
   agentId: string,
 ): Promise<void> {
-  // Fetch concepts, profiles, sessions in parallel
-  const [concepts, profiles, sessions] = await Promise.all([
+  // Fetch concepts, profiles, sessions, aaak, diary in parallel
+  const [concepts, profiles, sessions, aaakConcepts, diaryEntries] = await Promise.all([
     pgStore.search("", undefined, { agentFilter: agentId, limit: 30 }),
     pgStore.getAllProfiles(),
     pgStore.getRecentSessionSummaries(3),
+    pgStore.getAaakConcepts(5),
+    pgStore.getDiaryEntries(3),
   ]);
 
   for (const c of concepts) {
@@ -212,6 +214,20 @@ async function appendPostgresBootSections(
         .filter((d): d is string => typeof d === "string")
         .join(", ");
       lines.push(`- **${s.sessionId}**: ${s.summary} | Decisions: ${decisions}`);
+    }
+  }
+
+  if (aaakConcepts.length > 0) {
+    lines.push("", "## L1 Memory (AAAK)", "");
+    for (const c of aaakConcepts) {
+      lines.push(c.compressed_aaak);
+    }
+  }
+
+  if (diaryEntries.length > 0) {
+    lines.push("", "## Agent Diary", "");
+    for (const e of diaryEntries) {
+      lines.push(e.body);
     }
   }
 }
@@ -270,6 +286,8 @@ function handleToolsList(id: string | number | null): Response {
           query: { type: "string", description: "Search query" },
           top_k: { type: "number", description: "Max results (default: 10)" },
           mode: { type: "string", enum: ["fast", "deep", "compressed"], description: "fast (default), deep (query expansion + RRF fusion), or compressed (TurboQuant two-stage search)" },
+          wing: { type: "string", description: "Filter results to this palace wing (e.g. wing_secretarius)" },
+          room: { type: "string", description: "Filter results to this room within the wing" },
         },
         required: ["query"],
       },
@@ -621,6 +639,8 @@ async function callRetrieve(
   const topK = typeof args.top_k === "number" ? args.top_k : 10;
   const typeFilter = typeof args.type === "string" ? args.type : undefined;
   const mode = typeof args.mode === "string" ? args.mode : "fast";
+  const wing = typeof args.wing === "string" ? args.wing : undefined;
+  const room = typeof args.room === "string" ? args.room : undefined;
 
   if (mode === "compressed") {
     return await callRetrieveCompressed(id, query, agentId, topK);
@@ -628,9 +648,9 @@ async function callRetrieve(
   const pgStore = new PostgresStore(agentId);
   try {
     if (mode === "deep") {
-      return await callRetrieveDeep(id, pgStore, query, agentId, typeFilter, topK);
+      return await callRetrieveDeep(id, pgStore, query, agentId, typeFilter, topK, wing, room);
     }
-    return await callRetrieveFast(id, pgStore, query, agentId, typeFilter, topK);
+    return await callRetrieveFast(id, pgStore, query, agentId, typeFilter, topK, wing, room);
   } finally {
     await pgStore.close();
   }
@@ -646,6 +666,8 @@ async function callRetrieveFast(
   agentId: string,
   typeFilter: string | undefined,
   topK: number,
+  wing?: string,
+  room?: string,
 ): Promise<Response> {
   const start = Date.now();
   const embedding = await embedText(query);
@@ -653,6 +675,8 @@ async function callRetrieveFast(
     agentFilter: agentId,
     typeFilter,
     limit: topK,
+    wing,
+    room,
   });
   const matches = results.map((r) => ({
     id: r.id,
@@ -685,6 +709,8 @@ async function callRetrieveDeep(
   agentId: string,
   typeFilter: string | undefined,
   topK: number,
+  wing?: string,
+  room?: string,
 ): Promise<Response> {
   // Expand query + generate embeddings in parallel
   const [queries, baseEmbedding] = await Promise.all([
@@ -704,6 +730,8 @@ async function callRetrieveDeep(
         agentFilter: agentId,
         typeFilter,
         limit: topK,
+        wing,
+        room,
       })
     )
   );

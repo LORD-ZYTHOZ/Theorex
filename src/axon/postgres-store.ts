@@ -182,6 +182,13 @@ export class PostgresStore {
     const { limit = 10, ftsWeight = 0.5, vecWeight = 0.5, agentFilter, typeFilter, wing, room } = opts;
     // room is only valid alongside wing
     const effectiveRoom = wing ? room : undefined;
+    const effectiveLimit = limit;
+
+    // NOTE: hybrid_search() applies LIMIT internally before we post-filter by wing/room.
+    // When wing is active, returned results may be fewer than requested limit.
+    // Fix: pass limit * 5 to hybrid_search when wing filter is active, then trim client-side.
+    // TODO: proper fix is to add wing/room params to the hybrid_search stored function.
+    const hybridLimit = wing ? Math.min(effectiveLimit * 5, 100) : effectiveLimit;
 
     return this.withAgentContext(async (tx) => {
       if (queryEmbedding) {
@@ -189,13 +196,13 @@ export class PostgresStore {
         // hybrid_search() is a stored function — we post-filter by wing/room in a wrapper CTE
         if (wing) {
           if (effectiveRoom) {
-            return await tx`
+            const rows = await tx`
               SELECT hs.* FROM hybrid_search(
                 ${queryText},
                 ${embeddingStr}::vector(768),
                 ${agentFilter ?? null},
                 ${typeFilter ?? null}::memory_type,
-                ${limit},
+                ${hybridLimit},
                 ${ftsWeight},
                 ${vecWeight}
               ) hs
@@ -203,20 +210,22 @@ export class PostgresStore {
               WHERE c.wing = ${wing}
                 AND c.room = ${effectiveRoom}
             ` as PgSearchResult[];
+            return rows.slice(0, effectiveLimit);
           }
-          return await tx`
+          const rows = await tx`
             SELECT hs.* FROM hybrid_search(
               ${queryText},
               ${embeddingStr}::vector(768),
               ${agentFilter ?? null},
               ${typeFilter ?? null}::memory_type,
-              ${limit},
+              ${hybridLimit},
               ${ftsWeight},
               ${vecWeight}
             ) hs
             JOIN concepts c ON c.id = hs.id
             WHERE c.wing = ${wing}
           ` as PgSearchResult[];
+          return rows.slice(0, effectiveLimit);
         }
         return await tx`
           SELECT * FROM hybrid_search(
@@ -224,7 +233,7 @@ export class PostgresStore {
             ${embeddingStr}::vector(768),
             ${agentFilter ?? null},
             ${typeFilter ?? null}::memory_type,
-            ${limit},
+            ${hybridLimit},
             ${ftsWeight},
             ${vecWeight}
           )
@@ -308,7 +317,9 @@ export class PostgresStore {
 
   /**
    * Upsert a concept into a specific palace wing/room.
-   * Wraps upsertConcept() and then sets wing, room, compressed_aaak on the row.
+   * Single atomic upsert — inserts label/body/memory_type/wing/room/compressed_aaak
+   * in one statement so there is no crash window between concept creation and
+   * palace metadata being set.
    * Returns the conceptId.
    */
   async addPalaceConcept(
@@ -317,17 +328,33 @@ export class PostgresStore {
     wing: string,
     room: string,
     compressedAaak?: string,
-    memoryType = 'fact',
+    memoryType: string = 'fact',
   ): Promise<string> {
-    const conceptId = await this.upsertConcept(label, memoryType, body);
-    await this.withAgentContext((tx) => tx`
-      UPDATE concepts
-      SET wing = ${wing},
-          room = ${room},
-          compressed_aaak = ${compressedAaak ?? null}
-      WHERE id = ${conceptId}
-    `);
-    return conceptId;
+    return this.withAgentContext(async (tx) => {
+      const rows = await tx`
+        INSERT INTO concepts (label, body, memory_type, agent_id, wing, room, compressed_aaak)
+        VALUES (
+          ${label},
+          ${body},
+          ${memoryType}::memory_type,
+          ${this.agentId},
+          ${wing},
+          ${room},
+          ${compressedAaak ?? null}
+        )
+        ON CONFLICT (label, agent_id) DO UPDATE SET
+          body = EXCLUDED.body,
+          memory_type = EXCLUDED.memory_type,
+          wing = EXCLUDED.wing,
+          room = EXCLUDED.room,
+          compressed_aaak = EXCLUDED.compressed_aaak,
+          updated_at = now()
+        RETURNING id
+      `;
+      const id = rows[0].id as string;
+      this._autoEmbed(id, label);
+      return id;
+    });
   }
 
   /**

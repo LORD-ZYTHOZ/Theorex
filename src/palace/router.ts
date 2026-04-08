@@ -6,7 +6,6 @@ export interface PalaceAddress {
 export interface RouterOptions {
   isDiary?: boolean;   // if true, wing = wing_diary_{agentId}, room = "diary"
   roomHint?: string;   // explicit room name (slugified if provided)
-  date?: string;       // ISO date string for session rooms, defaults to today
 }
 
 /**

@@ -17,7 +17,7 @@ from pathlib import Path
 DREAMS_MD = "/Users/claw/.openclaw/memory/DREAMS.md"
 CHECKPOINT_FILE = "/Users/claw/.openclaw/memory/.dreams/ingest_checkpoint.json"
 THEOREX_URL = "http://10.10.0.1:18800/mcp"
-API_KEY = "kI7TKs8icME9w9IfTxmLZAjB2U9x_8E47Z24w3eCzmpRIG9gXGRx_sg4uyWkyPh7"
+API_KEY = os.environ.get("THEOREX_API_KEY", "kI7TKs8icME9w9IfTxmLZAjB2U9x_8E47Z24w3eCzmpRIG9gXGRx_sg4uyWkyPh7")
 DEFAULT_AGENT_ID = "main"
 LOG_PREFIX = "[dream_ingest]"
 

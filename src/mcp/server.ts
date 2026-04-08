@@ -37,6 +37,12 @@ import { routeToAddress } from "../palace/router.js";
 const _spanStore = new SpanStore();
 
 // ---------------------------------------------------------------------------
+// Validation
+// ---------------------------------------------------------------------------
+
+const VALID_AGENT_ID = /^[\w-]{1,64}$/;
+
+// ---------------------------------------------------------------------------
 // Config
 // ---------------------------------------------------------------------------
 
@@ -1088,9 +1094,12 @@ async function callIngestDream(
   const content = typeof args.content === "string" ? args.content : "";
   const agentId = typeof args.agentId === "string" ? args.agentId : "";
   if (!content) return makeError(id, -32602, "Missing required argument: content");
-  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+  if (!agentId || !VALID_AGENT_ID.test(agentId)) return makeError(id, -32602, `Invalid agentId: ${agentId}`);
 
   const wingOverride = typeof args.wing === "string" ? args.wing : undefined;
+  if (wingOverride && !/^wing_[\w-]{1,60}$/.test(wingOverride)) {
+    return makeError(id, -32602, `Invalid wing override: ${wingOverride}`);
+  }
   const roomHint = typeof args.room === "string" ? args.room : undefined;
   const source = typeof args.source === "string" ? args.source : "manual";
 
@@ -1109,7 +1118,9 @@ async function callIngestDream(
         return results.map((r) => ({ id: r.id, label: r.label, body: r.body ?? null }));
       },
       llmVerdict: async (newContent, existingBody) => {
-        const prompt = `Does this new fact contradict the existing one? Answer only: hard, soft, or none.\n\nNew: ${newContent}\n\nExisting: ${existingBody}`;
+        const safeNew = newContent.slice(0, 2000);
+        const safeExisting = existingBody.slice(0, 2000);
+        const prompt = `Analyze for contradiction. Reply ONLY with one word: hard, soft, or none.\n\n---NEW---\n${safeNew}\n---EXISTING---\n${safeExisting}\n---END---`;
         const resp = await fetch("http://localhost:11434/api/generate", {
           method: "POST",
           body: JSON.stringify({ model: "gemma3:latest", prompt, stream: false }),
@@ -1178,7 +1189,7 @@ async function callDiaryWrite(
 ): Promise<Response> {
   const agentId = typeof args.agentId === "string" ? args.agentId : "";
   const entry = typeof args.entry === "string" ? args.entry : "";
-  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+  if (!agentId || !VALID_AGENT_ID.test(agentId)) return makeError(id, -32602, `Invalid agentId: ${agentId}`);
   if (!entry) return makeError(id, -32602, "Missing required argument: entry");
 
   const diaryWingStr = `wing_diary_${agentId}`;
@@ -1205,7 +1216,7 @@ async function callDiaryRead(
   args: Record<string, unknown>,
 ): Promise<Response> {
   const agentId = typeof args.agentId === "string" ? args.agentId : "";
-  if (!agentId) return makeError(id, -32602, "Missing required argument: agentId");
+  if (!agentId || !VALID_AGENT_ID.test(agentId)) return makeError(id, -32602, `Invalid agentId: ${agentId}`);
   const limit = typeof args.limit === "number" ? args.limit : 3;
 
   const pgStore = new PostgresStore(agentId);

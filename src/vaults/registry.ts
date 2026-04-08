@@ -56,7 +56,7 @@ export const DEFAULT_VAULTS: readonly VaultConfig[] = [
   {
     name: "fleet",
     path: resolveVaultAxonPath("fleet"),
-    members: ["main", "qwen-sage", "secretarius", "m4-engineer", "claude-code-agent"],
+    members: ["main", "qwen-sage", "secretarius", "claude-code-agent"],
     read_only_members: [],
     domains: [], // all domains
     created_at: new Date(0).toISOString(),
@@ -72,7 +72,7 @@ export const DEFAULT_VAULTS: readonly VaultConfig[] = [
   {
     name: "coding",
     path: resolveVaultAxonPath("coding"),
-    members: ["m4-engineer", "claude-code-agent", "qwen-sage", "main"],
+    members: ["claude-code-agent", "qwen-sage", "main"],
     read_only_members: [],
     domains: ["code", "typescript", "python", "system", "api", "function", "test", "bun", "node"],
     created_at: new Date(0).toISOString(),

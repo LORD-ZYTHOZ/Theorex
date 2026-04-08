@@ -103,7 +103,7 @@ export class PostgresStore {
         ${event.surface_form},
         ${memType}::memory_type,
         ${this.agentId},
-        ${JSON.stringify(meta)},
+        ${meta},
         ${event.timestamp},
         ${event.timestamp}
       )
@@ -126,6 +126,7 @@ export class PostgresStore {
    * Simple upsert — just label + agent, no ConceptEvent needed.
    */
   async upsertConcept(label: string, memoryType = 'fact', body?: string, meta?: Record<string, unknown>): Promise<string> {
+    const metaJson = meta ?? {};
     const rows = await this.withAgentContext((tx) => tx`
       INSERT INTO concepts (label, body, memory_type, agent_id, meta)
       VALUES (
@@ -133,11 +134,12 @@ export class PostgresStore {
         ${body ?? null},
         ${memoryType}::memory_type,
         ${this.agentId},
-        ${JSON.stringify(meta ?? {})}
+        ${metaJson}
       )
       ON CONFLICT (label, agent_id) DO UPDATE SET
         updated_at = now(),
-        body = COALESCE(EXCLUDED.body, concepts.body)
+        body = COALESCE(EXCLUDED.body, concepts.body),
+        meta = EXCLUDED.meta
       RETURNING id
     `);
 
@@ -193,12 +195,35 @@ export class PostgresStore {
       }
 
       if (agentFilter) {
+        if (typeFilter) {
+          return await tx`
+            SELECT id, label, body, memory_type, agent_id, meta,
+              ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+            FROM concepts
+            WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+              AND agent_id = ${agentFilter}
+              AND memory_type = ${typeFilter}::memory_type
+            ORDER BY score DESC
+            LIMIT ${limit}
+          ` as PgSearchResult[];
+        }
         return await tx`
           SELECT id, label, body, memory_type, agent_id, meta,
             ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
           FROM concepts
           WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
             AND agent_id = ${agentFilter}
+          ORDER BY score DESC
+          LIMIT ${limit}
+        ` as PgSearchResult[];
+      }
+      if (typeFilter) {
+        return await tx`
+          SELECT id, label, body, memory_type, agent_id, meta,
+            ts_rank(fts_tokens, websearch_to_tsquery('english', ${queryText})) AS score
+          FROM concepts
+          WHERE fts_tokens @@ websearch_to_tsquery('english', ${queryText})
+            AND memory_type = ${typeFilter}::memory_type
           ORDER BY score DESC
           LIMIT ${limit}
         ` as PgSearchResult[];
@@ -319,7 +344,7 @@ export class PostgresStore {
     // Heartbeat uses raw sql (no RLS context) — heartbeats are cross-agent visible
     await sql`
       INSERT INTO agent_heartbeats (agent_id, status, last_seen, meta)
-      VALUES (${this.agentId}, ${status}, now(), ${JSON.stringify(meta ?? {})})
+      VALUES (${this.agentId}, ${status}, now(), ${meta ?? {}})
       ON CONFLICT (agent_id) DO UPDATE SET
         status = EXCLUDED.status,
         last_seen = now(),
@@ -411,7 +436,7 @@ export class PostgresStore {
         ${body},
         'procedure'::memory_type,
         ${this.agentId},
-        ${JSON.stringify(meta)}
+        ${meta}
       )
       ON CONFLICT (label, agent_id) DO UPDATE SET
         body = EXCLUDED.body,

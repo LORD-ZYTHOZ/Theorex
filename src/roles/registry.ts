@@ -65,15 +65,6 @@ export const DEFAULT_AGENT_PROFILES: readonly AgentProfile[] = [
     active: true,
   },
   {
-    agent_id: "m4-engineer",
-    role: "operative",
-    capabilities: ["code", "analyze", "review"],
-    preferred_query_types: ["code", "synthesis"],
-    model_preference: "qwen3-32b",
-    description: "M4 engineering operative — code generation, analysis, and technical review on M4 Pro",
-    active: true,
-  },
-  {
     agent_id: "claude-code-agent",
     role: "operative",
     capabilities: ["code", "suggest", "review"],

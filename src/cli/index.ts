@@ -54,6 +54,31 @@ export async function runScan(axonPath: string, config: Config): Promise<void> {
   console.log("Scan complete.");
 }
 
+/** Status of the shared axon + all registered agent axons. */
+export async function runStatusAll(config: Config): Promise<void> {
+  const { agentAxonPath, resolvedSharedAxonPath } = await import("../family/paths");
+  const agents = ["main", "qwen-sage", "claude-code-agent", "secretarius"];
+  const sharedPath = resolvedSharedAxonPath(config.sharedAxonPath);
+
+  const printStore = async (label: string, path: string) => {
+    const store = await AxonStore.load(path);
+    const n = store.graph.order;
+    const e = store.graph.size;
+    if (n === 0) {
+      console.log(`  ${label}: empty`);
+    } else {
+      console.log(`  ${label}: ${n} nodes, ${e} edges`);
+    }
+  };
+
+  console.log("═══ Theorex Concept Web ═══\n");
+  await printStore("shared (hot core)", sharedPath);
+  for (const agent of agents) {
+    await printStore(agent, agentAxonPath(agent, config.agentAxonDir));
+  }
+  console.log("\nRun `theorex promote --agent <id>` to push private concepts to shared.");
+}
+
 export async function runStatus(axonPath: string, config: Config): Promise<void> {
   if (isPostgresEnabled() && process.env.THEOREX_AGENT_ID) {
     const agentId = process.env.THEOREX_AGENT_ID;
@@ -603,8 +628,8 @@ export async function runIngestCode(agentId: string, targetDir: string, config: 
  * boot-inject: Write SHARED_CONTEXT.md from the shared axon for agent boot loading.
  * Usage: theorex boot-inject [--output <path>]
  */
-export async function runBootInject(config: Config, outputPath?: string): Promise<void> {
-  const result = await generateBootContext(config, outputPath);
+export async function runBootInject(config: Config, outputPath?: string, top?: number): Promise<void> {
+  const result = await generateBootContext(config, outputPath, top);
   console.log(`Boot context written: ${result.activeConcepts} active concepts → ${result.outputPath}`);
 }
 
@@ -821,6 +846,10 @@ if (import.meta.main) {
       await runStatus(config.axonPath ?? "data/axon.json", config);
       break;
 
+    case "status-all":
+      await runStatusAll(config);
+      break;
+
     case "ref": {
       const keyword = rest[0];
       if (!keyword) {
@@ -943,14 +972,15 @@ if (import.meta.main) {
       break;
 
     case "boot-inject": {
-      // Usage: theorex boot-inject [--output <path>]
+      // Usage: theorex boot-inject [--output <path>] [--top N]
       const { values: biValues } = parseArgs({
         args: Bun.argv.slice(3),
-        options: { output: { type: "string" } },
+        options: { output: { type: "string" }, top: { type: "string" } },
         allowPositionals: false,
         strict: false,
       });
-      await runBootInject(config, typeof biValues.output === "string" ? biValues.output : undefined);
+      const top = typeof biValues.top === "string" ? parseInt(biValues.top) : undefined;
+      await runBootInject(config, typeof biValues.output === "string" ? biValues.output : undefined, top);
       break;
     }
 

@@ -283,6 +283,7 @@ function handleToolsList(id: string | number | null): Response {
         type: "object",
         properties: {
           query: { type: "string", description: "Concept or keyword to search for" },
+          repo: { type: "string", description: "Repository name to query (omit to search all: theorex, godmode-skills, secretarius, codexbar)" },
         },
         required: ["query"],
       },
@@ -451,6 +452,40 @@ function handleToolsList(id: string | number | null): Response {
         },
       },
     },
+    {
+      name: "write_concept",
+      description: "Write a structured concept directly to Theorex with explicit memory_type and meta. Use this for godmode-skills Phase 6 institutional memory: autotune_outcome, prompt_hardening, dissent_override, consensus_score.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          label: { type: "string", description: "Unique label for this concept, e.g. autotune:main:trend_follow:2026-04-06T12:00:00Z" },
+          memory_type: { type: "string", description: "Memory type enum value", enum: ["autotune_outcome", "prompt_hardening", "dissent_override", "consensus_score", "episode", "fact", "preference", "relationship", "procedure", "core"] },
+          body: { type: "string", description: "Human-readable summary of this concept" },
+          meta: { type: "object", description: "Structured metadata stored as JSONB", additionalProperties: true },
+          agent_id: { type: "string", description: "Agent ID (default: main)" },
+          importance: { type: "number", description: "Importance score 0-1 (default: 0.5)" },
+          tags: { type: "array", items: { type: "string" }, description: "Optional tags for filtering" },
+        },
+        required: ["label", "memory_type", "body"],
+      },
+    },
+    {
+      name: "retrieve_outcomes",
+      description: "Retrieve AutoTune outcome history filtered by context, regime, session, instrument. Phase 6 godmode-skills institutional memory.",
+      inputSchema: {
+        type: "object",
+        properties: {
+          agent_id: { type: "string", description: "Filter by agent ID (optional)" },
+          context_type: { type: "string", description: "Filter by context type (e.g. trend_follow, range_bound)" },
+          regime: { type: "string", description: "Filter by regime name" },
+          session: { type: "string", description: "Filter by trading session (london, new_york, asian, off_hours)" },
+          instrument: { type: "string", description: "Filter by instrument (e.g. XAUUSD)" },
+          pnl_filter: { type: "string", enum: ["wins", "losses", "all"], default: "all", description: "Filter by win/loss" },
+          limit: { type: "number", default: 20, description: "Max results (default: 20)" },
+        },
+        required: ["agent_id"],
+      },
+    },
     deliberateToolDef(),
     deliberationHistoryToolDef(),
     ...spanToolDefs,
@@ -468,6 +503,10 @@ async function handleToolCall(
   switch (name) {
     case "synthesize":
       return await callSynthesize(id, args);
+    case "write_concept":
+      return await callWriteConcept(id, args);
+    case "retrieve_outcomes":
+      return await callRetrieveOutcomes(id, args);
     case "retrieve":
       return await callRetrieve(id, args);
     case "status":
@@ -546,6 +585,105 @@ async function callSynthesize(
     text: `Written to ${agentId}: +${result.conceptsAdded} concepts, +${result.edgesAdded} edges`,
   }];
   return makeResult(id, { content });
+}
+
+async function callWriteConcept(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const label = typeof args.label === "string" ? args.label : "";
+  const memoryType = typeof args.memory_type === "string" ? args.memory_type : "fact";
+  const body = typeof args.body === "string" ? args.body : "";
+  const meta = (args.meta as Record<string, unknown>) ?? {};
+  const agentId = typeof args.agent_id === "string" ? args.agent_id : "main";
+  const tags = Array.isArray(args.tags) ? (args.tags as string[]) : [];
+
+  if (!label || !memoryType) {
+    return makeError(id, -32602, "Missing required arguments: label, memory_type");
+  }
+
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const conceptId = await pgStore.upsertConcept(label, memoryType, body, meta);
+
+    // Tag edges
+    if (tags.length > 0) {
+      for (const tag of tags) {
+        try {
+          const tagId = await pgStore.upsertConcept(`tag:${tag}`, "core", tag, { tag_name: tag });
+          await pgStore.mergeEdge(conceptId, tagId, "tagged_as", 1.0);
+        } catch {
+          // Ignore tag failures
+        }
+      }
+    }
+
+    return makeResult(id, {
+      content: [{ type: "text", text: `write_concept ${conceptId} [${memoryType}] ${label}` }],
+      id: conceptId,
+    });
+  } catch (err) {
+    return makeError(id, -32000, `write_concept failed: ${err}`);
+  } finally {
+    await pgStore.close();
+  }
+}
+
+async function callRetrieveOutcomes(
+  id: string | number | null,
+  args: Record<string, unknown>,
+): Promise<Response> {
+  const agentId = typeof args.agent_id === "string" ? args.agent_id : "main";
+  const contextType = typeof args.context_type === "string" ? args.context_type : undefined;
+  const regime = typeof args.regime === "string" ? args.regime : undefined;
+  const session = typeof args.session === "string" ? args.session : undefined;
+  const instrument = typeof args.instrument === "string" ? args.instrument : undefined;
+  const pnlFilter = typeof args.pnl_filter === "string" ? args.pnl_filter : "all";
+  const limit = typeof args.limit === "number" ? args.limit : 20;
+
+  const pgStore = new PostgresStore(agentId);
+  try {
+    const results = await pgStore.getByType("autotune_outcome", limit * 5);
+
+    const filtered = results
+      .filter((r) => {
+        // meta is jsonb, not string in getByType result
+        const m = typeof r.meta === "object" ? (r.meta as Record<string, unknown>) : {};
+        if (contextType && String(m.context_type ?? "") !== contextType) return false;
+        if (regime && String(m.regime ?? "") !== regime) return false;
+        if (session && String(m.session ?? "") !== session) return false;
+        if (instrument && String(m.instrument ?? "") !== instrument) return false;
+        const pips = Number(m.pnl_pips ?? 0);
+        if (pnlFilter === "wins") return pips > 0;
+        if (pnlFilter === "losses") return pips < 0;
+        return true;
+      })
+      .slice(0, limit)
+      .map((r) => {
+        const m = typeof r.meta === "object" ? (r.meta as Record<string, unknown>) : {};
+        return {
+          id: String(r.id),
+          label: String(r.label ?? ""),
+          body: String(r.body ?? ""),
+          agent_id: String(r.agent_id ?? agentId),
+          pnl_pips: Number(m.pnl_pips ?? 0),
+          context_type: String(m.context_type ?? ""),
+          regime: String(m.regime ?? ""),
+          session: String(m.session ?? ""),
+          instrument: String(m.instrument ?? ""),
+          meta: m,
+        };
+      });
+
+    return makeResult(id, {
+      content: [{ type: "text", text: JSON.stringify(filtered) }],
+      count: filtered.length,
+    });
+  } catch (err) {
+    return makeError(id, -32000, `retrieve_outcomes failed: ${err}`);
+  } finally {
+    await pgStore.close();
+  }
 }
 
 async function callRetrieve(
@@ -749,7 +887,8 @@ async function callTheronexusQuery(
   const query = typeof args.query === "string" ? args.query : "";
   if (!query) return makeError(id, -32602, "Missing required argument: query");
   try {
-    const result = await runTheronexusCli(["query", query]);
+    const repo = typeof args.repo === "string" ? ["--repo", args.repo] : [];
+    const result = await runTheronexusCli(["query", query, ...repo]);
     try {
       const state = getState();
       const r = result as any;

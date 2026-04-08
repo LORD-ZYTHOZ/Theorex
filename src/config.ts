@@ -82,7 +82,7 @@ export const DEFAULT_CONFIG: Config = {
   halfLifeDays: 14,
   activeThreshold: 0.6,
   mildThreshold: 0.3,
-  pruneThresholdDays: 30,
+  pruneThresholdDays: 180,  // 6 months — large context window (1M tokens) means concepts stay hot longer
   edgePruneThreshold: 0.01,
   // Phase 2: Short-Term Memory defaults
   stmRetentionDays: 14,
@@ -111,12 +111,12 @@ export const DEFAULT_CONFIG: Config = {
   temporalAgentId: "main",
   temporalStorePath: "data/temporal.json",
   // Phase 15: Auto-Sliding Context Window
-  contextSlideThreshold: 0.50,
+  contextSlideThreshold: 0.90,  // don't compress until 90% context usage
   contextSlideCooldownCalls: 20,
   synthEndpoint: "http://localhost:11434",
   // Phase 9: Memory Compression
   coldStorePath: "data/cold.db",
-  compressAfterDays: 30,
+  compressAfterDays: 180,  // compress LESS nodes after 6 months instead of 30 days
   // Phase 12: Deployment Mode + Profession Packs
   deploymentMode: "personal",
   professionPack: "",

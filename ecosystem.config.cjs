@@ -40,7 +40,7 @@ module.exports = {
       script: BUN,
       args: `run ${CLI} mcp-start --port 18800`,
       cwd: "/Users/eoh/theorex",
-      env: { THEOREX_STORAGE: "postgres", THEOREX_PG_HOST: "192.168.50.28" },
+      env: { THEOREX_STORAGE: "postgres", THEOREX_PG_HOST: "10.10.0.2" },
       out_file: `${LOG_DIR}/theorex-mcp-out.log`,
       error_file: `${LOG_DIR}/theorex-mcp-err.log`,
     },

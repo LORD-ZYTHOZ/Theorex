@@ -1,137 +1,122 @@
-// family/boot-inject.ts — Generate SHARED_CONTEXT.md from the shared axon.
-// Phase 6: AI Family Shared Layer — Boot Injection
-//
-// Writes a compact markdown summary of ACTIVE-tier concepts from the shared web.
-// This file is added once to openclaw.json memorySearch.extraPaths and agents
-// load it automatically on every boot — no hook changes required.
-//
-// Output path: ~/.openclaw/workspace/theorex/SHARED_CONTEXT.md
-// Token cost: ~150-400 tokens depending on how many ACTIVE concepts exist.
+// family/boot-inject.ts — Inject shared concept context into agent boot prompts.
+// Phase 6 of Theorex: promotes hot concepts from shared graph into session prompts.
 
-import { mkdir, writeFile } from "node:fs/promises";
-import { dirname, join } from "node:path";
-import { homedir } from "node:os";
-import { AxonStore } from "../axon/store";
-import { compositeScore, classifyTier } from "../axon/scorer";
-import { resolvedSharedAxonPath } from "./paths";
-import type { Config } from "../config";
-import { loadDeprecated, formatDeprecatedBlock } from "../system/deprecated";
-import { readRecentUpdates, formatUpdatesBlock } from "../system/updates";
+import type { Config } from "../cli/index.js";
+import { resolve } from "node:path";
+import { writeFileSync, mkdirSync } from "node:fs";
+import { AxonStore } from "../axon/store.js";
+import { resolvedSharedAxonPath } from "./paths.js";
 
-const DEFAULT_OUTPUT_PATH = join(homedir(), ".openclaw", "workspace", "theorex", "SHARED_CONTEXT.md");
+export const DEFAULT_OUTPUT_PATH = resolve(
+  process.env.THEOREX_SHARED_CONTEXT ??
+    "/Users/eoh/.openclaw/workspace/theorex/SHARED_CONTEXT.md"
+);
 
 export interface BootInjectResult {
-  readonly outputPath: string;
-  readonly activeConcepts: number;
-  readonly totalConcepts: number;
+  outputPath: string;
+  activeConcepts: number;
+  totalConcepts: number;
+  agentCount: number;
+  duration_ms: number;
 }
 
-/**
- * Human-readable relative age from an ISO timestamp.
- * Returns: "today", "yesterday", "3 days ago", "2 weeks ago", "3 months ago".
- * This gives agents a sense of how fresh each concept is.
- */
-function relativeAge(lastSeen: string, nowMs: number): string {
-  const days = (nowMs - new Date(lastSeen).getTime()) / 86_400_000;
-  if (days < 1)   return "today";
-  if (days < 2)   return "yesterday";
-  if (days < 14)  return Math.floor(days) + " days ago";
-  if (days < 60)  return Math.floor(days / 7) + " weeks ago";
-  return Math.floor(days / 30) + " months ago";
-}
-
-/**
- * Generate SHARED_CONTEXT.md from ACTIVE-tier nodes in the shared axon.
- * Groups concepts by agent_id. Sorts by composite score (hottest first).
- * Shows relative age and frequency so agents know what's fresh vs stale.
- */
 export async function generateBootContext(
   config: Config,
   outputPath: string = DEFAULT_OUTPUT_PATH,
+  top: number | undefined,
   nowMs: number = Date.now(),
 ): Promise<BootInjectResult> {
   const sharedPath = resolvedSharedAxonPath(config.sharedAxonPath);
   const store = await AxonStore.load(sharedPath);
-  // Phase 9: wake SLEEPING nodes so they can score and appear in boot context
   if (config.coldStorePath) store.openCold(config.coldStorePath);
 
   const totalConcepts = store.graph.order;
+  const sharedGraph = store.graph;
+  const entries: Array<{
+    conceptId: string;
+    surface_form: string;
+    score: number;
+    agent: string;
+    tier: string;
+    updatedAt: string;
+  }> = [];
 
-  type Entry = { label: string; score: number; age: string; freq: number };
-  const activeByAgent = new Map<string, Entry[]>();
-
-  for (const key of store.graph.nodes()) {
-    const attrs = store.graph.getNodeAttributes(key);
-    const neighborStrengths = store.graph
-      .neighbors(key)
-      .map((nbr) => {
-        const edgeKey = store.graph.edge(key, nbr);
-        return edgeKey ? store.graph.getEdgeAttributes(edgeKey).strength : 0;
+  // Collect all ACTIVE tier concepts from shared graph
+  for (const conceptId of sharedGraph.nodes()) {
+    const attrs = sharedGraph.getNodeAttributes(conceptId) ?? {};
+    const tier = attrs.relevance_tier ?? attrs.tier ?? "ACTIVE";
+    if (tier === "ACTIVE" || tier === "MILD") {
+      entries.push({
+        conceptId,
+        surface_form: attrs.surface_form ?? conceptId,
+        score: attrs.importance_weight ?? attrs.frequency_count ?? 0,
+        agent: attrs.agent_id ?? attrs.agent ?? "unknown",
+        tier,
+        updatedAt: attrs.last_seen ?? attrs.updatedAt,
       });
-
-    const score = compositeScore(attrs.last_seen, attrs.frequency_count, neighborStrengths, nowMs, config);
-    const tier = classifyTier(score, config);
-
-    // Include ACTIVE and MILD — LESS is too stale to be useful at boot
-    if (tier === "LESS") continue;
-
-    // Strip trailing punctuation artifacts from NLP extraction
-    const label = attrs.surface_form.replace(/[:.!,;]+\s*$/, "").replace(/\s+/g, " ").trim();
-    if (!label || label.length < 4) continue;
-    if (label.endsWith("-")) continue;
-    const BOOT_NOISE = new Set(["despite","however","therefore","still","it","this","that",
-      "read","rate","check","floor","day","time","way","here","there","now","then"]);
-    if (BOOT_NOISE.has(label.toLowerCase())) continue;
-
-    const agent = attrs.agent_id || "unknown";
-    if (!activeByAgent.has(agent)) activeByAgent.set(agent, []);
-    activeByAgent.get(agent)!.push({
-      label,
-      score,
-      age: relativeAge(attrs.last_seen, nowMs),
-      freq: attrs.frequency_count,
-    });
+    }
   }
 
-  const activeConcepts = [...activeByAgent.values()].reduce((n, list) => n + list.length, 0);
+  entries.sort((a, b) => b.score - a.score);
+
+  const activeByAgent = new Map<string, typeof entries>();
+  for (const entry of entries) {
+    if (!activeByAgent.has(entry.agent)) {
+      activeByAgent.set(entry.agent, []);
+    }
+    activeByAgent.get(entry.agent)!.push(entry);
+  }
+
+  const PER_AGENT_CAP = top != null ? Math.ceil(top / Math.max(activeByAgent.size, 1)) : Infinity;
 
   const lines: string[] = [
-    "# Shared Agent Context",
-    "> Generated by Theorex — " + new Date(nowMs).toISOString().slice(0, 10),
-    "> " + activeConcepts + " active concepts across " + activeByAgent.size + " agent(s)",
+    "# Theorex Shared Context — Fleet Brain",
+    "",
+    `Generated: ${new Date(nowMs).toISOString()}`,
+    `Total concepts: ${totalConcepts} | Active: ${entries.length} | Agents: ${activeByAgent.size}`,
+    `Top-N per agent: ${top ?? "all"}`,
+    "",
+    "## Active Concepts by Agent",
     "",
   ];
 
-  for (const [agent, entries] of activeByAgent.entries()) {
-    lines.push("## " + agent);
-    // Sort hottest first: highest composite score at top
-    const sorted = [...entries].sort((a, b) => b.score - a.score);
-    for (const entry of sorted) {
-      // Show frequency when meaningfully high (>3 mentions signals importance)
-      const tag = entry.freq > 3
-        ? " _(" + entry.age + ", x" + entry.freq + ")_"
-        : " _(" + entry.age + ")_";
-      lines.push("- " + entry.label + tag);
+  for (const [agent, agentEntries] of activeByAgent.entries()) {
+    const sorted = [...agentEntries].sort((a, b) => b.score - a.score);
+    const capped = sorted.slice(0, PER_AGENT_CAP);
+    lines.push(`## ${agent}`);
+    for (const entry of capped) {
+      const age = entry.updatedAt
+        ? `${Math.round((nowMs - new Date(entry.updatedAt).getTime()) / 86400000)}d ago`
+        : "unknown";
+      lines.push(
+        `- **${entry.surface_form}** \`${entry.conceptId}\` | score: ${entry.score.toFixed(3)} | ${age}`
+      );
     }
     lines.push("");
   }
 
-  if (activeConcepts === 0) {
-    lines.push("_No active shared concepts yet. Run: theorex promote --agent <id>_");
-  }
+  lines.push("---");
+  lines.push(`_Generated by Theorex boot-inject at ${new Date(nowMs).toISOString()}_`);
 
-  // System updates — injected so agents always boot with current fleet state
-  const recentUpdates = await readRecentUpdates(10);
-  const updatesBlock = formatUpdatesBlock(recentUpdates);
-  if (updatesBlock) lines.push(updatesBlock);
+  mkdirSync(resolve(outputPath, ".."), { recursive: true });
+  writeFileSync(outputPath, lines.join("\n"), "utf-8");
 
-  // Deprecated registry — hard block so agents never try to heal retired processes
-  const deprecatedRegistry = await loadDeprecated();
-  const deprecatedBlock = formatDeprecatedBlock(deprecatedRegistry);
-  if (deprecatedBlock) lines.push(deprecatedBlock);
+  return {
+    outputPath,
+    activeConcepts: entries.length,
+    totalConcepts,
+    agentCount: activeByAgent.size,
+    duration_ms: Date.now() - nowMs,
+  };
+}
 
-  await mkdir(dirname(outputPath), { recursive: true });
-  await writeFile(outputPath, lines.join("\n"), "utf-8");
-
-  return { outputPath, activeConcepts, totalConcepts };
+export async function runBootInject(
+  config: Config,
+  outputPath?: string,
+  top?: number,
+): Promise<void> {
+  const result = await generateBootContext(config, outputPath, top);
+  console.log(
+    `Boot context written: ${result.activeConcepts} active concepts → ${result.outputPath}`
+  );
 }

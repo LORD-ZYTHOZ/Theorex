@@ -314,14 +314,10 @@ export function searchHNSW(
 ): readonly HNSWResult[] {
   if (!index.entrypoint || Object.keys(index.nodes).length === 0) return [];
 
-  // Build mutable proxy nodes for searchLayer (read-only view)
+  // searchLayer only reads neighbors — shallow view with id, no array clone needed.
   const proxyNodes: Record<string, BuildNode> = {};
   for (const [id, n] of Object.entries(index.nodes)) {
-    proxyNodes[id] = {
-      id,
-      level: n.level,
-      neighbors: n.neighbors.map((layer) => [...layer]),
-    };
+    proxyNodes[id] = { id, level: n.level, neighbors: n.neighbors as string[][] };
   }
 
   const epVec = vectors.get(index.entrypoint);

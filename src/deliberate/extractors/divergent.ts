@@ -3,6 +3,7 @@
 // Reads a pre-computed JSON report file produced by the Divergent engine.
 // Returns null if the file does not exist.
 
+import { readJsonReport } from "./read-report.ts";
 import type { TradingSession, DivergentReport } from "../types";
 
 /**
@@ -14,15 +15,5 @@ export async function extractDivergentReport(
   _session: TradingSession,
   _date: string,
 ): Promise<DivergentReport | null> {
-  try {
-    const file = Bun.file(reportPath);
-    const exists = await file.exists();
-    if (!exists) return null;
-
-    const text = await file.text();
-    const parsed = JSON.parse(text) as DivergentReport;
-    return parsed;
-  } catch {
-    return null;
-  }
+  return readJsonReport<DivergentReport>(reportPath);
 }

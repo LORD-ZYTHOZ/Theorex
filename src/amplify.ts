@@ -6,7 +6,7 @@ import type { GatedConcept, ScoredConcept } from "./types.ts";
 /**
  * Amplifies each gated concept with a log-normalized frequency score.
  *
- * Formula: frequencyAmplifier = 1 + Math.log1p(frequencyCount)
+ * Formula: frequencyAmplifier = 1 + Math.log(frequencyCount)
  * Yields: f(1)=1.0, f(10)≈3.302, f(1000)≈7.908 — sublinear, bounded growth.
  *
  * Frequency is counted against originalText (not canonicalForm) via case-insensitive

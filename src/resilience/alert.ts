@@ -12,17 +12,17 @@ import type { ErrorEvent, ServiceId } from "./types";
 const lastSent = new Map<ServiceId, number>();
 const lastMessageHashes = new Map<string, boolean>(); // Store hashes of messages
 const RATE_LIMIT_MS = 5 * 60 * 1000; // 5 minutes
+const MAX_HASH_SIZE = 1000; // Prevent unbounded growth
 
 function isRateLimitedOrDuplicate(service: ServiceId, messageHash: string): boolean {
-  // Check rate limiting
-  const last = lastSent.get(service);
-  if (!last) return false;
-  
-  // Check if this message was already sent recently (deduplication)
-  const isDuplicate = lastMessageHashes.get(messageHash);
-  if (isDuplicate) return true;
+  // Check duplicate first — exact content match wins over rate limit
+  if (lastMessageHashes.has(messageHash)) return true;
 
-  return Date.now() - last < RATE_LIMIT_MS;
+  // Check rate limit
+  const last = lastSent.get(service);
+  if (last && Date.now() - last < RATE_LIMIT_MS) return true;
+
+  return false;
 }
 
 // ---------------------------------------------------------------------------
@@ -53,10 +53,10 @@ export async function alertCritical(event: ErrorEvent): Promise<void> {
     if (!token || !chatId) return; // silently skip if not configured
 
     const text = formatAlertMessage(event);
-    const messageHash = JSON.stringify({ 
+    const messageHash = JSON.stringify({
       service: event.service,
       agent_id: event.agent_id,
-      timestamp: event.timestamp,
+      message: event.message,
     });
 
     if (isRateLimitedOrDuplicate(event.service, messageHash)) return;
@@ -71,8 +71,9 @@ export async function alertCritical(event: ErrorEvent): Promise<void> {
       }),
     });
 
+    if (lastMessageHashes.size >= MAX_HASH_SIZE) lastMessageHashes.clear();
     lastSent.set(event.service, Date.now());
-    lastMessageHashes.set(messageHash, true); // Track this message hash to avoid duplicates
+    lastMessageHashes.set(messageHash, true);
   } catch {
     // Alerting must never crash the system
   }
@@ -84,4 +85,5 @@ export async function alertCritical(event: ErrorEvent): Promise<void> {
 
 export function resetRateLimiter(): void {
   lastSent.clear();
+  lastMessageHashes.clear();
 }

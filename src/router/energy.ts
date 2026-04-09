@@ -26,18 +26,6 @@ export interface EnergyDispatchAdvice {
   readonly energy_reading: EnergyReading;
 }
 
-export interface EnergyRecord {
-  readonly id: string;
-  readonly timestamp: string;
-  readonly agent_id: string;
-  readonly task_type: string;
-  readonly model_used: string;
-  readonly energy_watts?: number;
-  readonly duration_ms: number;
-  readonly quality_score?: number;
-  readonly on_battery: boolean;
-}
-
 // ---------------------------------------------------------------------------
 // Power state reading
 // ---------------------------------------------------------------------------
@@ -145,83 +133,5 @@ export function getDispatchAdvice(
     ...base,
     allow_large_model: true,
     reason: "AC power or moderate complexity — large model allowed",
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Energy record persistence
-// ---------------------------------------------------------------------------
-
-const DEFAULT_ENERGY_DIR = "data/energy";
-
-/**
- * Write an EnergyRecord to data/energy/{id}.json atomically.
- * Creates the directory if it does not exist.
- */
-export async function recordEnergyUsage(
-  record: EnergyRecord,
-  dir: string = DEFAULT_ENERGY_DIR,
-): Promise<void> {
-  await Bun.$`mkdir -p ${dir}`.quiet();
-  const path = join(dir, `${record.id}.json`);
-  await Bun.write(path, JSON.stringify(record, null, 2));
-}
-
-// ---------------------------------------------------------------------------
-// Energy statistics
-// ---------------------------------------------------------------------------
-
-interface EnergyStats {
-  readonly avg_watts: number;
-  readonly on_battery_pct: number;
-  readonly sample_count: number;
-}
-
-const ZERO_STATS: EnergyStats = {
-  avg_watts: 0,
-  on_battery_pct: 0,
-  sample_count: 0,
-};
-
-/** Read and parse a single energy record file. Returns undefined on parse error. */
-async function readEnergyRecord(path: string): Promise<EnergyRecord | undefined> {
-  try {
-    return await Bun.file(path).json() as EnergyRecord;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Compute aggregate energy stats from all records in the energy directory.
- * Returns zero stats if the directory is empty or does not exist.
- */
-export async function getEnergyStats(dir: string = DEFAULT_ENERGY_DIR): Promise<EnergyStats> {
-  let files: string[];
-
-  try {
-    const glob = new Bun.Glob("*.json");
-    files = await Array.fromAsync(glob.scan({ cwd: dir, absolute: true }));
-  } catch {
-    return ZERO_STATS;
-  }
-
-  if (files.length === 0) return ZERO_STATS;
-
-  const records = (await Promise.all(files.map(readEnergyRecord)))
-    .filter((r): r is EnergyRecord => r !== undefined);
-
-  if (records.length === 0) return ZERO_STATS;
-
-  const total_watts = records.reduce(
-    (sum, r) => sum + (r.energy_watts ?? 0),
-    0,
-  );
-  const battery_count = records.filter((r) => r.on_battery).length;
-
-  return {
-    avg_watts: total_watts / records.length,
-    on_battery_pct: (battery_count / records.length) * 100,
-    sample_count: records.length,
   };
 }

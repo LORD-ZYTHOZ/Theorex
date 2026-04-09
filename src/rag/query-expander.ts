@@ -11,31 +11,65 @@ const TIMEOUT_MS = 8_000;
 
 const SYSTEM_PROMPT = `You are a search query expansion assistant. Given a search query, generate 2 alternative queries that capture different semantic angles of the same information need. Return ONLY a JSON array of strings with no explanation. Example: ["alternative query one", "alternative query two"]`;
 
+// ---------------------------------------------------------------------------
+// 5-minute TTL cache
+// ---------------------------------------------------------------------------
+
+interface CacheEntry {
+  readonly expansions: string[];
+  readonly expiresAt: number;
+}
+
+const _cache = new Map<string, CacheEntry>();
+
+// ---------------------------------------------------------------------------
+// Public API
+// ---------------------------------------------------------------------------
+
 /**
  * Expand a query into up to 3 variants (original + 2).
  * Falls back to returning just the original on any error.
  */
 export async function expandQuery(query: string): Promise<string[]> {
+  // Check cache first
+  const cached = _cache.get(query);
+  if (cached !== undefined && Date.now() < cached.expiresAt) {
+    return cached.expansions;
+  }
+
   const provider = process.env.QUERY_EXPAND_PROVIDER || 'ollama';
 
+  let result: string[];
   try {
     const variants = provider === 'minimax'
       ? await expandViaMinimax(query)
       : await expandViaOllama(query);
 
     const seen = new Set<string>([query.toLowerCase()]);
-    const result = [query];
+    result = [query];
     for (const v of variants) {
       if (v.trim() && !seen.has(v.toLowerCase())) {
         seen.add(v.toLowerCase());
         result.push(v.trim());
       }
     }
-    return result.slice(0, 3);
+    result = result.slice(0, 3);
   } catch {
-    return [query];
+    result = [query];
   }
+
+  // Store in cache with 5-minute TTL
+  _cache.set(query, {
+    expansions: result,
+    expiresAt: Date.now() + 5 * 60 * 1000,
+  });
+
+  return result;
 }
+
+// ---------------------------------------------------------------------------
+// Ollama provider
+// ---------------------------------------------------------------------------
 
 async function expandViaOllama(query: string): Promise<string[]> {
   const base = process.env.OLLAMA_URL || 'http://localhost:11434';
@@ -60,6 +94,10 @@ async function expandViaOllama(query: string): Promise<string[]> {
   const data = await res.json() as { message?: { content?: string } };
   return parseJsonArray(data.message?.content ?? '');
 }
+
+// ---------------------------------------------------------------------------
+// Minimax provider
+// ---------------------------------------------------------------------------
 
 async function expandViaMinimax(query: string): Promise<string[]> {
   const apiKey = process.env.MINIMAX_API_KEY || '';
@@ -92,6 +130,10 @@ async function expandViaMinimax(query: string): Promise<string[]> {
   const data = await res.json() as { choices?: { message?: { content?: string } }[] };
   return parseJsonArray(data.choices?.[0]?.message?.content ?? '');
 }
+
+// ---------------------------------------------------------------------------
+// Parse helpers
+// ---------------------------------------------------------------------------
 
 function parseJsonArray(content: string): string[] {
   const match = content.match(/\[[\s\S]*\]/);

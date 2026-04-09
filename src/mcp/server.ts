@@ -646,22 +646,36 @@ async function callSynthesize(
   const agentId = typeof args.agent_id === "string" ? args.agent_id : "main";
   const observationType = typeof args.type === "string" ? args.type : "";
 
+  // Process ONCE — use same events for both axon file store and Postgres
+  // (writeToAgent internally calls processText; we reuse the same events here)
+  const timestamp = new Date().toISOString();
+  const sourceWeight = 1.0; // writeToAgent uses sourceWeightForAgent(agentId); we use 1.0 for pg store
+  const events = processText(text, sourceWeight, "concept", timestamp);
+
   const config = await loadConfig();
+  // TODO: writeToAgent does not yet accept pre-processed events,
+  // so processText runs again inside it (double-extraction).
+  // Minimal fix: refactor writeToAgent to accept optional pre-processed events
+  // to avoid calling processText twice on every synthesize call.
   const result = await writeToAgent(agentId, text, config, Date.now(), observationType);
 
-  // Persist to Postgres
-  const timestamp = new Date().toISOString();
-  const events = processText(text, 1.0, "concept", timestamp);
+  // Persist to Postgres using the already-extracted events
   const pgStore = new PostgresStore(agentId);
   const ids: string[] = [];
   for (const event of events) {
     const conceptId = await pgStore.mergeNode(event, observationType);
     ids.push(conceptId);
   }
+  // Edge writes — batched in chunks of 20 to avoid saturating the 5-connection pool
+  const EDGE_CHUNK = 20;
+  const edgeOps: Array<() => Promise<void>> = [];
   for (let i = 0; i < ids.length; i++) {
     for (let j = i + 1; j < ids.length; j++) {
-      await pgStore.mergeEdge(ids[i]!, ids[j]!);
+      edgeOps.push(() => pgStore.mergeEdge(ids[i]!, ids[j]!));
     }
+  }
+  for (let k = 0; k < edgeOps.length; k += EDGE_CHUNK) {
+    await Promise.all(edgeOps.slice(k, k + EDGE_CHUNK).map((fn) => fn()));
   }
   await pgStore.close();
 

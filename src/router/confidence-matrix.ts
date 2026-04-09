@@ -255,7 +255,7 @@ export async function loadMatrix(
  * Normalized latency maps [min, max] latency among peers to [0, 1].
  * If all peers have identical latency the normalized value is 0 (best).
  */
-export function compositeScore(
+function compositeScore(
   cell: MatrixCell,
   allCells: readonly MatrixCell[],
 ): number {

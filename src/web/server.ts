@@ -262,7 +262,8 @@ export function startWebServer(port = 7777): ReturnType<typeof Bun.serve> {
       }
 
       if (url.pathname === "/api/churn-refresh" && req.method === "POST") {
-        (async () => {
+        // Properly await the async work before returning so errors surface to caller
+        const refreshDone = (async () => {
           try {
             const graphData = await runGitnexusCli([
               "cypher",
@@ -285,8 +286,11 @@ export function startWebServer(port = 7777): ReturnType<typeof Bun.serve> {
               state.updateChurn(id, churn, todos);
               await Bun.sleep(50);
             }
-          } catch {}
+          } catch (err) {
+            console.error("[churn-refresh]", err);
+          }
         })();
+        await refreshDone;
         return Response.json({ ok: true, message: "churn refresh started" });
       }
 

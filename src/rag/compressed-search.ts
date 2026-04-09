@@ -5,6 +5,12 @@
  * Stage 2 (accurate): Cosine similarity rerank on full 768d embeddings for top candidates.
  */
 
+import { getDb as _getSharedDb, resetDb as _resetSharedDb } from "../axon/pg-connection";
+
+// Test injection — overrides the shared pool in test contexts only.
+let _testDb: ReturnType<typeof Bun.sql> | null = null;
+function getDb() { return _testDb ?? _getSharedDb(); }
+
 // ── Configuration ─────────────────────────────────────────────────────────────
 const COMPRESS_DIM   = 768;  // nomic-embed-text output dimension
 const COMPRESS_BITS  = 8;    // bits per component
@@ -80,25 +86,6 @@ export interface CompressedSearchOptions {
   readonly agentId?: string;
   readonly preFilterN?: number;
   readonly topK?: number;
-}
-
-// ---------------------------------------------------------------------------
-// DB connection (module-level singleton)
-// ---------------------------------------------------------------------------
-
-let _sql: ReturnType<typeof Bun.sql> | null = null;
-
-function getDb(): ReturnType<typeof Bun.sql> {
-  if (!_sql) {
-    _sql = new Bun.SQL({
-      host: process.env.THEOREX_PG_HOST || "100.95.91.32",
-      port: Number(process.env.THEOREX_PG_PORT || 5432),
-      user: process.env.THEOREX_PG_USER || "claw",
-      database: process.env.THEOREX_PG_DB || "theorex",
-      max: 5,
-    });
-  }
-  return _sql;
 }
 
 // ---------------------------------------------------------------------------
@@ -274,11 +261,12 @@ export async function compressedSearch(
 // ---------------------------------------------------------------------------
 
 export function _setDbForTesting(db: ReturnType<typeof Bun.sql>): void {
-  _sql = db;
+  _testDb = db;
 }
 
 export function _resetDbForTesting(): void {
-  _sql = null;
+  _testDb = null;
+  _resetSharedDb();
 }
 
 export function _setQuantizerForTesting(q: NativeQuantizerType): void {

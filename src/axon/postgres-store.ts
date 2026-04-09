@@ -10,6 +10,7 @@
 import type { ConceptEvent } from "../types";
 import { embedText } from "../rag/ollama-embedder";
 import { resilientQuery, isConnectionError, getCircuitBreaker } from "./pg-resilience";
+import { getDb, resetDb } from "./pg-connection";
 
 export interface PgConceptRow {
   id: string;
@@ -25,29 +26,6 @@ export interface PgConceptRow {
 
 export interface PgSearchResult extends PgConceptRow {
   score: number;
-}
-
-// ---------------------------------------------------------------------------
-// Connection (singleton)
-// ---------------------------------------------------------------------------
-
-let _sql: ReturnType<typeof Bun.sql> | null = null;
-
-function resetDb(): void {
-  _sql = null;
-}
-
-function getDb() {
-  if (!_sql) {
-    _sql = new Bun.SQL({
-      host: process.env.THEOREX_PG_HOST || '100.95.91.32',
-      port: Number(process.env.THEOREX_PG_PORT || 5432),
-      user: process.env.THEOREX_PG_USER || 'claw',
-      database: process.env.THEOREX_PG_DB || 'theorex',
-      max: 5,
-    });
-  }
-  return _sql;
 }
 
 // ---------------------------------------------------------------------------
@@ -477,11 +455,12 @@ export class PostgresStore {
   /**
    * Get all profiles for this agent.
    */
-  async getAllProfiles(): Promise<Array<{ subject: string; traits: Record<string, unknown> }>> {
+  async getAllProfiles(limit = 10): Promise<Array<{ subject: string; traits: Record<string, unknown> }>> {
     const rows = await this.withAgentContext((tx) => tx`
       SELECT subject, traits FROM profiles
       WHERE agent_id = ${this.agentId}
       ORDER BY updated_at DESC
+      LIMIT ${limit}
     `);
     return rows.map((r) => ({
       subject: r.subject as string,

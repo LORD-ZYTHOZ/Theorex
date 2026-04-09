@@ -226,6 +226,7 @@ interface InFlightSession {
   readonly agent_id: string;
   readonly model: string;
   readonly start_time: string;
+  readonly startedAt: number;       // epoch ms — used for TTL expiry
   readonly prompt_tokens: number;
   readonly query_type: string;
   readonly events: BusEvent[];
@@ -246,6 +247,8 @@ export class EventBus {
   private readonly inFlight = new Map<string, InFlightSession>();
   // configurable traces directory — set via setTracesDir()
   private tracesDir: string = DEFAULT_TRACES_DIR;
+  // throttle cleanup — only scan inFlight every 5 minutes
+  private lastCleanup = 0;
 
   // ---------------------------------------------------------------------------
   // Subscribe / unsubscribe
@@ -261,11 +264,23 @@ export class EventBus {
     this.listeners.get(type)?.delete(listener as AnyListener);
   }
 
+  /** Remove in-flight sessions older than 30 minutes. Throttled — only scans every 5 minutes. */
+  private cleanupStale(): void {
+    const now = Date.now();
+    if (now - this.lastCleanup < 5 * 60 * 1000) return;
+    this.lastCleanup = now;
+    const cutoff = now - 30 * 60 * 1000;
+    for (const [agentId, session] of this.inFlight) {
+      if (session.startedAt < cutoff) this.inFlight.delete(agentId);
+    }
+  }
+
   // ---------------------------------------------------------------------------
   // Emit — dispatches to subscribers then runs internal trace assembler
   // ---------------------------------------------------------------------------
 
   emit<T extends BusEventType>(type: T, payload: BusEventPayloadMap[T]): void {
+    this.cleanupStale();   // throttled — at most every 5 min
     const event: BusEvent<T> = {
       type,
       timestamp: new Date().toISOString(),
@@ -311,6 +326,7 @@ export class EventBus {
       agent_id,
       model,
       start_time: event.timestamp,
+      startedAt: Date.now(),
       prompt_tokens,
       query_type,
       events: [event as BusEvent],

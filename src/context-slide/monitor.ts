@@ -32,8 +32,8 @@ export async function readContextMetrics(sessionId: string): Promise<ContextMetr
     if (timestamp > 0 && nowSecs - timestamp > STALE_SECONDS) return null;
 
     const used_pct = typeof raw.used_pct === "number" ? raw.used_pct : 0;
-    const remaining_pct = typeof raw.remaining_percentage === "number"
-      ? raw.remaining_percentage
+    const remaining_pct = typeof raw.remaining_pct === "number"
+      ? raw.remaining_pct
       : 100 - used_pct;
 
     return { used_pct, remaining_pct, timestamp };

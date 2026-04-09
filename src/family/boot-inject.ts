@@ -6,6 +6,7 @@ import { resolve } from "node:path";
 import { writeFileSync, mkdirSync } from "node:fs";
 import { AxonStore } from "../axon/store.js";
 import { resolvedSharedAxonPath } from "./paths.js";
+import { pgNotify } from "../axon/postgres-store.js";
 
 export const DEFAULT_OUTPUT_PATH = resolve(
   process.env.THEOREX_SHARED_CONTEXT ??
@@ -119,4 +120,11 @@ export async function runBootInject(
   console.log(
     `Boot context written: ${result.activeConcepts} active concepts → ${result.outputPath}`
   );
+  pgNotify("boot_inject_complete", {
+    concepts: result.activeConcepts,
+    agent_count: result.agentCount,
+    output_path: result.outputPath,
+    duration_ms: result.duration_ms,
+    fired_at: new Date().toISOString(),
+  }).catch(() => {/* best-effort */});
 }

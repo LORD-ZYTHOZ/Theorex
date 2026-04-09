@@ -12,7 +12,12 @@ import re
 import sys
 import urllib.error
 import urllib.request
+from collections import Counter
+from datetime import datetime, timezone
 from pathlib import Path
+
+import psycopg2
+import psycopg2.extensions
 
 DREAMS_MD = "/Users/claw/.openclaw/memory/DREAMS.md"
 CHECKPOINT_FILE = "/Users/claw/.openclaw/memory/.dreams/ingest_checkpoint.json"
@@ -146,6 +151,26 @@ def call_ingest_dream(content: str, agent_id: str) -> bool:
         return False
 
 
+def pg_notify_dream_complete(agent_counts: dict[str, int]) -> None:
+    """Best-effort pg_notify — failure does not block ingest."""
+    try:
+        conn = psycopg2.connect(host="localhost", port=5432, user="claw", dbname="theorex")
+        conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
+        cur = conn.cursor()
+        for agent_id, count in agent_counts.items():
+            payload = json.dumps({
+                "agent_id": agent_id,
+                "count": count,
+                "source": "dream_deep",
+                "fired_at": datetime.now(timezone.utc).isoformat(),
+            })
+            cur.execute("SELECT pg_notify('dream_ingest_complete', %s)", (payload,))
+            log(f"  pg_notify dream_ingest_complete: agent={agent_id} count={count}")
+        conn.close()
+    except Exception as exc:
+        log(f"  [WARN] pg_notify failed (non-fatal): {exc}")
+
+
 def main() -> int:
     dreams_path = Path(DREAMS_MD)
 
@@ -197,6 +222,14 @@ def main() -> int:
         f"Processed {processed} promotion(s), skipped {failed} "
         f"(checkpoint advanced to line {total_lines})"
     )
+
+    # Notify pulse-daemon that dream ingest is complete (one notify per agent)
+    if processed > 0:
+        agent_counts: dict[str, int] = Counter(
+            agent_id for _, agent_id in promotions
+        )
+        pg_notify_dream_complete(dict(agent_counts))
+
     return 0
 
 

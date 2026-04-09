@@ -795,3 +795,13 @@ export function isPostgresEnabled(): boolean {
 export function createStore(agentId: string): PostgresStore {
   return new PostgresStore(agentId);
 }
+
+// ---------------------------------------------------------------------------
+// One-shot pg_notify helper — fire-and-forget, best-effort
+// ---------------------------------------------------------------------------
+
+export async function pgNotify(channel: string, payload: Record<string, unknown>): Promise<void> {
+  const db = getDb();
+  const payloadStr = JSON.stringify(payload);
+  await db`SELECT pg_notify(${channel}, ${payloadStr})`;
+}

@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 """
-pulse-daemon.py — Theorex Pulse: LISTEN for concept_new, write PULSE.md per agent.
+pulse-daemon.py — Theorex Pulse: LISTEN for concept events, write PULSE.md per agent.
 
-Connects to local Postgres, LISTENs on 'concept_new' channel.
-Batches events per agent over a 10s window, then writes:
-  ~/.openclaw/workspace/{agent_id}/PULSE.md
+Channels:
+  concept_new            — individual concept INSERT (batched per agent, 10s window)
+  boot_inject_complete   — shared context refresh (writes SHARED_PULSE.md)
+  dream_ingest_complete  — nightly dream batch done (writes agent PULSE.md)
 
 Runs as a PM2 process on m1. Reconnects automatically on connection loss.
 """
@@ -32,6 +33,8 @@ WORKSPACE   = Path(os.environ.get("OC_WORKSPACE", Path.home() / ".openclaw/works
 BATCH_SECS  = 10       # flush window per agent
 RECONNECT_SECS = 5     # wait before reconnecting after error
 
+LISTEN_CHANNELS = ["concept_new", "boot_inject_complete", "dream_ingest_complete"]
+
 LOG_PREFIX = "[pulse]"
 
 
@@ -41,7 +44,7 @@ def log(msg: str) -> None:
 
 
 # ---------------------------------------------------------------------------
-# PULSE.md writer
+# Writers
 # ---------------------------------------------------------------------------
 
 MAX_PENDING_PER_AGENT = 100  # force flush if batch grows too large
@@ -85,6 +88,61 @@ def write_pulse(agent_id: str, events: list[dict]) -> None:
     log(f"  wrote PULSE.md → {agent_id} ({len(events)} concepts, {len(by_wing)} wing(s))")
 
 
+def write_shared_pulse(payload: dict) -> None:
+    """Write SHARED_PULSE.md — notifies all agents that boot context was refreshed."""
+    shared_pulse_path = WORKSPACE / "theorex" / "SHARED_PULSE.md"
+    try:
+        shared_pulse_path.parent.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        log(f"  [WARN] cannot create theorex workspace dir")
+        return
+
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    concepts = payload.get("concepts", "?")
+    agent_count = payload.get("agent_count", "?")
+    duration_ms = payload.get("duration_ms", "?")
+    fired_at = payload.get("fired_at", now)
+
+    lines = [
+        "# Shared Context — Boot Inject Complete",
+        f"_Refreshed: {fired_at}_",
+        "",
+        f"- **{concepts}** active concepts promoted",
+        f"- **{agent_count}** agents covered",
+        f"- Generated in {duration_ms}ms",
+        "",
+        "_Read SHARED_CONTEXT.md for the full injected context._",
+    ]
+    shared_pulse_path.write_text("\n".join(lines))
+    log(f"  wrote SHARED_PULSE.md ({concepts} concepts, {agent_count} agents)")
+
+
+def write_dream_pulse(agent_id: str, payload: dict) -> None:
+    """Append dream ingest completion notice to agent's PULSE.md."""
+    agent_dir = WORKSPACE / agent_id
+    try:
+        agent_dir.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        log(f"  [WARN] cannot create workspace for {agent_id}: {agent_dir}")
+        return
+
+    pulse_path = agent_dir / "PULSE.md"
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    count = payload.get("count", "?")
+    fired_at = payload.get("fired_at", now)
+
+    section = (
+        f"\n## Dream Ingest Complete — {fired_at}\n"
+        f"\n- **{count}** dream promotion(s) ingested from DREAMS.md\n"
+        f"- Source: `dream_deep` (nightly cron)\n"
+    )
+
+    # Append to existing PULSE.md if present, otherwise create
+    existing = pulse_path.read_text() if pulse_path.exists() else f"# Pulse — {agent_id}\n_Last updated: {now}_\n"
+    pulse_path.write_text(existing.rstrip() + "\n" + section)
+    log(f"  wrote dream pulse → {agent_id} ({count} promotions)")
+
+
 # ---------------------------------------------------------------------------
 # Main loop
 # ---------------------------------------------------------------------------
@@ -103,8 +161,9 @@ def run() -> None:
             )
             conn.set_isolation_level(psycopg2.extensions.ISOLATION_LEVEL_AUTOCOMMIT)
             cur = conn.cursor()
-            cur.execute("LISTEN concept_new;")
-            log(f"connected to {PG_DB}@{PG_HOST}, LISTENing on concept_new")
+            for channel in LISTEN_CHANNELS:
+                cur.execute(f"LISTEN {channel};")
+            log(f"connected to {PG_DB}@{PG_HOST}, LISTENing on {', '.join(LISTEN_CHANNELS)}")
 
             while True:
                 # Wait up to 2s for a notification
@@ -118,19 +177,31 @@ def run() -> None:
                         try:
                             payload = json.loads(notify.payload)
                         except (json.JSONDecodeError, ValueError, TypeError):
-                            log(f"  [WARN] bad payload: {str(notify.payload)[:100]}")
+                            log(f"  [WARN] bad payload on {notify.channel}: {str(notify.payload)[:100]}")
                             continue
 
-                        agent_id = payload.get("agent_id") or "main"
-                        if agent_id not in pending:
-                            pending[agent_id] = (time.monotonic(), [])
-                        pending[agent_id][1].append(payload)
-                        log(f"  recv concept_new: agent={agent_id} label={payload.get('label','?')}")
+                        channel = notify.channel
 
-                        # Force flush if batch is too large
-                        if len(pending[agent_id][1]) >= MAX_PENDING_PER_AGENT:
-                            _, events = pending.pop(agent_id)
-                            write_pulse(agent_id, events)
+                        if channel == "concept_new":
+                            agent_id = payload.get("agent_id") or "main"
+                            if agent_id not in pending:
+                                pending[agent_id] = (time.monotonic(), [])
+                            pending[agent_id][1].append(payload)
+                            log(f"  recv concept_new: agent={agent_id} label={payload.get('label','?')}")
+
+                            # Force flush if batch is too large
+                            if len(pending[agent_id][1]) >= MAX_PENDING_PER_AGENT:
+                                _, events = pending.pop(agent_id)
+                                write_pulse(agent_id, events)
+
+                        elif channel == "boot_inject_complete":
+                            log(f"  recv boot_inject_complete: concepts={payload.get('concepts','?')}")
+                            write_shared_pulse(payload)
+
+                        elif channel == "dream_ingest_complete":
+                            agent_id = payload.get("agent_id") or "main"
+                            log(f"  recv dream_ingest_complete: agent={agent_id} count={payload.get('count','?')}")
+                            write_dream_pulse(agent_id, payload)
 
                 # Flush agents whose batch window has elapsed
                 now = time.monotonic()

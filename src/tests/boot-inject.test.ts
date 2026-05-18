@@ -44,7 +44,7 @@ describe("generateBootContext()", () => {
 
     expect(result.outputPath).toBe(outputPath);
     const content = await readFile(outputPath, "utf-8");
-    expect(content).toContain("# Shared Agent Context");
+    expect(content).toContain("# Theorex Shared Context");
   });
 
   test("returns totalConcepts=0 for empty axon", async () => {
@@ -91,7 +91,7 @@ describe("generateBootContext()", () => {
     const result = await generateBootContext(config, deepOutput);
     expect(result.outputPath).toBe(deepOutput);
     const content = await readFile(deepOutput, "utf-8");
-    expect(content).toContain("# Shared Agent Context");
+    expect(content).toContain("# Theorex Shared Context");
   });
 
   test("counts concepts from axon nodes above LESS tier", async () => {

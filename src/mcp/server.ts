@@ -612,8 +612,27 @@ async function handleToolCall(
       return await callRefineProcedure(id, args);
     case "meta_review":
       return await callMetaReview(id, args);
-    case "deliberate":
-      return makeResult(id, await handleDeliberateTool(args));
+    case "deliberate": {
+      // Dispatch: POST to Qwen3 via LM Studio on m4
+      const largeModelUrl = "http://localhost:8082/v1/chat/completions";
+      const dispatchFn = async (prompt: string): Promise<string> => {
+        const body = JSON.stringify({
+          messages: [{ role: "user", content: `/no_think ${prompt}` }],
+          max_tokens: 2048,
+          temperature: 0.3,
+        });
+        const res = await Bun.fetch(largeModelUrl, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body,
+          signal: AbortSignal.timeout(120_000),
+        });
+        if (!res.ok) throw new Error(`Model returned HTTP ${res.status}`);
+        const json = await res.json() as { choices?: Array<{ message?: { content?: string } }> };
+        return (json.choices?.[0]?.message?.content ?? "").replace(/<think>[\s\S]*?<\/think>\s*/g, "").trim();
+      };
+      return makeResult(id, await handleDeliberateTool(args, dispatchFn));
+    }
     case "deliberation_history":
       return makeResult(id, await handleDeliberationHistoryTool(args));
     case "emit-span":
@@ -695,6 +714,8 @@ async function callWriteConcept(
   const body = typeof args.body === "string" ? args.body : "";
   const meta = (args.meta as Record<string, unknown>) ?? {};
   const agentId = typeof args.agent_id === "string" ? args.agent_id : "main";
+  const wing = typeof args.wing === "string" ? args.wing : undefined;
+  const room = typeof args.room === "string" ? args.room : undefined;
   const tags = Array.isArray(args.tags) ? (args.tags as string[]) : [];
 
   if (!label || !memoryType) {
@@ -703,13 +724,13 @@ async function callWriteConcept(
 
   const pgStore = new PostgresStore(agentId);
   try {
-    const conceptId = await pgStore.upsertConcept(label, memoryType, body, meta);
+    const conceptId = await pgStore.upsertConcept(label, memoryType, body, meta, wing, room);
 
     // Tag edges
     if (tags.length > 0) {
       for (const tag of tags) {
         try {
-          const tagId = await pgStore.upsertConcept(`tag:${tag}`, "core", tag, { tag_name: tag });
+          const tagId = await pgStore.upsertConcept(`tag:${tag}`, "core", tag, { tag_name: tag }, wing, room);
           await pgStore.mergeEdge(conceptId, tagId, "tagged_as", 1.0);
         } catch {
           // Ignore tag failures
@@ -718,7 +739,7 @@ async function callWriteConcept(
     }
 
     return makeResult(id, {
-      content: [{ type: "text", text: `write_concept ${conceptId} [${memoryType}] ${label}` }],
+      content: [{ type: "text", text: `write_concept ${conceptId} [${memoryType}] ${label}${wing ? ` @ ${wing}/${room ?? "*"}` : ""}` }],
       id: conceptId,
     });
   } catch (err) {
@@ -1496,32 +1517,14 @@ async function handleMcpRequestRaw(body: unknown): Promise<object | null> {
   return await resp.json() as object;
 }
 
-export async function startMcpStdio(): Promise<void> {
-  const reader = Bun.stdin.stream().getReader();
-  const decoder = new TextDecoder();
-  let buffer = "";
+const server = startMcpServer();
+console.log(`Theorex MCP → http://127.0.0.1:${server.port}/mcp`);
 
-  while (true) {
-    const { done, value } = await reader.read();
-    if (done) break;
-    buffer += decoder.decode(value);
-    const lines = buffer.split("\n");
-    buffer = lines.pop() ?? "";
-    for (const line of lines) {
-      const trimmed = line.trim();
-      if (!trimmed) continue;
-      try {
-        const body = JSON.parse(trimmed);
-        const result = await handleMcpRequestRaw(body);
-        if (result !== null) {
-          process.stdout.write(JSON.stringify(result) + "\n");
-        }
-      } catch {
-        process.stdout.write(JSON.stringify({
-          jsonrpc: "2.0", id: null,
-          error: { code: -32700, message: "Parse error" },
-        }) + "\n");
-      }
-    }
-  }
-}
+process.on("SIGTERM", () => {
+  server.stop();
+  process.exit(0);
+});
+process.on("SIGINT", () => {
+  server.stop();
+  process.exit(0);
+});

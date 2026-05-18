@@ -1,9 +1,9 @@
 // dispatch/worker.ts — Phase 16 Parallel Background Processing.
-// Dispatches tasks to local LLM (Gemma4-31B via Ollama) when context
+// Dispatches tasks to local LLM (Gemma3 via Ollama) when context
 // pressure reaches 50%. Fire-and-forget — results written to agent axon.
 //
 // Flow:
-//   1. route() picks model tier (all tiers → gemma4:31b on port 11434)
+//   1. route() picks model tier (all tiers → qwen-abliterated on port 11434)
 //   2. readPowerState() + getDispatchAdvice() may downgrade large→medium on battery
 //   3. LM_INFERENCE_START emitted on EventBus
 //   4. Bun.fetch POST to Ollama /v1/chat/completions (120s timeout)
@@ -64,8 +64,8 @@ export interface DispatchConfig {
 // ---------------------------------------------------------------------------
 
 const DEFAULT_DISPATCH_CONFIG: DispatchConfig = {
-  largeModelUrl: "http://localhost:11434",
-  mediumModelUrl: "http://localhost:11434",
+  largeModelUrl: "http://localhost:8000",
+  mediumModelUrl: "http://localhost:8000",
   timeoutMs: 120_000,
   contextTriggerPct: 50,
 } as const;
@@ -85,7 +85,7 @@ function resolveEndpoint(
 
 /** Resolve human-readable model name for trace payloads. */
 function resolveModelName(_tier: "large" | "medium" | "small"): string {
-  return "gemma4:31b";
+  return "qwen-abliterated";
 }
 
 /** POST to LM Studio and return { text, completion_tokens, latency_ms }. */
@@ -97,7 +97,7 @@ async function callLmStudio(
   maxTokens: number = 1024,
 ): Promise<{ readonly text: string; readonly completion_tokens: number; readonly latency_ms: number }> {
   const body = JSON.stringify({
-    model: "gemma4:31b",
+    model: "qwen-abliterated",
     messages: [{ role: "user", content: task }],
     max_tokens: maxTokens,
     temperature: 0.3,

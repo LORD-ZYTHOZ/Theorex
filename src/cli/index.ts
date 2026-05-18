@@ -7,6 +7,7 @@
 
 import { parseArgs } from "util";
 import { scanAxon } from "../axon/scan";
+import { enrich_concept_bodies } from "../axon/enrich-bodies";
 import { pruneAxon } from "../axon/prune";
 import { propagateActivation } from "../axon/propagate";
 import { AxonStore } from "../axon/store";
@@ -51,6 +52,7 @@ import { addDeprecated, removeDeprecated, loadDeprecated } from "../system/depre
 
 export async function runScan(axonPath: string, config: Config): Promise<void> {
   await scanAxon(axonPath, config);
+  await enrich_concept_bodies(axonPath);
   console.log("Scan complete.");
 }
 
@@ -972,15 +974,16 @@ if (import.meta.main) {
       break;
 
     case "boot-inject": {
-      // Usage: theorex boot-inject [--output <path>] [--top N]
+      // Usage: theorex boot-inject [--output <path>] [--top N] [--depth summary|full]
       const { values: biValues } = parseArgs({
         args: Bun.argv.slice(3),
-        options: { output: { type: "string" }, top: { type: "string" } },
+        options: { output: { type: "string" }, top: { type: "string" }, depth: { type: "string" } },
         allowPositionals: false,
         strict: false,
       });
       const top = typeof biValues.top === "string" ? parseInt(biValues.top) : undefined;
-      await runBootInject(config, typeof biValues.output === "string" ? biValues.output : undefined, top);
+      const depth = (biValues.depth === "full" ? "full" : "summary") as "summary" | "full";
+      await runBootInject(config, typeof biValues.output === "string" ? biValues.output : undefined, top, depth);
       break;
     }
 
@@ -2411,6 +2414,63 @@ if (import.meta.main) {
       }
 
       console.log(`Deliberation complete (${record.latency_ms}ms)`);
+      break;
+    }
+
+    // Phase 13: Outcomes — view trade outcomes
+    case "outcomes": {
+      // Usage: theorex outcomes --agent <id> [--limit N] | --summary
+      const { values: ocValues } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:   { type: "string" },
+          limit:   { type: "string" },
+          summary: { type: "boolean" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const { runOutcomesCLI } = await import("./commands/outcomes");
+      await runOutcomesCLI({
+        agent: typeof ocValues.agent === "string" ? ocValues.agent : undefined,
+        limit: typeof ocValues.limit === "string" ? parseInt(ocValues.limit, 10) : 50,
+        summary: ocValues.summary === true,
+      });
+      break;
+    }
+
+    // Phase 22: Learn — Nova's learning system
+    case "learn": {
+      const { values: lv } = parseArgs({
+        args: Bun.argv.slice(3),
+        options: {
+          agent:     { type: "string" },
+          event:     { type: "string" },
+          context:   { type: "string" },
+          pattern:   { type: "string" },
+          outcome:   { type: "string" },
+          confidence:{ type: "string" },
+          meta:      { type: "string" },
+          query:     { type: "boolean" },
+          summary:   { type: "boolean" },
+          list:      { type: "boolean" },
+        },
+        allowPositionals: false,
+        strict: false,
+      });
+      const { runLearnCLI } = await import("./commands/learn");
+      await runLearnCLI({
+        agent:     typeof lv.agent === "string" ? lv.agent : undefined,
+        event:     typeof lv.event === "string" ? lv.event : undefined,
+        context:   typeof lv.context === "string" ? lv.context : undefined,
+        pattern:   typeof lv.pattern === "string" ? lv.pattern : undefined,
+        outcome:   typeof lv.outcome === "string" ? lv.outcome : undefined,
+        confidence: typeof lv.confidence === "string" ? parseFloat(lv.confidence) : undefined,
+        meta:      typeof lv.meta === "string" ? lv.meta : undefined,
+        query:     lv.query === true,
+        summary:   lv.summary === true,
+        list:      lv.list === true,
+      });
       break;
     }
 

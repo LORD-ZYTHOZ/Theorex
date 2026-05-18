@@ -22,6 +22,10 @@ export interface AgentSpan {
   readonly reward_at: string | null;
   readonly optimized: boolean;
   readonly optimized_at: string | null;
+  /** FTS5 tsvector — auto-populated via generated column. Search across prompt/output/thought. */
+  readonly fts_content?: unknown;
+  /** LLM-generated one-line summary of this span's outcome. Set by nightly pipeline. */
+  readonly session_summary?: string | null;
 }
 
 export interface SpanEmitInput {

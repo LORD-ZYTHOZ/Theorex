@@ -103,21 +103,32 @@ export class PostgresStore {
   /**
    * Simple upsert — just label + agent, no ConceptEvent needed.
    */
-  async upsertConcept(label: string, memoryType = 'fact', body?: string, meta?: Record<string, unknown>): Promise<string> {
+  async upsertConcept(
+    label: string,
+    memoryType = "fact",
+    body?: string,
+    meta?: Record<string, unknown>,
+    wing?: string,
+    room?: string,
+  ): Promise<string> {
     const metaJson = meta ?? {};
     const rows = await this.withAgentContext((tx) => tx`
-      INSERT INTO concepts (label, body, memory_type, agent_id, meta)
+      INSERT INTO concepts (label, body, memory_type, agent_id, meta, wing, room)
       VALUES (
         ${label},
         ${body ?? null},
         ${memoryType}::memory_type,
         ${this.agentId},
-        ${metaJson}
+        ${metaJson},
+        ${wing ?? null},
+        ${room ?? null}
       )
       ON CONFLICT (label, agent_id) DO UPDATE SET
         updated_at = now(),
         body = COALESCE(EXCLUDED.body, concepts.body),
-        meta = EXCLUDED.meta
+        meta = EXCLUDED.meta,
+        wing = COALESCE(EXCLUDED.wing, concepts.wing),
+        room = COALESCE(EXCLUDED.room, concepts.room)
       RETURNING id
     `);
 
@@ -724,10 +735,8 @@ export class PostgresStore {
   }
 
   async close(): Promise<void> {
-    if (_sql) {
-      await _sql.end();
-      _sql = null;
-    }
+    // Connection pool is managed as a singleton via pg-connection.ts getDb().
+    // No-op: pool stays alive for the lifetime of the process.
   }
 }
 

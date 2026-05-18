@@ -46,52 +46,39 @@ With Theorex:     Agent boots with its 50 most relevant concepts injected.
 ## > ARCHITECTURE.exe
 
 ```mermaid
-graph TD
-    subgraph SESSION["⚡ CLAUDE CODE SESSION"]
-        HOOK["Hook Dispatcher\nPostToolUse · Stop"]
-        FLASH["Flash Lobe\nring buffer per session"]
-    end
+flowchart LR
+    HOOK(["⚡ Hook\nDispatcher"])
+    FLASH(["Flash Lobe\nring buffer"])
+    SIG(["Significance\nEngine"])
+    AXON(["Concept Web\nAxon"])
+    PG[("PostgreSQL")]
+    STL(["Short-Term\nBM25 + vector"])
+    LTL(["Long-Term\naxon.json"])
+    BI(["boot-inject\nSHARED_CONTEXT"])
+    MCP(["MCP :18800\nJSON-RPC 2.0"])
+    SESSION(["Claude Code\nSession"])
 
-    subgraph SIG["🔬 SIGNIFICANCE ENGINE"]
-        CE["ConceptExtractor\ntoken → concept ID"]
-        IG["ImportanceGate\nbinary: worth tracking?"]
-        FA["FrequencyAmplifier\nlog-normalised count"]
-        CS["CompositeSignal\nscore 0.0 → 1.0"]
-    end
-
-    subgraph MEMORY["🧠 CONCEPT WEB (Axon)"]
-        CP["CrossPollinator\nactivation through edges"]
-        DR["DecayRunner\nexponential decay on idle nodes"]
-        TC["TierClassifier\nACTIVE · MILD · LESS"]
-        PG["PostgreSQL\nconcepts · spans · outcomes · flash"]
-    end
-
-    subgraph LOBES["📦 MEMORY LOBES"]
-        STL["Short-Term Lobe\nBM25 + vector · 14-day JSONL"]
-        LTL["Long-Term Lobe\naxon.json · moment nodes"]
-        RAG["RAG Bootstrap\nembed → neighbors → seed edges"]
-    end
-
-    subgraph OUTPUT["🚀 BOOT OUTPUT"]
-        BI["boot-inject\nSHARED_CONTEXT.md"]
-        MCP["MCP Server :18800\nJSON-RPC 2.0"]
-    end
-
+    SESSION -->|PostToolUse| HOOK
     HOOK --> FLASH
-    FLASH -->|flush on Stop| CE
-    CE --> IG --> FA --> CS
-    CS --> CP --> DR --> TC --> PG
-    PG --> STL & LTL
-    RAG --> STL
-    TC -->|graduates| LTL
-    PG --> BI --> SESSION
+    FLASH -->|flush on Stop| SIG
+    SIG -->|score 0–1| AXON
+    AXON --> PG
+    PG --> STL
+    PG --> LTL
+    PG --> BI
     PG --> MCP
+    BI -->|inject at start| SESSION
 
-    style SESSION fill:#0d001a,stroke:#c800ff,color:#c800ff
-    style SIG fill:#0a000f,stroke:#9933cc,color:#9933cc
-    style MEMORY fill:#080010,stroke:#7700aa,color:#7700aa
-    style LOBES fill:#0d001a,stroke:#5500aa,color:#9966cc
-    style OUTPUT fill:#0a000f,stroke:#c800ff,color:#c800ff
+    style HOOK fill:#1a0033,stroke:#c800ff,color:#c800ff
+    style FLASH fill:#1a0033,stroke:#9933cc,color:#cc66ff
+    style SIG fill:#0d001a,stroke:#c800ff,color:#c800ff
+    style AXON fill:#0d001a,stroke:#9933cc,color:#cc66ff
+    style PG fill:#0a000f,stroke:#7700aa,color:#bb44ff
+    style STL fill:#0d001a,stroke:#5500aa,color:#9966cc
+    style LTL fill:#0d001a,stroke:#5500aa,color:#9966cc
+    style BI fill:#1a0033,stroke:#c800ff,color:#c800ff
+    style MCP fill:#1a0033,stroke:#9933cc,color:#cc66ff
+    style SESSION fill:#1a0033,stroke:#c800ff,color:#c800ff
 ```
 
 ---

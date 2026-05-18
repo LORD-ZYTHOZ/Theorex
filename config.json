@@ -1,4 +1,6 @@
 {
+  "TURBOQUANT_SEED": "42",
+  "TURBOQUANT_WARNING": "CRITICAL: This seed is baked into all 4320 stored TurboCode compressed vectors (1260 tests green). Changing this value invalidates ALL stored codes and requires full backfill. Never change without a complete migration plan.",
   "lmStudioUrl": "http://localhost:11434",
   "synthEndpoint": "http://localhost:11434",
   "lmStudioTimeoutMs": 30000,

@@ -29,7 +29,6 @@ module.exports = {
       name: "theorex-scan",
       script: BUN,
       args: `run ${CLI} scan`,
-      cron_restart: "0 */6 * * *",
       autorestart: false,
       env: { THEOREX_STORAGE: "postgres" },
       out_file: `${LOG_DIR}/theorex-scan-out.log`,

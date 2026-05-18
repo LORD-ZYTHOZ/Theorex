@@ -57,7 +57,7 @@ export class AxonStore {
    * Open cold storage for this store. Call once after load() when Phase 9 is active.
    * If not opened, SLEEPING nodes are left as-is (backward compatible).
    */
-  openCold(coldPath: string, retries = 3, delayMs = 500): void {
+  openCold(coldPath: string, retries = 10, delayMs = 2000): void {
     for (let i = 0; i < retries; i++) {
       try {
         this._cold = new ColdStore(coldPath);

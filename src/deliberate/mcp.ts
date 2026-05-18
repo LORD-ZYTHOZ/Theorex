@@ -94,6 +94,7 @@ export function deliberationHistoryToolDef(): object {
 
 export async function handleDeliberateTool(
   args: Record<string, unknown>,
+  dispatch?: (prompt: string, maxTokens?: number) => Promise<string>,
 ): Promise<McpToolResponse> {
   const session = typeof args.session === "string" ? args.session : "";
   const date = typeof args.date === "string" ? args.date : "";
@@ -111,15 +112,70 @@ export async function handleDeliberateTool(
     );
   }
 
-  // For now, return a stub acknowledgment.
-  // Full orchestration wiring will connect runDeliberation in a later task.
+  // If no dispatch function provided, return the queued stub (backward compat)
+  if (!dispatch) {
+    return mcpText(
+      JSON.stringify({
+        status: "accepted",
+        session,
+        date,
+        force,
+        message: `Deliberation queued for ${session} session on ${date}. Use the CLI 'theorex deliberate' for full execution.`,
+      }),
+    );
+  }
+
+  // Full execution via runDeliberation
+  const { runDeliberation } = await import("./orchestrate");
+  const { writeDeliberation } = await import("./writer");
+  const { join: pathJoin } = await import("node:path");
+
+  // Resolve data paths — assumes singularity+divergence+horizon on m4
+  const singularityPath = process.env.SINGULARITY_TRADES_PATH ?? "data/singularity/trades.jsonl";
+  const divergentPath = pathJoin(process.env.DIVERGENT_DIR ?? "data/divergence", `${date}-${session}.json`);
+  const horizonPath = pathJoin(process.env.HORIZON_DIR ?? "data/horizon", `${date}-${session}.json`);
+  const outputDir = process.env.DELIBERATIONS_DIR ?? "data/deliberations";
+
+  const record = await runDeliberation({
+    session: session as TradingSession,
+    date,
+    paths: { singularity: singularityPath, divergent: divergentPath, horizon: horizonPath },
+    outputDir,
+    dispatch,
+    force,
+  }).catch((e: Error) => {
+    return {
+      id: crypto.randomUUID(),
+      session: session as TradingSession,
+      date,
+      status: "error" as const,
+      created_at: new Date().toISOString(),
+      completed_at: new Date().toISOString(),
+      model: "unknown",
+      latency_ms: 0,
+      packet: null,
+      debrief: null,
+      takeaways: [],
+      error: e.message,
+    };
+  });
+
+  if (record.status === "error") {
+    return mcpError(`Deliberation failed: ${record.error}`);
+  }
+
+  const { jsonPath } = await writeDeliberation(record, outputDir, { force });
+
   return mcpText(
     JSON.stringify({
-      status: "accepted",
+      status: "completed",
+      id: record.id,
       session,
       date,
-      force,
-      message: `Deliberation queued for ${session} session on ${date}`,
+      model: record.model,
+      latency_ms: record.latency_ms,
+      takeaways_count: record.takeaways?.length ?? 0,
+      output: jsonPath,
     }),
   );
 }

@@ -24,12 +24,12 @@ Persistent, self-improving memory system for multi-agent LLM environments. Graph
 | Component | Technology |
 |-----------|-----------|
 | Runtime | Bun 1.3+ |
-| Storage | PostgreSQL on m1 (100.95.91.32) — concepts, agent_spans, flash_events, outcomes, learnings |
+| Storage | PostgreSQL — concepts, agent_spans, flash_events, outcomes, learnings |
 | Semantic search | Nomic embeddings via LM Studio (localhost:1234) |
 | Full-text search | Postgres FTS5 with ts_rank scoring |
 | Span compression | TokenJuice — ~60–80% token reduction on stored spans |
 | Large LLM | Qwen API (cloud) — Qwen Max / Qwen3.5-122B-A10B |
-| Background dispatch | qwen-abliterated (localhost:8000, owned by Hades) |
+| Background dispatch | qwen-abliterated (:8000) — fire-and-forget background inference |
 | External protocol | JSON-RPC 2.0 MCP server on `:18800` |
 | Scheduling | OpenClaw cron (not PM2) for scan, evolve-review, health-check |
 
@@ -197,7 +197,7 @@ theorex outcomes --agent singularity --limit 20
 
 ```bash
 theorex learn --agent secretarius --event escalation \
-  --context "m1 unreachable" --pattern "bridge0 more reliable than Tailscale" \
+  --context "unreachable host" --pattern "direct LAN more reliable than relay" \
   --outcome positive
 
 theorex learn --query --agent meridian --context "RISK_OFF"
@@ -343,7 +343,7 @@ patchOutcomeTraceId(outcome_id, trace_id)
   "agentAxonDir": "~/.openclaw/agents",
   "sharedAxonPath": "~/.openclaw/workspace/theorex/shared-axon.json",
   "THEOREX_STORAGE": "postgres",
-  "THEOREX_PG_HOST": "10.10.0.2",
+  "THEOREX_PG_HOST": "[pg-host]",
   "THEOREX_PG_PORT": 5432,
   "THEOREX_PG_USER": "claw",
   "THEOREX_PG_DB": "theorex"
@@ -466,8 +466,8 @@ bun run src/cli/index.ts outcomes --agent singularity --summary
 
 # Record a learning
 bun run src/cli/index.ts learn --agent nova --event decision \
-  --context "bridge0 vs Tailscale for m1" \
-  --pattern "bridge0 more reliable for m1 access" \
+  --context "direct LAN vs relay for host access" \
+  --pattern "direct LAN more reliable for host access" \
   --outcome positive
 
 # Run evolution (scan + trace review)
@@ -501,7 +501,7 @@ bun run src/cli/index.ts boot-inject --top 50 --depth summary
 │  evolve-review → trace_fix concepts                      │
 └──────────────────────────────────────────────────────────┘
 
-Postgres backend (m1: 100.95.91.32) is the single source of truth.
+PostgreSQL backend is the single source of truth.
 OC cron drives all scheduling. PM2 manages only theorex-scan (one-shot).
 ```
 

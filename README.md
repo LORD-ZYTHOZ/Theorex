@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="https://capsule-render.vercel.app/api?type=venom&color=0:0a0010,30:1a0040,60:2d0060,100:0a0010&height=220&section=header&text=THEOREX&fontSize=80&fontColor=df00ff&animation=twinkling&fontAlignY=55&stroke=df00ff&strokeWidth=2" width="100%"/>
+<img src="assets/banner.jpg" width="100%"/>
 
 </div>
 
@@ -345,6 +345,6 @@ MIT License · [Bun](https://bun.sh) · TypeScript · PostgreSQL
 
 <br/>
 
-<img src="https://capsule-render.vercel.app/api?type=venom&color=0:0a0010,50:1a0040,100:0a0010&height=120&section=footer&text=MEMORY+THAT+EARNS+ITS+KEEP&fontSize=20&fontColor=df00ff&animation=twinkling&fontAlignY=65" width="100%"/>
+<img src="https://capsule-render.vercel.app/api?type=waving&color=0:1a0033,50:0d001a,100:0a0a0a&height=100&section=footer" width="100%"/>
 
 </div>

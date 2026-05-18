@@ -10,13 +10,12 @@
 ```
 
 [![Bun](https://img.shields.io/badge/Bun-1.3+-fbf0df?style=flat-square&logo=bun&logoColor=000)](https://bun.sh)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=fff)](https://www.typescriptlang.org)
-[![Tests](https://img.shields.io/badge/Tests-826_passing-22C55E?style=flat-square)](#tests)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript&logoColor=fff)](https://www.typescript.com)
 [![License: MIT](https://img.shields.io/badge/License-MIT-22C55E?style=flat-square)](LICENSE)
 
 </div>
 
-Persistent, self-improving memory system for multi-agent LLM environments. Graph-based concept store with decay scoring, multi-agent promotion, local LLM dispatch, and a closed learning loop that diagnoses its own failures and writes fixes back into memory.
+Persistent, self-improving memory system for multi-agent LLM environments. Graph-based concept store with Postgres-backed semantic memory, span analytics with full-text search, fleet-wide signal detection, and a closed learning loop that diagnoses its own failures and writes fixes back into memory.
 
 ---
 
@@ -25,88 +24,102 @@ Persistent, self-improving memory system for multi-agent LLM environments. Graph
 | Component | Technology |
 |-----------|-----------|
 | Runtime | Bun 1.3+ |
-| Graph store | Graphology 0.26 (in-memory, serialised to JSON) |
-| NLP extraction | compromise (entity/concept extraction) |
-| Full-text search | wink-bm25-text-search |
-| Semantic search | HNSW-lite (append-only JSONL embedding store) |
-| Embeddings | @huggingface/transformers ONNX, or LM Studio endpoint |
-| Local LLM (large) | Qwen3 32B via MLX — `localhost:8082` |
-| Local LLM (medium) | Ministral 3B via LM Studio — `localhost:1234` |
-| External protocol | JSON-RPC 2.0 (MCP-compatible) on `:18800` |
-| Storage | Flat JSON/JSONL files — no database |
+| Storage | PostgreSQL on m1 (100.95.91.32) — concepts, agent_spans, flash_events, outcomes, learnings |
+| Semantic search | Nomic embeddings via LM Studio (localhost:1234) |
+| Full-text search | Postgres FTS5 with ts_rank scoring |
+| Span compression | TokenJuice — ~60–80% token reduction on stored spans |
+| Large LLM | Qwen API (cloud) — Qwen Max / Qwen3.5-122B-A10B |
+| Background dispatch | qwen-abliterated (localhost:8000, owned by Hades) |
+| External protocol | JSON-RPC 2.0 MCP server on `:18800` |
+| Scheduling | OpenClaw cron (not PM2) for scan, evolve-review, health-check |
 
 ---
 
 ## Core Data Model
 
-### AxonNodeAttrs
+### Concepts (long-term memory)
 
 ```typescript
-interface AxonNodeAttrs {
-  canonical_form: string;
-  concept_id: number;          // Bun.hash.wyhash of canonical_form
-  node_type: string;           // "concept" | "code_function" | ...
-  observation_type: string;    // "decision" | "discovery" | "trace_fix" | ...
-  importance_weight: number;   // composite score 0.0–1.0
-  relevance_tier: string;      // "ACTIVE" | "MILD" | "LESS" | "NEUTRAL" | "SLEEPING"
-  frequency_count: number;
-  last_seen: string;           // ISO 8601
-  sentiment: number;           // -1.0 to 1.0
-  agent_id: string;
-  source_weight: number;       // agent source credibility 0.0–1.0
+interface Concept {
+  id: string;                  // UUID
+  label: string;               // canonical surface form
+  body: string | null;         // enriched body (from metadata or LLM summary)
+  agent_id: string;            // owner agent
+  memory_type: string;         // "decision" | "discovery" | "trace_fix" | ...
+  wing: string | null;        // palace wing (e.g. "wins", "losses", "identity")
+  room: string | null;         // palace room within wing
+  meta: Record<string, unknown>; // contains: relevance_tier, importance_weight, frequency_count, observation_type
+  created_at: string;
+  updated_at: string;
 }
 ```
 
-### Scoring
+### Agent Spans (session trace)
 
+```typescript
+interface AgentSpan {
+  span_id: string;
+  agent_id: string;
+  task_type: string;
+  prompt_sent: string | null;     // TokenJuice-compressed
+  output_recv: string | null;      // TokenJuice-compressed
+  raw_thought: string | null;      // TokenJuice-compressed
+  tools_called: string[];
+  session_id: string | null;
+  regime_snapshot: Record<string, unknown>;
+  latency_ms: number | null;
+  token_usage: number | null;
+  metadata: Record<string, unknown>;
+  fts_content: tsvector;           // FTS5 generated column (auto-populated)
+  session_summary: string | null;  // LLM-generated one-line outcome
+  resolved: boolean;
+  reward_score: number | null;
+}
 ```
-importance_weight = recency(last_seen, halfLifeDays)
-                  × frequencyAmplifier(frequency_count)   // 1 + ln(count)
-                  × coOccurrenceBoost(neighbor_strengths)
 
-recency(t, h) = exp(-ln(2) / h × daysSince(t))
+### Flash Events (fleet signal bus)
 
-Tier thresholds (configurable):
-  ACTIVE  score >= 0.6   → injected at boot
-  MILD    score >= 0.3   → available on search
-  LESS    score < 0.3    → scheduled for pruning
-  SLEEPING               → cold-stored (Phase 9)
+```typescript
+type FlashEventType =
+  | "WIN" | "LOSS" | "TIMEOUT"
+  | "KELLY_CHANGE"
+  | "APPROVAL" | "REJECTION"
+  | "REGIME_SHIFT";
 ```
 
-### observation_type half-lives
-
-| Type | Half-life |
-|------|-----------|
-| All standard types | `config.halfLifeDays` (default 14) |
-| `trace_fix` | `min(config.halfLifeDays, 7)` — stale fixes decay faster |
+Partitioned `flash_events` table — written by trade outcome pipeline, Kelly sizing changes, Nova approval/rejection events. Powers Fleet-GE signal detection.
 
 ---
 
 ## Memory Pipeline
 
 ```
-Claude Code session
+Claude Code session (tool call)
        │
-       │ PostToolUse hook
+       │ SpanStore.emitSpan() — TokenJuice compression → Postgres
        ▼
-data/flash/{session-id}.json          ← raw tool-use events, scored live
+agent_spans (compressed, FTS5-indexed)
        │
-       │ Stop hook (or manual: theorex flush)
+       │ 3am OC cron: theorex evolve-review --agent all
        ▼
-data/stm.jsonl                        ← Short-Term Memory, 14-day rolling JSONL
+concepts (enriched via enrich_bodies, promoted via scan)
        │
-       │ theorex graduate (score >= threshold × 7 consecutive days)
-       ▼
-~/.openclaw/agents/{id}/theorex/axon.json   ← Long-Term Axon (Graphology graph)
-       │
-       │ theorex promote (score > promotionThreshold)
-       ▼
-~/.openclaw/workspace/theorex/shared-axon.json   ← Shared multi-agent web
-       │
-       │ theorex boot-inject
+       │ theorex boot-inject — Postgres source, semantic grouping
        ▼
 ~/.openclaw/workspace/theorex/SHARED_CONTEXT.md  ← injected at session start
 ```
+
+### Boot Inject — Semantic Grouping
+
+Concepts grouped by palace structure at inject time:
+
+```
+## 🟢 Wins (ACTIVE, score >= 0.6)
+## 🔴 Losses (ACTIVE, score >= 0.6)
+## 🟡 Identity (MILD, score >= 0.3)
+```
+
+Depth modes: `summary` (top 10 per group) or `full` (top 50 per agent).
 
 ---
 
@@ -114,55 +127,46 @@ data/stm.jsonl                        ← Short-Term Memory, 14-day rolling JSON
 
 ### Dispatch (Phase 16)
 
-Fire-and-forget to local LLM. Caller pre-generates `trace_id` — EventBus uses it so the trace file is addressable before it's written.
+Fire-and-forget to qwen-abliterated on :8000. Pre-generated `trace_id` — EventBus uses it so the trace file is addressable before it's written.
 
 ```typescript
-// DispatchTask
-{
+interface DispatchTask {
   id: string;
   agent_id: string;
   task: string;
   context_pct: number;        // trigger threshold (default 50%)
   query_tokens: number;
   tags: string[];
-  outcome_id?: string;        // if set, trace_id is patched onto this outcome on success
+  outcome_id?: string;        // if set, trace_id patched onto outcome after dispatch
+  tier_override?: "large" | "medium" | "small";
 }
 
-// DispatchResult
-{
+interface DispatchResult {
   task_id: string;
-  model_used: string;         // "qwen3-32b" | "ministral-3b"
+  model_used: string;
   response: string;
   latency_ms: number;
   success: boolean;
   written_to_axon: boolean;
-  trace_id?: string;          // the EventBus trace ID (deterministic, pre-generated)
+  trace_id?: string;
 }
 ```
 
 ### Routing priority (highest → lowest)
 
-1. **Role registry** (`src/roles/registry.ts`) — operative's `model_preference` wins if it matches the query type
-2. **EnergyDispatch** (`src/router/energy.ts`) — `pmset` battery check, downgrades `large→medium` below 20%
-3. **ConfidenceMatrix** (`src/router/confidence-matrix.ts`) — empirical win-rate data after ≥5 samples per `(query_type, model)` cell; composite score = `0.6 × success_rate + 0.4 × (1 − normalized_latency)`
-4. **HeuristicRouter** (`src/router/heuristic.ts`) — 7 keyword tiers: `code`, `math`, `retrieval`, `synthesis`, `creative`, `safety`, `general`
+1. **Role registry** — operative's `model_preference` wins if it matches query type
+2. **EnergyDispatch** — `pmset` battery check, downgrades `large→medium` below 20%
+3. **ConfidenceMatrix** — empirical win-rate data; composite score = `0.6 × success_rate + 0.4 × (1 − normalized_latency)`
+4. **HeuristicRouter** — 7 keyword tiers: `code`, `math`, `retrieval`, `synthesis`, `creative`, `safety`, `general`
 
-### EventBus (Phase 15.5)
+### EventBus
 
 ```typescript
 // LM_INFERENCE_START → LM_INFERENCE_END auto-assembles TraceRecord
-// Caller-supplied trace_id is honoured — EventBus uses it instead of randomUUID()
-
-bus.emit("LM_INFERENCE_START", {
-  agent_id, model, prompt_tokens, query_type,
-  trace_id: preGeneratedId,   // ← pre-generated by worker.ts
-});
-// ... inference ...
+bus.emit("LM_INFERENCE_START", { agent_id, model, prompt_tokens, query_type, trace_id });
 bus.emit("LM_INFERENCE_END", { agent_id, model, ..., success, latency_ms });
-// → writes data/traces/{trace_id}.json atomically (tmp → rename)
+// → TraceRecord written atomically (tmp → rename)
 ```
-
-TraceRecord `tags[0]` = `query_type` — the ConfidenceMatrix reads this to populate cells correctly.
 
 ---
 
@@ -171,51 +175,71 @@ TraceRecord `tags[0]` = `query_type` — the ConfidenceMatrix reads this to popu
 ### Outcome recording (Phase 13)
 
 ```typescript
-interface OutcomeRecord {
-  id: string;
-  agent_id: string;
-  decision: string;
-  result: string;
-  success: boolean;
-  concept_ids: number[];
-  tags: string[];
-  explicit_score?: number;    // 0.0–1.0 API-provided
-  thumbs_up?: boolean;
-  judge_score?: number;       // 0.0–1.0 async LLM judge
-  trace_id?: string;          // linked TraceRecord — set automatically by dispatch()
+interface TradeOutcome {
+  trade_id: string;
+  agent: string;
+  direction: "long" | "short" | "flat";
+  entry_price: number;
+  exit_price: number;
+  pnl: number;
+  meta?: Record<string, unknown>;
 }
+```
 
-// composite score: weighted average of whichever channels are present
-// weights: explicit=40%, thumbs=20%, judge=40% (rebalanced if channels absent)
-// fallback: success → 0.6, failure → 0.0
+Shadows Singularity trade outcomes → Postgres → flash event (WIN/LOSS/TIMEOUT). Read via:
+
+```bash
+theorex outcomes --agent singularity --summary
+theorex outcomes --agent singularity --limit 20
+```
+
+### Learnings (Nova's structured lesson store)
+
+```bash
+theorex learn --agent secretarius --event escalation \
+  --context "m1 unreachable" --pattern "bridge0 more reliable than Tailscale" \
+  --outcome positive
+
+theorex learn --query --agent meridian --context "RISK_OFF"
+theorex learn --summary
 ```
 
 ### Trace Review (Phase 20)
 
-Nightly pass over `data/outcomes/` — for every failure with `compositeScore ≤ 0.3`:
+Nightly pass — for every failure with `compositeScore ≤ 0.3`:
 
-1. Load linked `data/traces/{trace_id}.json`
-2. Build structured prompt: `[outcome decision + result + tags] + [trace model/tokens/latency/error/events]`
-3. POST to Qwen3 32B (`localhost:8082`), fallback Ministral 3B (`localhost:1234`), 45s timeout
-4. Parse response JSON `{ score: 0.0–1.0, fix_description: string }`
-5. `writeToAgent(agent_id, "trace_fix: {fix_description}", config, Date.now(), "trace_fix")`
-6. Return `TraceReviewRecord` — always returned, even on LLM failure (stub with `written_to_axon: false`)
-
-```bash
-# Standalone
-theorex trace-review --agent main
-
-# Runs automatically inside evolve-review
-theorex evolve-review --agent all
-```
-
-### Gated Learning (Phase 13)
-
-Policy snapshots saved to `data/policy-snapshots/`. Gate threshold: 2% improvement required before a policy update is committed. Prevents thrashing on noisy outcome data.
+1. Load linked trace
+2. Build structured prompt
+3. Call reviewer (Qwen API)
+4. `writeToAgent(agent_id, "trace_fix: {fix_description}", "trace_fix")`
+5. Return `TraceReviewRecord`
 
 ---
 
-## MCP Server (Phase 19)
+## Fleet-GE Signal Scanner
+
+Scans runtime signals (watchdog events, PM2 logs, Theorex spans) for patterns. Matches against gene registry. Emits signals + GEP directives to Postgres.
+
+```bash
+bun run src/ge/signal-scanner.ts --source watchdog
+bun run src/ge/signal-scanner.ts --source pm2
+bun run src/ge/signal-scanner.ts --source theorex
+```
+
+Gene registry: `fleet-brain/genes/` — 6 active genes tracking:
+- `gene_divergence_win_rate_anomaly` (HIGH)
+- `gene_horizon_outcome_tracking` (HIGH)
+- `gene_singularity_position_cap` (CRITICAL — not deployed)
+- `gene_hades_turboquant_health_monitor` (MEDIUM)
+- `gene_hades_watchdog_cooldown_race` (HIGH — fixed)
+
+### GEP Event Audit Trail
+
+Every directive written to `evolution_events` with full audit trail. Nova ops guide: `fleet-brain/ops/NOVA_FLEET_GE_OPS.md`
+
+---
+
+## MCP Server
 
 JSON-RPC 2.0 HTTP server. Exposes read/write/search over the agent axon to any external tool.
 
@@ -223,17 +247,22 @@ JSON-RPC 2.0 HTTP server. Exposes read/write/search over the agent axon to any e
 theorex mcp-start --port 18800 --agent main
 ```
 
-**Supported methods** (`tools/call` with `name`):
+**Supported methods**:
 
 | name | params | description |
 |------|--------|-------------|
 | `status` | — | agent name, concept count, top ACTIVE concepts |
-| `search` | `query: string` | BM25 + vector hybrid search |
+| `search` | `query: string` | FTS5 + vector hybrid search |
 | `write` | `text: string` | extract concepts + write to axon |
+| `search_spans` | `agent: string, query: string, limit?: number` | FTS5 span search (sessions can query own history) |
 | `promote` | — | promote qualifying concepts to shared web |
 | `boot-inject` | — | regenerate SHARED_CONTEXT.md |
+| `retrieve_outcomes` | `agent: string, limit?: number` | read trade outcomes |
+| `write_trade_outcome` | `outcome: TradeOutcome` | shadow a trade outcome |
+| `write_learning` | `learning: Learning` | write to learnings store |
+| `get_learnings` | `agent: string, context?: string` | query learnings |
 
-### A2A Task Protocol (Phase 19)
+### A2A Task Protocol
 
 ```typescript
 interface A2ATask {
@@ -249,78 +278,75 @@ interface A2ATask {
 }
 ```
 
-Tasks stored in `data/a2a/{to_agent}/`. Agents poll via `theorex a2a-tasks --agent <id>`.
+Stored in Postgres via `src/a2a/tasks.ts`.
 
 ---
 
-## Agent Roles (Phase 18)
+## Agent Roles
 
 ```typescript
 interface AgentProfile {
   agent_id: string;
   role: "orchestrator" | "operative";
-  capabilities: QueryType[];   // "code" | "math" | "retrieval" | "synthesis" | "general"
-  model_preference: string;    // "qwen3-32b" | "ministral-3b" | "claude-sonnet"
+  capabilities: QueryType[];
+  model_preference: string;
   active: boolean;
 }
 ```
 
-`routeToAgent(queryType, profiles)` — returns the highest-priority operative whose capabilities include the query type. Used by dispatch to override heuristic model selection.
+`routeToAgent(queryType, profiles)` — highest-priority operative whose capabilities match query type.
 
 ---
 
 ## Full Learning Loop
 
 ```
-dispatch(task, {outcome_id})
+theorex dispatch(task, {outcome_id})
   ↓
 emit LM_INFERENCE_START (trace_id = preGeneratedUUID)
   ↓
-callLmStudio() → success/failure
+qwen-abliterated on :8000 → success/failure
   ↓
 emit LM_INFERENCE_END
   ↓
-EventBus.handleInferenceEnd()
-  → TraceRecord written to data/traces/{trace_id}.json
+EventBus → TraceRecord written
   ↓
-patchOutcomeTraceId(outcome_id, trace_id)   ← atomic, immutable
+patchOutcomeTraceId(outcome_id, trace_id)
   ↓
-[3am PM2 cron] theorex evolve-review --agent all
-  → reviewOutcomes() + refineFromReport()   ← pattern win-rate analysis
-  → reviewAllFailures()
-       filter: success=false AND compositeScore ≤ 0.3
-       for each:
-         loadTrace(outcome.trace_id)
-         buildTraceReviewPrompt(outcome, trace)
-         callReviewer() → Qwen3 primary / Ministral fallback
-         parseReviewerResponse() → {score, fix_description}
-         writeToAgent(agent_id, "trace_fix: ...", "trace_fix")
+[3am OC cron] theorex evolve-review --agent all
+  → reviewOutcomes() + refineFromReport()
+  → reviewAllFailures() → trace_fix concepts written
   ↓
-[3am PM2 cron continues] theorex promote + boot-inject
+[OC cron: theorex promote + boot-inject]
   → trace_fix concepts in SHARED_CONTEXT.md at next session start
-  → trace_fix half-life = 7 days (decays in scan.ts)
+  → trace_fix half-life = 7 days
 ```
 
 ---
 
 ## Configuration
 
-`config.json` in project root — all optional, merged with defaults at startup.
+`config.json` in project root — merged with defaults at startup.
 
 ```json
 {
+  "TURBOQUANT_SEED": "42",
+  "TURBOQUANT_WARNING": "CRITICAL: This seed is baked into all 4320 stored TurboCode compressed vectors. Changing this value invalidates ALL stored codes and requires full backfill.",
+  "lmStudioUrl": "http://localhost:11434",
+  "synthEndpoint": "http://localhost:11434",
+  "lmStudioTimeoutMs": 30000,
   "halfLifeDays": 14,
   "activeThreshold": 0.6,
   "mildThreshold": 0.3,
-  "pruneThresholdDays": 30,
   "promotionThreshold": 0.5,
   "evolveWindowDays": 7,
-  "lmStudioUrl": "http://localhost:1234",
-  "lmStudioEmbedModel": "nomic-embed-text-v1.5",
   "agentAxonDir": "~/.openclaw/agents",
   "sharedAxonPath": "~/.openclaw/workspace/theorex/shared-axon.json",
-  "outcomesDir": "data/outcomes",
-  "coldStorePath": "data/cold-store.db"
+  "THEOREX_STORAGE": "postgres",
+  "THEOREX_PG_HOST": "10.10.0.2",
+  "THEOREX_PG_PORT": 5432,
+  "THEOREX_PG_USER": "claw",
+  "THEOREX_PG_DB": "theorex"
 }
 ```
 
@@ -330,37 +356,27 @@ patchOutcomeTraceId(outcome_id, trace_id)   ← atomic, immutable
 
 ```
 src/
-├── axon/           scan.ts prune.ts store.ts scorer.ts propagate.ts
-├── short-term/     store.ts search.ts graduate.ts
-├── flash/          store.ts inject.ts
-├── moments/        capture.ts store.ts search.ts
-├── family/         write.ts paths.ts
-├── rag/            semantic-index.ts bootstrap.ts
-├── trace/          bus.ts index.ts
+├── axon/           store.ts postgres-store.ts scan.ts prune.ts scorer.ts
+│                   propagate.ts enrich-bodies.ts tokenjuice.ts flash-writer.ts
+│                   learnings.ts outcomes.ts cold.ts compress.ts
+├── spans/          store.ts types.ts          ← TokenJuice + FTS5 span storage
+├── family/         write.ts paths.ts boot-inject.ts synthesize.ts
+├── dispatch/       worker.ts index.ts router/
 ├── router/         heuristic.ts confidence-matrix.ts energy.ts
-├── dispatch/       worker.ts index.ts
-├── roles/          registry.ts index.ts
 ├── evolve/         outcome.ts review.ts refine.ts gated-learning.ts trace-review.ts
-├── memory/         boot-aware.ts
 ├── mcp/            server.ts
-├── a2a/            tasks.ts
-├── audit/          logger.ts reader.ts scorer.ts
-├── vision/         video.ts ingest.ts store.ts
-├── code/           parse.ts parse-multi.ts ingest.ts
-└── cli/            index.ts
+├── a2a/            index.ts tasks.ts
+├── ge/             signal-scanner.ts audit-adversarial.ts gene-outcome-check.ts
+├── cli/            index.ts commands/
+│                   learn.ts outcomes.ts
+└── tests/          (unit + integration)
 
-data/               (gitignored)
-├── axon.json
-├── stm.jsonl
-├── embeddings.jsonl
-├── traces/
-├── outcomes/
-├── moments/
-├── flash/
-├── traces/
-└── evolution.jsonl
+scripts/
+├── run-nightly.sh       ← called by OC cron (10fd0f7d)
+├── run-idle-flush.sh    ← called by OC cron
+└── (ops scripts for nightly/idle/health pipelines)
 
-tests/              826 tests across all modules + e2e CLI
+ecosystem.config.cjs  ← PM2 (theorex-scan only; OC cron drives schedule)
 ```
 
 ---
@@ -377,9 +393,11 @@ Memory
   scan / scan-agent --agent <id>
   prune / prune-agent --agent <id>
   promote        --agent <id>
-  boot-inject
-  session-summary --agent <id> --investigated --learned --completed --next
+  boot-inject    [--top <n>] [--depth summary|full]
   synthesize     --agent <id> <text>
+
+Spans
+  search-spans   --agent <id> <query> [--limit <n>]
 
 Ingestion
   ingest         --agent <id> <files...>
@@ -393,7 +411,6 @@ Execution
   role-route     <query>
   roles
   energy-check
-  boot-aware     [--model <name>] [--agent <id>]
 
 Traces
   trace-stats
@@ -408,27 +425,29 @@ Evolution
   trace-review   [--agent <id|all>]
   policy-snapshot
 
+Outcomes & Learnings
+  outcomes       --agent <id> [--limit <n>] [--summary]
+  learn          --agent <id> --event <type> --context <text> --pattern <text>
+                 --outcome <positive|negative|neutral>
+  learn          --query --agent <id> [--context <text>]
+  learn          --summary
+
 MCP / A2A
   mcp-start      [--port <n>] [--agent <id>]
   a2a-tasks      [--agent <id>]
-
-Multi-agent
-  query-shared
-  ingest         --agent <id> <files>
-  context-monitor --session <id>
 ```
 
 ---
 
-## Tests
+## OpenClaw Cron Jobs (source of truth for scheduling)
 
-```bash
-bun test               # 826 tests, all phases
-bun test tests/evolve  # Evolution layer only
-bun test src/tests/e2e.test.ts  # CLI integration (spawns real subprocesses)
-```
-
-Tests use `process.execPath` (not `"bun"`) for subprocess spawning — works on any machine regardless of PATH.
+| OC Cron ID | Schedule | Command | Purpose |
+|-----------|----------|---------|---------|
+| `c6bd399a` | `0 */4 * * *` | fleet-ge-signal-scan | Pattern detection + GEP directives |
+| `10fd0f7d` | `0 3 * * *` | theorex-evolve-review | scan → prune → promote → boot-inject |
+| `4f7a8761` | `*/5 * * * *` | theorex-health-check | Agent endpoint health + trace metrics |
+| `66ddb18c` | `0 6 * * *` | monitor-partitions | Partition check (daily) |
+| `5b65a0c7` | `0 2 * * 0` | security-sweep | Weekly security audit |
 
 ---
 
@@ -442,22 +461,48 @@ bun install
 # Write a concept
 bun run src/cli/index.ts write --agent main "TTL invalidation prevents cache stampedes"
 
-# Record a dispatch outcome and link it
-bun run src/cli/index.ts outcome --agent main \
-  --decision "use aggressive in-process cache" \
-  --result "stale data served for 10 minutes after deploy" \
-  --fail --tags caching
+# Record a trade outcome
+bun run src/cli/index.ts outcomes --agent singularity --summary
 
-# Dispatch background analysis (links trace to outcome automatically)
-bun run src/cli/index.ts dispatch "diagnose cache invalidation failure" \
-  --agent main --context 60 --outcome-id <id>
+# Record a learning
+bun run src/cli/index.ts learn --agent nova --event decision \
+  --context "bridge0 vs Tailscale for m1" \
+  --pattern "bridge0 more reliable for m1 access" \
+  --outcome positive
 
-# Run evolution (includes trace review)
-bun run src/cli/index.ts evolve-review --agent main
+# Run evolution (scan + trace review)
+bun run src/cli/index.ts evolve-review --agent all
 
-# Regenerate boot context
-bun run src/cli/index.ts promote --agent main
-bun run src/cli/index.ts boot-inject
+# Boot inject — build session context from Postgres
+bun run src/cli/index.ts boot-inject --top 50 --depth summary
+```
+
+---
+
+## Architecture Summary
+
+```
+┌──────────────────────────────────────────────────────────┐
+│  SESSION LAYER (append-only spans)                       │
+│  emitSpan → TokenJuice → Postgres (FTS5-indexed)          │
+│  Sessions can retroactively query their own history       │
+├──────────────────────────────────────────────────────────┤
+│  MEMORY LAYER (semantic graph)                           │
+│  Concepts + embeddings + palace structure (wing/room)     │
+│  Boot-inject: Postgres source → SHARED_CONTEXT.md        │
+├──────────────────────────────────────────────────────────┤
+│  SIGNAL LAYER (Fleet-GE)                                 │
+│  flash_events (WIN/LOSS/KELLY_CHANGE/...)                 │
+│  signal-scanner → gene registry → GEP directives          │
+├──────────────────────────────────────────────────────────┤
+│  LEARNING LAYER                                          │
+│  outcomes pipeline (trade shadows)                       │
+│  learnings system (structured lessons per agent)          │
+│  evolve-review → trace_fix concepts                      │
+└──────────────────────────────────────────────────────────┘
+
+Postgres backend (m1: 100.95.91.32) is the single source of truth.
+OC cron drives all scheduling. PM2 manages only theorex-scan (one-shot).
 ```
 
 ---
